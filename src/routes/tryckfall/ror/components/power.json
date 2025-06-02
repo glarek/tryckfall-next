@@ -1,0 +1,26 @@
+[
+	{
+		"label": "W",
+		"name": "Watt",
+		"value": 1.0,
+		"step": 1
+	},
+	{
+		"label": "kW",
+		"name": "Kilowatt",
+		"value": 1000.0,
+		"step": 0.001
+	},
+	{
+		"label": "hp",
+		"name": "Hästkraft (mekanisk)",
+		"value": 745.699872,
+		"step": 0.01
+	},
+	{
+		"label": "BTU/h",
+		"name": "BTU per timme",
+		"value": 0.2930710701722222,
+		"step": 1
+	}
+]

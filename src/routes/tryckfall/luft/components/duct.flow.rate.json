@@ -1,0 +1,32 @@
+[
+	{
+		"label": "l/s",
+		"name": "Liter per sekund",
+		"value": 0.001,
+		"step": 1
+	},
+	{
+		"label": "l/min",
+		"name": "Liter per minut",
+		"value": 0.000016666666666666667,
+		"step": 1
+	},
+	{
+		"label": "m³/h",
+		"name": "Kubikmeter per timme",
+		"value": 0.0002777777777777778,
+		"step": 1
+	},
+	{
+		"label": "m³/s",
+		"name": "Kubikmeter per sekund",
+		"value": 1.0,
+		"step": 0.01
+	},
+	{
+		"label": "cfm",
+		"name": "Kubikfot per minut",
+		"value": 0.0004719474499999999,
+		"step": 1
+	}
+]
