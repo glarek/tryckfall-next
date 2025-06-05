@@ -3,9 +3,8 @@
 	let { link, children, ...restProps } = $props();
 	import { base } from '$app/paths';
 
-	let activeLink = $derived(page.url.pathname.replace(base, '') == link.replace(base, ''));
-	let test = page.url.pathname;
-	import { getShowNavbar, toggleNavbar, setShowNavbar } from '$lib/utils/navBarState.svelte.js';
+	let activeLink = $derived(page.url.pathname.includes(link));
+	import { setShowNavbar } from '$lib/utils/navBarState.svelte.js';
 </script>
 
 <li

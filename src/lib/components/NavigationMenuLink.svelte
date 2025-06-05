@@ -3,7 +3,8 @@
 	import { slide } from 'svelte/transition';
 	import { ChevronRight } from '@lucide/svelte'; // Ikon för att indikera expanderbart tillstånd
 	import { page } from '$app/state';
-	import {base} from '$app/paths';
+	import { base } from '$app/paths';
+	import { setShowNavbar } from '$lib/utils/navBarState.svelte.js';
 
 	let {
 		open = $bindable(false),
@@ -14,7 +15,9 @@
 		link,
 		...restProps
 	} = $props();
-	let activeLink = $derived(page.url.pathname.replace(base, '').split('/')[1] == link.replace(base, '').split('/')[1]);
+	let activeLink = $derived(
+		page.url.pathname.replace(base, '').split('/')[1] == link.replace(base, '').split('/')[1]
+	);
 	let test = page.url.pathname;
 </script>
 
@@ -23,6 +26,7 @@
 		<Collapsible.Trigger class="w-full {activeLink ? 'text-primary' : ''}">
 			<a
 				href={link}
+				onclick={() => setShowNavbar(false)}
 				class="flex w-full items-center gap-2 rounded-sm p-2 m-1 text-left hover:bg-muted"
 			>
 				{#if icon}
