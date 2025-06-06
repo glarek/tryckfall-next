@@ -4,8 +4,8 @@
 	import { slide, fly } from 'svelte/transition';
 	import { tick } from 'svelte';
 
-
 	import { getBellCurveValue } from '$lib/utils/bellCurveUtils.js';
+	import { smartRound } from '$lib/utils/smartRound';
 
 	// -- We load layout-relevant modules here ---
 	import InputLabel from '$lib/components/InputLabel.svelte';
@@ -27,6 +27,7 @@
 	// --- We load Swedish standard ductt series, flow rate units, and power units ---
 	import pipeSeriesData from '../ror/components/pipe.series.json';
 	import flowRateSeriesData from '../ror/components/pipe.flow.rate.json';
+	import fluidSeriesData from '../ror/components/fluidTypes.json';
 	import powerData from '../ror/components/power.json';
 
 	// --- VARIABLE DEFINITIONS ---
@@ -39,6 +40,7 @@
 	let flowRateSeries = $state(flowRateSeriesData[0]);
 	let powerSeries = $state(powerData[0]);
 	let pipeSeries = $state(pipeSeriesData[0]);
+	let fluidSeries = $state(fluidSeriesData[0]);
 	let roughness = $derived(pipeSeries.roughness);
 	let TRANSITIONLIMIT = 2300;
 	let TRANSITION_INTERVAL = 500;
@@ -150,13 +152,22 @@
 						id="flowrate"
 						step="0.01"
 						bind:value={
-							() =>
-								flowRateM3s
-									? flowPriority
-										? parseFloat((flowRateM3s / flowRateSeries.value).toPrecision(12))
-										: parseFloat((flowRateM3s / flowRateSeries.value).toFixed(3))
-									: null,
-							(v) => (flowRateM3s = v * flowRateSeries.value)
+							() => {
+								if (flowRateM3s === null) {
+									return null;
+								}
+								const displayValue = flowRateM3s / flowRateSeries.value;
+								return flowPriority
+									? parseFloat(displayValue.toPrecision(12))
+									: smartRound(displayValue, 3);
+							},
+							(v) => {
+								if (v === null) {
+									flowRateM3s = null;
+								} else {
+									flowRateM3s = v * flowRateSeries.value;
+								}
+							}
 						}
 						onfocus={(e) => {
 							if (!e.target) return;
@@ -191,13 +202,20 @@
 						class="w-full md:w-[120px] {flowPriority ? 'text-muted-foreground' : ''}"
 						id="power"
 						bind:value={
-							() =>
-								powerW
-									? !flowPriority
-										? parseFloat((powerW / powerSeries.value).toPrecision(12))
-										: parseFloat((powerW / powerSeries.value).toFixed(3))
-									: null,
-							(v) => (powerW = v * powerSeries.value)
+							() => {
+								if (powerW === null) return null;
+								const displayValue = powerW / powerSeries.value;
+								return !flowPriority
+									? parseFloat(displayValue.toPrecision(12))
+									: smartRound(displayValue, 3);
+							},
+							(v) => {
+								if (v === null) {
+									powerW = null;
+								} else {
+									power((powerW = v * powerSeries.value));
+								}
+							}
 						}
 						onfocus={(e) => {
 							flowPriority = false;
@@ -237,26 +255,27 @@
 		{#if propertiesVisible}
 			<Card.Content>
 				<div transition:slide class="flex flex-col pt-2">
-					<div class="flex w-full max-w-sm flex-col gap-1.5">
-						<Label for="supply">Relativ fukt</Label>
-						<div class="flex flex-row items-center gap-x-2">
-							<Input
-								type="number"
-								class="w-[80px] mb-4"
-								id="supply"
-								max={100}
-								min={0}
-								bind:value={$inputStore.relativeHumidity}
-							/>
-							<span>%</span>
-						</div>
-					</div>
+					<Select.Root
+						type="single"
+						bind:value={fluidSeries.value}
+						onValueChange={(value) =>
+							(fluidSeries = fluidSeriesData.find((d) => d.value === value) ?? fluidSeriesData[0])}
+					>
+						<Select.Trigger class="w-[220px]">{fluidSeries.label}</Select.Trigger>
+						<Select.Content>
+							<Select.Label>Köldbärare</Select.Label>
+							{#each fluidSeriesData as option}
+								<Select.Item value={option.value} label={option.label} />
+							{/each}
+						</Select.Content>
+					</Select.Root>
 					<div class="flex w-full max-w-sm flex-col gap-2.5">
 						<Label for="thermal-capacity"
 							>Värmekapacitet: {$fluidPropertiesStore.specificHeatCapacity.toFixed(0)} J/kg·K</Label
 						>
 						<Label for="density">Densitet: {$fluidPropertiesStore.density.toFixed(3)} kg/m³</Label>
 						<Label for="roughness">Råhet: {pipeSeries.roughness} mm</Label>
+						<Label for="fluid">Köldbärare: {fluidSeries.label} {fluidSeries.value}</Label>
 					</div>
 				</div>
 			</Card.Content>

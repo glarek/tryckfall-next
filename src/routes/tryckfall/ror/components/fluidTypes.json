@@ -1,0 +1,93 @@
+[
+	{
+		"label": "Vatten (H2O)",
+		"value": "Water",
+		"xmin": null,
+		"xmax": null,
+		"tmin": 0,
+		"tmax": 200
+	},
+	{ "label": "Ammoniak, (NH3)", "value": "MAM", "xmin": 0, "xmax": 0.3, "tmin": -100, "tmax": 30 },
+	{
+		"label": "Kalciumklorid (CaCl2)",
+		"value": "MCA",
+		"xmin": 0,
+		"xmax": 0.3,
+		"tmin": -100,
+		"tmax": 40
+	},
+	{ "label": "Etanol (C2H6O)", "value": "MEA", "xmin": 0, "xmax": 0.6, "tmin": -100, "tmax": 40 },
+	{
+		"label": "Etylenglykol (C2H4(OH)2)",
+		"value": "MEG",
+		"xmin": 0,
+		"xmax": 0.6,
+		"tmin": -100,
+		"tmax": 100
+	},
+	{
+		"label": "Glycerol (C3H5(OH)3)",
+		"value": "MGL",
+		"xmin": 0,
+		"xmax": 0.6,
+		"tmin": -100,
+		"tmax": 40
+	},
+	{
+		"label": "Kaliumacetat (KCH3CO2)",
+		"value": "MKA",
+		"xmin": 0,
+		"xmax": 0.45,
+		"tmin": -100,
+		"tmax": 40
+	},
+	{
+		"label": "Kaliumkarbonat (K2CO3)",
+		"value": "MKC",
+		"xmin": 0,
+		"xmax": 0.4,
+		"tmin": -100,
+		"tmax": 40
+	},
+	{
+		"label": "Kaliumformiat (CKHO2)",
+		"value": "MKF",
+		"xmin": 0,
+		"xmax": 0.48,
+		"tmin": -100,
+		"tmax": 40
+	},
+	{
+		"label": "Litiumklorid (LiCl)",
+		"value": "MLI",
+		"xmin": 0,
+		"xmax": 0.24,
+		"tmin": -100,
+		"tmax": 40
+	},
+	{ "label": "Metanol (CH3OH)", "value": "MMA", "xmin": 0, "xmax": 0.6, "tmin": -100, "tmax": 40 },
+	{
+		"label": "Magnesiumklorid (MgCl2)",
+		"value": "MMG",
+		"xmin": 0,
+		"xmax": 0.3,
+		"tmin": -100,
+		"tmax": 40
+	},
+	{
+		"label": "Natriumklorid/koksalt (NaCl)",
+		"value": "MNA",
+		"xmin": 0,
+		"xmax": 0.23,
+		"tmin": -100,
+		"tmax": 40
+	},
+	{
+		"label": "Propylenglykol (C3H6(OH)2)",
+		"value": "MPG",
+		"xmin": 0,
+		"xmax": 0.6,
+		"tmin": -100,
+		"tmax": 100
+	}
+]

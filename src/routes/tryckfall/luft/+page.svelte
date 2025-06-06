@@ -22,6 +22,7 @@
 	import { airPropertiesStore } from '../luft/components/airPropertiesStore.js'; // Import the air properties store
 	import { inputStore } from '../luft/components/inputStore.js'; // Import the air properties store
 	import { calculatePressureDrop, colebrook } from '../components/calculations.js'; // Import the pressure drop calculation function
+	import { smartRound } from '$lib/utils/smartRound.js';
 
 	// --- We load Swedish standard ductt series, flow rate units, and power units ---
 	import ductSeriesData from '../luft/components/duct.series.json';
@@ -182,13 +183,22 @@
 						class="w-full md:w-[120px] {!flowPriority ? 'text-muted-foreground' : ''}"
 						id="flowrate"
 						bind:value={
-							() =>
-								flowRateM3s
-									? flowPriority
-										? parseFloat((flowRateM3s / flowRateSeries.value).toPrecision(12))
-										: parseFloat((flowRateM3s / flowRateSeries.value).toFixed(3))
-									: null,
-							(v) => (flowRateM3s = v * flowRateSeries.value)
+							() => {
+								if (flowRateM3s === null) {
+									return null;
+								}
+								const displayValue = flowRateM3s / flowRateSeries.value;
+								return flowPriority
+									? parseFloat(displayValue.toPrecision(12))
+									: smartRound(displayValue, 3);
+							},
+							(v) => {
+								if (v === null) {
+									flowRateM3s = null;
+								} else {
+									flowRateM3s = v * flowRateSeries.value;
+								}
+							}
 						}
 						onfocus={(e) => {
 							if (!e.target) return;
@@ -223,13 +233,20 @@
 						class="w-full md:w-[120px] {flowPriority ? 'text-muted-foreground' : ''}"
 						id="power"
 						bind:value={
-							() =>
-								powerW
-									? !flowPriority
-										? parseFloat((powerW / powerSeries.value).toPrecision(12))
-										: parseFloat((powerW / powerSeries.value).toFixed(3))
-									: null,
-							(v) => (powerW = v * powerSeries.value)
+							() => {
+								if (powerW === null) return null;
+								const displayValue = powerW / powerSeries.value;
+								return !flowPriority
+									? parseFloat(displayValue.toPrecision(12))
+									: smartRound(displayValue, 3);
+							},
+							(v) => {
+								if (v === null) {
+									powerW = null;
+								} else {
+									power((powerW = v * powerSeries.value));
+								}
+							}
 						}
 						onfocus={(e) => {
 							flowPriority = false;
