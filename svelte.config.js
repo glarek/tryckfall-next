@@ -13,7 +13,7 @@ const config = {
 		// See https://svelte.dev/docs/kit/adapters for more information about adapters.
 		paths: {
 			relative: false,
-			base: '/next'
+			base: '/tryckfall-next'
 		},
 		adapter: adapter({
 			// default options are shown. On some platforms
