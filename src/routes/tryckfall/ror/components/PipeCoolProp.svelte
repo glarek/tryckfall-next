@@ -13,8 +13,6 @@
 	let isCoolPropReady = false;
 	let assignedRuntimeInitializedCallback = null; // Store the function we assign for cleanup
 
-	$inspect(H);
-
 	function calculateAirProperties() {
 		// Read input values directly from the store
 		if (!isCoolPropReady || !coolPropModule) {
@@ -29,10 +27,10 @@
 			const avgTempK = avgTempC + ZERO_CELSIUS_KELVIN;
 
 			// Calculate properties using HAPropsSI and PropsSI
-			const H = coolPropModule.PropsSI('H', 'T', avgTempK, 'P', FLUID_PRESSURE, fluidType);
-			const Cp = coolPropModule.PropsSI('C', 'T', avgTempK, 'P', FLUID_PRESSURE, fluidType);
-			const D = coolPropModule.PropsSI('D', 'T', avgTempK, 'P', FLUID_PRESSURE, fluidType); // Density
-			const V = coolPropModule.PropsSI('V', 'T', avgTempK, 'P', FLUID_PRESSURE, fluidType); // Dynamic Viscosity
+			const H = coolPropModule.PropsSI('H', 'T', avgTempK, 'P', FLUID_PRESSURE, fluidType.value);
+			const Cp = coolPropModule.PropsSI('C', 'T', avgTempK, 'P', FLUID_PRESSURE, fluidType.value);
+			const D = coolPropModule.PropsSI('D', 'T', avgTempK, 'P', FLUID_PRESSURE, fluidType.value); // Density
+			const V = coolPropModule.PropsSI('V', 'T', avgTempK, 'P', FLUID_PRESSURE, fluidType.value); // Dynamic Viscosity
 			const kinematicVisc = D > 0 ? V / D : 0;
 
 			// Update the store with calculated values

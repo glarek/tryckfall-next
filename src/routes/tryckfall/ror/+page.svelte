@@ -6,6 +6,7 @@
 
 	import { getBellCurveValue } from '$lib/utils/bellCurveUtils.js';
 	import { smartRound } from '$lib/utils/smartRound';
+	import ChemicalFormula from '$lib/utils/ChemicalFormula.svelte';
 
 	// -- We load layout-relevant modules here ---
 	import InputLabel from '$lib/components/InputLabel.svelte';
@@ -30,6 +31,10 @@
 	import fluidSeriesData from '../ror/components/fluidTypes.json';
 	import powerData from '../ror/components/power.json';
 
+	$inputStore.fluidType = fluidSeriesData[0];
+
+	$inspect(fluidSeriesData);
+
 	// --- VARIABLE DEFINITIONS ---
 	// --- Local UI states ---
 	let propertiesVisible = $state(false);
@@ -40,7 +45,6 @@
 	let flowRateSeries = $state(flowRateSeriesData[0]);
 	let powerSeries = $state(powerData[0]);
 	let pipeSeries = $state(pipeSeriesData[0]);
-	let fluidSeries = $state(fluidSeriesData[0]);
 	let roughness = $derived(pipeSeries.roughness);
 	let TRANSITIONLIMIT = 2300;
 	let TRANSITION_INTERVAL = 500;
@@ -213,7 +217,7 @@
 								if (v === null) {
 									powerW = null;
 								} else {
-									power((powerW = v * powerSeries.value));
+									powerW = v * powerSeries.value;
 								}
 							}
 						}
@@ -257,15 +261,20 @@
 				<div transition:slide class="flex flex-col pt-2">
 					<Select.Root
 						type="single"
-						bind:value={fluidSeries.value}
-						onValueChange={(value) =>
-							(fluidSeries = fluidSeriesData.find((d) => d.value === value) ?? fluidSeriesData[0])}
+						value={$inputStore.fluidType.value}
+						onValueChange={(x) =>
+							($inputStore.fluidType =
+								fluidSeriesData.find((d) => d.value === x) ?? fluidSeriesData[0])}
 					>
-						<Select.Trigger class="w-[220px]">{fluidSeries.label}</Select.Trigger>
+						<Select.Trigger class="w-[220px]"
+							><ChemicalFormula formula={$inputStore.fluidType.label} /></Select.Trigger
+						>
 						<Select.Content>
 							<Select.Label>Köldbärare</Select.Label>
 							{#each fluidSeriesData as option}
-								<Select.Item value={option.value} label={option.label} />
+								<Select.Item value={option.value}
+									><ChemicalFormula formula={option.label} /></Select.Item
+								>
 							{/each}
 						</Select.Content>
 					</Select.Root>
@@ -275,7 +284,6 @@
 						>
 						<Label for="density">Densitet: {$fluidPropertiesStore.density.toFixed(3)} kg/m³</Label>
 						<Label for="roughness">Råhet: {pipeSeries.roughness} mm</Label>
-						<Label for="fluid">Köldbärare: {fluidSeries.label} {fluidSeries.value}</Label>
 					</div>
 				</div>
 			</Card.Content>

@@ -2,8 +2,8 @@
 	{
 		"label": "Vatten (H2O)",
 		"value": "Water",
-		"xmin": null,
-		"xmax": null,
+		"xmin": 0,
+		"xmax": 1,
 		"tmin": 0,
 		"tmax": 200
 	},
@@ -65,7 +65,14 @@
 		"tmin": -100,
 		"tmax": 40
 	},
-	{ "label": "Metanol (CH3OH)", "value": "MMA", "xmin": 0, "xmax": 0.6, "tmin": -100, "tmax": 40 },
+	{
+		"label": "Metanol (CH3OH)",
+		"value": "MMA",
+		"xmin": 0,
+		"xmax": 0.6,
+		"tmin": -100,
+		"tmax": 40
+	},
 	{
 		"label": "Magnesiumklorid (MgCl2)",
 		"value": "MMG",
