@@ -20,17 +20,54 @@
 			return; // Don't run if CoolProp isn't loaded
 		}
 
-		const { inletTemperature, outletTemperature, fluidType } = $inputStore; // Use the store directly
+		const { inletTemperature, outletTemperature, fluidType, concentration } = $inputStore; // Use the store directly
+		let fluidTypeInputValue;
+
+		if (fluidType.value === 'Water' || concentration === 0) {
+			fluidTypeInputValue = 'Water';
+		} else {
+			fluidTypeInputValue = 'INCOMP::' + fluidType.value + '[' + concentration + ']';
+		}
+
+		console.log(fluidTypeInputValue);
 
 		try {
 			const avgTempC = (inletTemperature + outletTemperature) / 2;
 			const avgTempK = avgTempC + ZERO_CELSIUS_KELVIN;
 
 			// Calculate properties using HAPropsSI and PropsSI
-			const H = coolPropModule.PropsSI('H', 'T', avgTempK, 'P', FLUID_PRESSURE, fluidType.value);
-			const Cp = coolPropModule.PropsSI('C', 'T', avgTempK, 'P', FLUID_PRESSURE, fluidType.value);
-			const D = coolPropModule.PropsSI('D', 'T', avgTempK, 'P', FLUID_PRESSURE, fluidType.value); // Density
-			const V = coolPropModule.PropsSI('V', 'T', avgTempK, 'P', FLUID_PRESSURE, fluidType.value); // Dynamic Viscosity
+			const H = coolPropModule.PropsSI(
+				'H',
+				'T',
+				avgTempK,
+				'P',
+				FLUID_PRESSURE,
+				fluidTypeInputValue
+			);
+			const Cp = coolPropModule.PropsSI(
+				'C',
+				'T',
+				avgTempK,
+				'P',
+				FLUID_PRESSURE,
+				fluidTypeInputValue
+			);
+			const D = coolPropModule.PropsSI(
+				'D',
+				'T',
+				avgTempK,
+				'P',
+				FLUID_PRESSURE,
+				fluidTypeInputValue
+			); // Density
+			const V = coolPropModule.PropsSI(
+				'V',
+				'T',
+				avgTempK,
+				'P',
+				FLUID_PRESSURE,
+				fluidTypeInputValue
+			); // Dynamic Viscosity
 			const kinematicVisc = D > 0 ? V / D : 0;
 
 			// Update the store with calculated values

@@ -7,7 +7,8 @@ const initialState = {
 	// Input values (can have default starting points)
 	inletTemperature: 60, // Example default
 	outletTemperature: 30, // Example default
-	fluidType: fluidSeriesData[0]
+	fluidType: fluidSeriesData[0],
+	concentration: 0
 };
 
 console.log('Fluidseriesdata set to ', initialState.fluidType);

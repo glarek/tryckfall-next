@@ -15,6 +15,8 @@
 	import { Input } from '$lib/components/ui/input/index.js';
 	import { Label } from '$lib/components/ui/label/index.js';
 	import { Switch } from '$lib/components/ui/switch/index.js';
+	import { SliderWithLabel } from '$lib/components/ui/slider/index.js';
+
 	import * as Table from '$lib/components/ui/table/index.js';
 
 	import { ChevronRight } from '@lucide/svelte';
@@ -25,7 +27,7 @@
 	import { inputStore } from '../ror/components/inputStore.js'; // Import the fluid properties store
 	import { calculatePressureDrop, colebrook } from '../components/calculations.js'; // Import the pressure drop calculation function
 
-	// --- We load Swedish standard ductt series, flow rate units, and power units ---
+	// --- We load Swedish standard pipe series, flow rate units, and power units ---
 	import pipeSeriesData from '../ror/components/pipe.series.json';
 	import flowRateSeriesData from '../ror/components/pipe.flow.rate.json';
 	import fluidSeriesData from '../ror/components/fluidTypes.json';
@@ -51,6 +53,7 @@
 	let flowRateM3s = $state(0); // Flow rate in m³/s
 	let powerW = $state(2000); // Power in Watts
 	let flowPriority = $state(false); // Flow rate priority for calculations
+	let temperatureLimitsAllowed = $state(true);
 
 	$effect(() => {
 		if (flowPriority) {
@@ -74,7 +77,7 @@
 		return pipeSeries.dIn.map((dInValue) => {
 			var diameter = dInValue / 1000; // Convert DN to meters
 			const velocity = Math.abs(flowRateM3s) / (Math.PI * Math.pow(diameter / 2, 2)); // Calculate velocity in m/s
-			const hydraulicDiameter = diameter; // For circular ducts, hydraulic diameter is the same as diameter
+			const hydraulicDiameter = diameter; // For circular pipes, hydraulic diameter is the same as diameter
 			const reynoldsNumber =
 				(velocity * hydraulicDiameter) / $fluidPropertiesStore.kinematicViscosity; // Calculate Reynolds number
 			const frictionFactor = colebrook(reynoldsNumber, roughness / (hydraulicDiameter * 1000)); // Calculate friction factor using Colebrook equation
@@ -130,6 +133,7 @@
 							id="supply"
 							bind:value={$inputStore.inletTemperature}
 						/>
+
 						<span>°C</span>
 					</div>
 				</div>
@@ -278,7 +282,22 @@
 							{/each}
 						</Select.Content>
 					</Select.Root>
-					<div class="flex w-full max-w-sm flex-col gap-2.5">
+
+					{#if $inputStore.fluidType.value != 'Water'}
+						<div transition:slide>
+							<Label for="concentration" class="pt-4">Koncentration</Label>
+							<SliderWithLabel
+								type="single"
+								thumbLabel={($inputStore.concentration * 100).toFixed(0) + '%'}
+								bind:value={$inputStore.concentration}
+								max={$inputStore.fluidType.xmax}
+								step={0.01}
+								class="max-w-[100%] pt-2 mt-8"
+							/>
+						</div>
+					{/if}
+
+					<div class="pt-4 flex w-full max-w-sm flex-col gap-2.5">
 						<Label for="thermal-capacity"
 							>Värmekapacitet: {$fluidPropertiesStore.specificHeatCapacity.toFixed(0)} J/kg·K</Label
 						>
@@ -316,10 +335,10 @@
 					</Table.Row>
 				</Table.Header>
 				<Table.Body>
-					{#each pipeArray as duct, i}
+					{#each pipeArray as pipe, i}
 						<Table.Row
 							class="hover:!opacity-100"
-							style="opacity: {getBellCurveValue(0.2, 1, 0.8, duct.pressureDrop / 100)}"
+							style="opacity: {getBellCurveValue(0.2, 1, 0.8, pipe.pressureDrop / 100)}"
 						>
 							<Table.Cell class="font-medium text-center"
 								><input
@@ -332,12 +351,12 @@
 								/></Table.Cell
 							>
 
-							<Table.Cell class="text-center">{duct.velocity.toFixed(2)}</Table.Cell>
+							<Table.Cell class="text-center">{pipe.velocity.toFixed(2)}</Table.Cell>
 							<Table.Cell class="text-center md:block hidden"
-								>{duct.reynoldsNumber.toPrecision(5)}</Table.Cell
+								>{pipe.reynoldsNumber.toPrecision(5)}</Table.Cell
 							>
 							<Table.Cell class="text-center overflow-x-clip">
-								{duct.pressureDrop.toFixed(0)}
+								{pipe.pressureDrop.toFixed(0)}
 							</Table.Cell>
 						</Table.Row>
 					{/each}
