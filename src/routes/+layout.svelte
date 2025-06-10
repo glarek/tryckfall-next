@@ -1,5 +1,7 @@
 <script>
 	let { children } = $props();
+	import { onNavigate, afterNavigate } from '$app/navigation';
+	import { tick } from 'svelte';
 	import '../app.css';
 	import { ModeWatcher, toggleMode } from 'mode-watcher';
 	import { Moon, Sun, Menu } from '@lucide/svelte';
@@ -9,13 +11,31 @@
 	import SideNav from '$lib/components/SideNav.svelte';
 	import { getShowNavbar, toggleNavbar, setShowNavbar } from '$lib/utils/navBarState.svelte.js';
 	import { get } from 'svelte/store';
-	import { onNavigate } from '$app/navigation';
 
 	let navBarHeight = 50;
+
+	onNavigate((navigation) => {
+		if (!document.startViewTransition) return;
+
+		return new Promise((resolve) => {
+			document.startViewTransition(async () => {
+				resolve();
+				await navigation.complete;
+			});
+		});
+	});
+
+	afterNavigate(() => {
+		const mainContainer = document.getElementById('main-container');
+		if (mainContainer) {
+			mainContainer.scrollTop = 0;
+		}
+	});
 </script>
 
 <TopNav mainClass="z-50" navClass="lg:w-5xl w-full" style="height: {navBarHeight}px" />
 <div
+	id="main-container"
 	class="relative flex flex-row justify-center w-dvw overflow-y-scroll"
 	style="max-height: calc(100dvh - {navBarHeight}px)"
 >
