@@ -1,13 +1,10 @@
 <script>
 	// prettier-ignore
 	import { onMount } from 'svelte'
-	import { inputStore } from './inputStore.js'; // Import the store
-	import { fluidPropertiesStore } from './fluidPropertiesStore.js'; // Import the store
-	import { base } from '$app/paths';
+	import { inputStore } from './inputStore.svelte.js'; // Import the store
+	import { fluidPropertiesStore } from './fluidPropertiesStore.svelte.js'; // Import the store
 
-	// --- Constants ---
-	const ZERO_CELSIUS_KELVIN = 273.15;
-	const FLUID_PRESSURE = 101325; // Standard atmospheric pressure in Pa
+	import { base } from '$app/paths';
 
 	let coolPropModule = null; // To hold the loaded CoolProp Module
 	let isCoolPropReady = false;
@@ -20,20 +17,20 @@
 			return; // Don't run if CoolProp isn't loaded
 		}
 
-		const { inletTemperature, outletTemperature, fluidType, concentration } = $inputStore; // Use the store directly
 		let fluidTypeInputValue;
 
-		if (fluidType.value === 'Water' || concentration === 0) {
+		if (inputStore.fluidType.value === 'Water' || inputStore.concentration === 0) {
 			fluidTypeInputValue = 'Water';
 		} else {
-			fluidTypeInputValue = 'INCOMP::' + fluidType.value + '[' + concentration + ']';
+			fluidTypeInputValue =
+				'INCOMP::' + inputStore.fluidType.value + '[' + inputStore.concentration + ']';
 		}
 
 		console.log(fluidTypeInputValue);
 
 		try {
-			const avgTempC = (inletTemperature + outletTemperature) / 2;
-			const avgTempK = avgTempC + ZERO_CELSIUS_KELVIN;
+			const avgTempC = (inputStore.inletTemperature + inputStore.outletTemperature) / 2;
+			const avgTempK = avgTempC + inputStore.ZERO_CELSIUS_KELVIN;
 
 			// Calculate properties using HAPropsSI and PropsSI
 			const H = coolPropModule.PropsSI(
@@ -41,7 +38,7 @@
 				'T',
 				avgTempK,
 				'P',
-				FLUID_PRESSURE,
+				inputStore.FLUID_PRESSURE,
 				fluidTypeInputValue
 			);
 			const Cp = coolPropModule.PropsSI(
@@ -49,7 +46,7 @@
 				'T',
 				avgTempK,
 				'P',
-				FLUID_PRESSURE,
+				inputStore.FLUID_PRESSURE,
 				fluidTypeInputValue
 			);
 			const D = coolPropModule.PropsSI(
@@ -57,7 +54,7 @@
 				'T',
 				avgTempK,
 				'P',
-				FLUID_PRESSURE,
+				inputStore.FLUID_PRESSURE,
 				fluidTypeInputValue
 			); // Density
 			const V = coolPropModule.PropsSI(
@@ -65,35 +62,56 @@
 				'T',
 				avgTempK,
 				'P',
-				FLUID_PRESSURE,
+				inputStore.FLUID_PRESSURE,
 				fluidTypeInputValue
 			); // Dynamic Viscosity
 			const kinematicVisc = D > 0 ? V / D : 0;
 
+			const freezeT =
+				fluidTypeInputValue === 'Water'
+					? inputStore.ZERO_CELSIUS_KELVIN
+					: (coolPropModule.PropsSI(
+							'T_freeze',
+							'T',
+							avgTempK,
+							'P',
+							inputStore.FLUID_PRESSURE,
+							fluidTypeInputValue
+						) ?? 0);
+
+			const maxT =
+				fluidTypeInputValue === 'Water'
+					? 100 + inputStore.ZERO_CELSIUS_KELVIN
+					: (coolPropModule.PropsSI(
+							'T_max',
+							'T',
+							avgTempK,
+							'P',
+							inputStore.FLUID_PRESSURE,
+							fluidTypeInputValue
+						) ?? 0);
+
 			// Update the store with calculated values
-			fluidPropertiesStore.update((store) => ({
-				...store,
-				enthalpy: H,
-				specificHeatCapacity: Cp,
-				density: D,
-				dynamicViscosity: V,
-				kinematicViscosity: kinematicVisc,
-				error: null // Clear any previous error
-			}));
+			fluidPropertiesStore.enthalpy = H;
+			fluidPropertiesStore.specificHeatCapacity = Cp;
+			fluidPropertiesStore.density = D;
+			fluidPropertiesStore.dynamicViscosity = V;
+			fluidPropertiesStore.kinematicViscosity = kinematicVisc;
+			fluidPropertiesStore.error = null; // Clear any previous error
+			fluidPropertiesStore.freezeT = freezeT - inputStore.ZERO_CELSIUS_KELVIN;
+			fluidPropertiesStore.maxT = maxT - inputStore.ZERO_CELSIUS_KELVIN;
 		} catch (error) {
 			console.error('Error during CoolProp calculation:', error);
 			// Update store with error state and potentially reset outputs
-			fluidPropertiesStore.update((store) => ({
-				...store,
-				error: error.message || 'Calculation failed'
-			}));
+			fluidPropertiesStore.error = error.message || 'Calculation failed';
 		}
 	}
 
 	// --- CoolProp Initialization ---
 	onMount(() => {
 		// Indicate loading state in the store
-		fluidPropertiesStore.update((store) => ({ ...store, isLoading: true, error: null }));
+		fluidPropertiesStore.isLoading = true;
+		fluidPropertiesStore.error = null;
 
 		const checkCoolProp = () => {
 			// Checks if 'Module' exists and is ready
@@ -101,7 +119,7 @@
 				console.log('CoolProp module already initialized.');
 				coolPropModule = Module; // Assigns the global Module to a local variable
 				isCoolPropReady = true;
-				fluidPropertiesStore.update((store) => ({ ...store, isLoading: false }));
+				fluidPropertiesStore.isLoading = false;
 				calculateAirProperties();
 			} else if (typeof Module !== 'undefined' && Module.onRuntimeInitialized) {
 				// Define the callback function separately for cleanup
@@ -109,7 +127,7 @@
 					console.log('CoolProp runtime initialized.');
 					coolPropModule = Module;
 					isCoolPropReady = true;
-					fluidPropertiesStore.update((store) => ({ ...store, isLoading: false }));
+					fluidPropertiesStore.isLoading = false;
 					calculateAirProperties();
 					assignedRuntimeInitializedCallback = null; // Clear reference after execution
 				};
@@ -136,9 +154,14 @@
 	// --- Reactive Effect for Calculations ---
 	// Use $effect.pre to ensure inputs are stable before calculating
 	$effect.pre(() => {
-		// Read input values directly from the store
-		const { inletTemperature, outletTemperature, fluidType } = $inputStore; // Use the store directly
-		calculateAirProperties(); // Call the calculation function
+		const _dependencies = [
+			inputStore.fluidType.value,
+			inputStore.concentration,
+			inputStore.inletTemperature,
+			inputStore.outletTemperature
+		];
+
+		calculateAirProperties();
 	});
 </script>
 

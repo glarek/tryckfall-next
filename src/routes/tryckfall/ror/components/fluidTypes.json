@@ -62,7 +62,7 @@
 		"value": "MLI",
 		"xmin": 0,
 		"xmax": 0.24,
-		"tmin": -100,
+		"tmin": -5,
 		"tmax": 40
 	},
 	{
@@ -86,7 +86,7 @@
 		"value": "MNA",
 		"xmin": 0,
 		"xmax": 0.23,
-		"tmin": -100,
+		"tmin": 0,
 		"tmax": 40
 	},
 	{

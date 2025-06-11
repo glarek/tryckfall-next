@@ -1,7 +1,7 @@
 <script>
 	// --- IMPORT DEFINITIONS ---
 	// --- We load UI-relevant modules here ---
-	import { slide, fly } from 'svelte/transition';
+	import { slide, fly, crossfade, draw } from 'svelte/transition';
 	import { tick } from 'svelte';
 
 	import { getBellCurveValue } from '$lib/utils/bellCurveUtils.js';
@@ -19,12 +19,12 @@
 
 	import * as Table from '$lib/components/ui/table/index.js';
 
-	import { ChevronRight } from '@lucide/svelte';
+	import { ChevronRight, CircleAlert, TriangleAlert } from '@lucide/svelte';
 
 	// --- We load program related modules ---
 	import CoolProp from './components/PipeCoolProp.svelte'; // Import the new component
-	import { fluidPropertiesStore } from '../ror/components/fluidPropertiesStore.js'; // Import the air properties store
-	import { inputStore } from '../ror/components/inputStore.js'; // Import the fluid properties store
+	import { fluidPropertiesStore } from '../ror/components/fluidPropertiesStore.svelte.js'; // Import the air properties store
+	import { inputStore } from './components/inputStore.svelte.js'; // Import the fluid properties store
 	import { calculatePressureDrop, colebrook } from '../components/calculations.js'; // Import the pressure drop calculation function
 
 	// --- We load Swedish standard pipe series, flow rate units, and power units ---
@@ -33,65 +33,69 @@
 	import fluidSeriesData from '../ror/components/fluidTypes.json';
 	import powerData from '../ror/components/power.json';
 
-	$inputStore.fluidType = fluidSeriesData[0];
-
 	$inspect(fluidSeriesData);
 
 	// --- VARIABLE DEFINITIONS ---
 	// --- Local UI states ---
 	let propertiesVisible = $state(false);
-
-	// --- State Variables ---
+	let temperatureError = $derived(
+		inputStore.inletTemperature > fluidPropertiesStore.maxT ||
+			inputStore.outletTemperature > fluidPropertiesStore.maxT ||
+			inputStore.inletTemperature < fluidPropertiesStore.freezeT ||
+			inputStore.outletTemperature < fluidPropertiesStore.freezeT
+	);
 
 	// Initialize standard values
-	let flowRateSeries = $state(flowRateSeriesData[0]);
-	let powerSeries = $state(powerData[0]);
-	let pipeSeries = $state(pipeSeriesData[0]);
-	let roughness = $derived(pipeSeries.roughness);
-	let TRANSITIONLIMIT = 2300;
-	let TRANSITION_INTERVAL = 500;
-	let flowRateM3s = $state(0); // Flow rate in m³/s
-	let powerW = $state(2000); // Power in Watts
-	let flowPriority = $state(false); // Flow rate priority for calculations
+	//let flowRateSeries = $state(flowRateSeriesData[0]);
+	//let powerSeries = $state(powerData[0]);
+	let roughness = $derived(inputStore.pipeSeries.roughness);
+
 	let temperatureLimitsAllowed = $state(true);
 
 	$effect(() => {
-		if (flowPriority) {
+		if (inputStore.flowPriority) {
 			// If flow rate is prioritized, calculate power based on flow rate
-			powerW =
-				flowRateM3s *
-				$fluidPropertiesStore.density *
-				$fluidPropertiesStore.specificHeatCapacity *
-				($inputStore.inletTemperature - $inputStore.outletTemperature);
+			inputStore.powerW =
+				inputStore.flowRateM3s *
+				fluidPropertiesStore.density *
+				fluidPropertiesStore.specificHeatCapacity *
+				(inputStore.inletTemperature - inputStore.outletTemperature);
 		} else {
 			// If power is prioritized, calculate flow rate based on power
-			flowRateM3s =
-				powerW /
-				($fluidPropertiesStore.density *
-					$fluidPropertiesStore.specificHeatCapacity *
-					($inputStore.inletTemperature - $inputStore.outletTemperature));
+			inputStore.flowRateM3s =
+				inputStore.powerW /
+				(fluidPropertiesStore.density *
+					fluidPropertiesStore.specificHeatCapacity *
+					(inputStore.inletTemperature - inputStore.outletTemperature));
 		}
 	});
 
 	let pipeArray = $derived.by(() => {
-		return pipeSeries.dIn.map((dInValue) => {
-			var diameter = dInValue / 1000; // Convert DN to meters
-			const velocity = Math.abs(flowRateM3s) / (Math.PI * Math.pow(diameter / 2, 2)); // Calculate velocity in m/s
+		return inputStore.pipeSeries.dIn.map((dInValue) => {
+			const diameter = dInValue / 1000; // Convert DN to meters
+			const velocity = Math.abs(inputStore.flowRateM3s) / (Math.PI * Math.pow(diameter / 2, 2)); // Calculate velocity in m/s
 			const hydraulicDiameter = diameter; // For circular pipes, hydraulic diameter is the same as diameter
 			const reynoldsNumber =
-				(velocity * hydraulicDiameter) / $fluidPropertiesStore.kinematicViscosity; // Calculate Reynolds number
+				(velocity * hydraulicDiameter) / fluidPropertiesStore.kinematicViscosity; // Calculate Reynolds number
 			const frictionFactor = colebrook(reynoldsNumber, roughness / (hydraulicDiameter * 1000)); // Calculate friction factor using Colebrook equation
 			const pressureDrop = calculatePressureDrop(
-				$fluidPropertiesStore.dynamicViscosity,
-				$fluidPropertiesStore.density,
+				fluidPropertiesStore.dynamicViscosity,
+				fluidPropertiesStore.density,
 				hydraulicDiameter,
 				velocity,
 				reynoldsNumber,
 				frictionFactor,
-				TRANSITIONLIMIT,
-				TRANSITION_INTERVAL
+				inputStore.TRANSITIONLIMIT,
+				inputStore.TRANSITION_INTERVAL
 			);
-			return { dn: dInValue, diameter, velocity, reynoldsNumber, frictionFactor, pressureDrop };
+			return {
+				dIn: dInValue,
+				diameter,
+				velocity,
+				reynoldsNumber,
+				frictionFactor,
+				pressureDrop
+			};
 		});
 	});
 </script>
@@ -110,11 +114,12 @@
 				<Label for="material">Rörtyp</Label>
 				<Select.Root
 					type="single"
-					bind:value={pipeSeries.name}
+					bind:value={inputStore.pipeSeries.name}
 					onValueChange={(name) =>
-						(pipeSeries = pipeSeriesData.find((d) => d.name === name) ?? pipeSeriesData[0])}
+						(inputStore.pipeSeries =
+							pipeSeriesData.find((d) => d.name === name) ?? pipeSeriesData[0])}
 				>
-					<Select.Trigger class="w-[220px]">{pipeSeries.name}</Select.Trigger>
+					<Select.Trigger class="w-[220px]">{inputStore.pipeSeries.name}</Select.Trigger>
 					<Select.Content>
 						<Select.Label>Kanalmaterial</Select.Label>
 						{#each pipeSeriesData as option}
@@ -131,7 +136,7 @@
 							type="number"
 							class="md:w-[80px]"
 							id="supply"
-							bind:value={$inputStore.inletTemperature}
+							bind:value={inputStore.inletTemperature}
 						/>
 
 						<span>°C</span>
@@ -145,109 +150,127 @@
 							type="number"
 							class="md:w-[80px]"
 							id="return"
-							bind:value={$inputStore.outletTemperature}
+							bind:value={inputStore.outletTemperature}
 						/>
 						<span>°C</span>
 					</div>
 				</div>
 			</div>
-			<div class="flex w-full max-w-sm flex-col gap-1.5 pb-4">
-				<Label for="supply">Vätskeflöde</Label>
-				<div class="flex flex-row gap-x-2">
-					<Input
-						type="number"
-						class="w-full md:w-[120px] {!flowPriority ? 'text-muted-foreground' : ''}"
-						id="flowrate"
-						step="0.01"
-						bind:value={
-							() => {
-								if (flowRateM3s === null) {
-									return null;
-								}
-								const displayValue = flowRateM3s / flowRateSeries.value;
-								return flowPriority
-									? parseFloat(displayValue.toPrecision(12))
-									: smartRound(displayValue, 3);
-							},
-							(v) => {
-								if (v === null) {
-									flowRateM3s = null;
-								} else {
-									flowRateM3s = v * flowRateSeries.value;
-								}
-							}
-						}
-						onfocus={(e) => {
-							if (!e.target) return;
-							flowPriority = true;
-							tick().then(() => {
-								e.target.select();
-							});
-						}}
-					/>
-					<Select.Root
-						type="single"
-						bind:value={flowRateSeries.label}
-						onValueChange={(label) =>
-							(flowRateSeries =
-								flowRateSeriesData.find((d) => d.label === label) ?? flowRateSeriesData[0])}
-					>
-						<Select.Trigger class="w-[80px]">{flowRateSeries.label}</Select.Trigger>
-						<Select.Content>
-							<Select.Label>Enheter</Select.Label>
-							{#each flowRateSeriesData as option}
-								<Select.Item value={option.label} label={option.label} />
-							{/each}
-						</Select.Content>
-					</Select.Root>
+			{#if temperatureError}
+				<div
+					transition:slide
+					class="border-1 p-2 rounded-md border-destructive text-sm mb-4 flex flex-row items-center gap-x-2"
+				>
+					<TriangleAlert class="flex text-destructive size-[28px]" /><span class="flex-1">
+						Temperatur måste begränsas mellan {parseFloat(fluidPropertiesStore.freezeT.toFixed(1))} °C
+						och {parseFloat(fluidPropertiesStore.maxT.toFixed(1))}
+						°C.
+					</span>
 				</div>
-			</div>
-			<div class="flex w-full max-w-sm flex-col gap-1.5 pb-4">
-				<Label for="power">Effekt</Label>
-				<div class="flex flex-row gap-x-2">
-					<Input
-						type="number"
-						class="w-full md:w-[120px] {flowPriority ? 'text-muted-foreground' : ''}"
-						id="power"
-						bind:value={
-							() => {
-								if (powerW === null) return null;
-								const displayValue = powerW / powerSeries.value;
-								return !flowPriority
-									? parseFloat(displayValue.toPrecision(12))
-									: smartRound(displayValue, 3);
-							},
-							(v) => {
-								if (v === null) {
-									powerW = null;
-								} else {
-									powerW = v * powerSeries.value;
+			{:else}
+				<div transition:slide>
+					<div class="flex w-full max-w-sm flex-col gap-1.5 pb-4">
+						<Label for="supply">Vätskeflöde</Label>
+						<div class="flex flex-row gap-x-2">
+							<Input
+								type="number"
+								class="w-full md:w-[120px] {!inputStore.flowPriority
+									? 'text-muted-foreground'
+									: ''}"
+								id="flowrate"
+								step="0.01"
+								bind:value={
+									() => {
+										if (inputStore.flowRateM3s === null) {
+											return null;
+										}
+										const displayValue = inputStore.flowRateM3s / inputStore.flowRateSeries.value;
+										return inputStore.flowPriority
+											? parseFloat(displayValue.toPrecision(12))
+											: smartRound(displayValue, 3);
+									},
+									(v) => {
+										if (v === null) {
+											inputStore.flowRateM3s = null;
+										} else {
+											inputStore.flowRateM3s = v * inputStore.flowRateSeries.value;
+										}
+									}
 								}
-							}
-						}
-						onfocus={(e) => {
-							flowPriority = false;
-							tick().then(() => {
-								e.target.select();
-							});
-						}}
-					/>
-					<Select.Root
-						type="single"
-						bind:value={powerSeries.label}
-						onValueChange={(label) =>
-							(powerSeries = powerData.find((d) => d.label === label) ?? powerData[0])}
-					>
-						<Select.Trigger class="w-[80px]">{powerSeries.label}</Select.Trigger>
-						<Select.Content>
-							<Select.Label>Enheter</Select.Label>
-							{#each powerData as option}
-								<Select.Item value={option.label} label={option.label} />
-							{/each}
-						</Select.Content>
-					</Select.Root>
+								onfocus={(e) => {
+									if (!e.target) return;
+									inputStore.flowPriority = true;
+									tick().then(() => {
+										e.target.select();
+									});
+								}}
+							/>
+							<Select.Root
+								type="single"
+								bind:value={inputStore.flowRateSeries.label}
+								onValueChange={(label) =>
+									(inputStore.flowRateSeries =
+										flowRateSeriesData.find((d) => d.label === label) ?? flowRateSeriesData[0])}
+							>
+								<Select.Trigger class="w-[80px]">{inputStore.flowRateSeries.label}</Select.Trigger>
+								<Select.Content>
+									<Select.Label>Enheter</Select.Label>
+									{#each flowRateSeriesData as option}
+										<Select.Item value={option.label} label={option.label} />
+									{/each}
+								</Select.Content>
+							</Select.Root>
+						</div>
+					</div>
+					<div class="flex w-full max-w-sm flex-col gap-1.5 pb-4">
+						<Label for="power">Effekt</Label>
+						<div class="flex flex-row gap-x-2">
+							<Input
+								type="number"
+								class="w-full md:w-[120px] {inputStore.flowPriority ? 'text-muted-foreground' : ''}"
+								id="power"
+								bind:value={
+									() => {
+										if (inputStore.powerW === null) return null;
+										const displayValue = inputStore.powerW / inputStore.powerSeries.value;
+										return !inputStore.flowPriority
+											? parseFloat(displayValue.toPrecision(12))
+											: smartRound(displayValue, 3);
+									},
+									(v) => {
+										if (v === null) {
+											inputStore.powerW = null;
+										} else {
+											inputStore.powerW = v * inputStore.powerSeries.value;
+										}
+									}
+								}
+								onfocus={(e) => {
+									inputStore.flowPriority = false;
+									tick().then(() => {
+										e.target.select();
+									});
+								}}
+							/>
+							<Select.Root
+								type="single"
+								bind:value={inputStore.powerSeries.label}
+								onValueChange={(label) =>
+									(inputStore.powerSeries =
+										powerData.find((d) => d.label === label) ?? powerData[0])}
+							>
+								<Select.Trigger class="w-[80px]">{inputStore.powerSeries.label}</Select.Trigger>
+								<Select.Content>
+									<Select.Label>Enheter</Select.Label>
+									{#each powerData as option}
+										<Select.Item value={option.label} label={option.label} />
+									{/each}
+								</Select.Content>
+							</Select.Root>
+						</div>
+					</div>
 				</div>
-			</div>
+			{/if}
 		</Card.Content>
 		<Card.Header>
 			<Card.Title
@@ -265,13 +288,13 @@
 				<div transition:slide class="flex flex-col pt-2">
 					<Select.Root
 						type="single"
-						value={$inputStore.fluidType.value}
+						value={inputStore.fluidType.value}
 						onValueChange={(x) =>
-							($inputStore.fluidType =
+							(inputStore.fluidType =
 								fluidSeriesData.find((d) => d.value === x) ?? fluidSeriesData[0])}
 					>
 						<Select.Trigger class="w-[220px]"
-							><ChemicalFormula formula={$inputStore.fluidType.label} /></Select.Trigger
+							><ChemicalFormula formula={inputStore.fluidType.label} /></Select.Trigger
 						>
 						<Select.Content>
 							<Select.Label>Köldbärare</Select.Label>
@@ -283,14 +306,14 @@
 						</Select.Content>
 					</Select.Root>
 
-					{#if $inputStore.fluidType.value != 'Water'}
+					{#if inputStore.fluidType.value != 'Water'}
 						<div transition:slide>
 							<Label for="concentration" class="pt-4">Koncentration</Label>
 							<SliderWithLabel
 								type="single"
-								thumbLabel={($inputStore.concentration * 100).toFixed(0) + '%'}
-								bind:value={$inputStore.concentration}
-								max={$inputStore.fluidType.xmax}
+								thumbLabel={(inputStore.concentration * 100).toFixed(0) + '%'}
+								bind:value={inputStore.concentration}
+								max={inputStore.fluidType.xmax}
 								step={0.01}
 								class="max-w-[100%] pt-2 mt-8"
 							/>
@@ -299,10 +322,10 @@
 
 					<div class="pt-4 flex w-full max-w-sm flex-col gap-2.5">
 						<Label for="thermal-capacity"
-							>Värmekapacitet: {$fluidPropertiesStore.specificHeatCapacity.toFixed(0)} J/kg·K</Label
+							>Värmekapacitet: {fluidPropertiesStore.specificHeatCapacity.toFixed(0)} J/kg·K</Label
 						>
-						<Label for="density">Densitet: {$fluidPropertiesStore.density.toFixed(3)} kg/m³</Label>
-						<Label for="roughness">Råhet: {pipeSeries.roughness} mm</Label>
+						<Label for="density">Densitet: {fluidPropertiesStore.density.toFixed(3)} kg/m³</Label>
+						<Label for="roughness">Råhet: {inputStore.pipeSeries.roughness} mm</Label>
 					</div>
 				</div>
 			</Card.Content>
@@ -316,6 +339,11 @@
 		</Card.Header>
 		<Card.Content>
 			<Table.Root>
+				<Table.Caption
+					><div class="inline-flex items-center gap-x-1">
+						<CircleAlert size="16px" />Laminär strömning
+					</div></Table.Caption
+				>
 				<Table.Header>
 					<Table.Row>
 						<Table.Head class="text-center font-semibold"
@@ -337,26 +365,35 @@
 				<Table.Body>
 					{#each pipeArray as pipe, i}
 						<Table.Row
-							class="hover:!opacity-100"
-							style="opacity: {getBellCurveValue(0.2, 1, 0.8, pipe.pressureDrop / 100)}"
+							style="color: color-mix(in srgb, var(--foreground) {getBellCurveValue(
+								0.2,
+								1,
+								0.8,
+								pipe.pressureDrop / 100
+							) * 100}%, transparent)"
 						>
-							<Table.Cell class="font-medium text-center"
-								><input
-									class="w-[50px] text-center no-spinner"
-									type="number"
-									bind:value={pipeSeries.dn[i]}
-									onfocus={(e) => {
-										e.target.select();
-									}}
-								/></Table.Cell
+							<Table.Cell class="font-medium text-center">{inputStore.pipeSeries.dn[i]}</Table.Cell>
+							<Table.Cell class="text-center ">
+								<div class="flex justify-center items-center gap-x-1 relative w-fit mx-auto">
+									{pipe.velocity.toFixed(2)}
+									{#if pipe.reynoldsNumber < inputStore.TRANSITIONLIMIT}<CircleAlert
+											size="16px"
+											class="absolute left-full translate-x-2 opacity-25"
+										/>{:else}{/if}
+								</div></Table.Cell
 							>
 
-							<Table.Cell class="text-center">{pipe.velocity.toFixed(2)}</Table.Cell>
-							<Table.Cell class="text-center md:block hidden"
-								>{pipe.reynoldsNumber.toPrecision(5)}</Table.Cell
-							>
-							<Table.Cell class="text-center overflow-x-clip">
-								{pipe.pressureDrop.toFixed(0)}
+							<Table.Cell class="text-center md:table-cell hidden relative"
+								>{#if temperatureError}<span
+										transition:fly
+										class="absolute left-1/2 top-1/2 -translate-y-1/2 -translate-x-1/2 align-center w-[56px] rounded-md h-[22px] bg-muted animate-pulse"
+									></span>{:else}<span transition:fly>{pipe.reynoldsNumber.toFixed(0)}</span>{/if}
+							</Table.Cell>
+							<Table.Cell class="text-center table-cell relative">
+								{#if temperatureError}<span
+										transition:fly
+										class="absolute left-1/2 top-1/2 -translate-y-1/2 -translate-x-1/2 align-center w-[56px] rounded-md h-[22px] bg-muted animate-pulse"
+									></span>{:else}<span transition:fly>{pipe.pressureDrop.toFixed(0)}</span>{/if}
 							</Table.Cell>
 						</Table.Row>
 					{/each}
