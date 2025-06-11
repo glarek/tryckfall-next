@@ -44,13 +44,12 @@
 			inputStore.inletTemperature < fluidPropertiesStore.freezeT ||
 			inputStore.outletTemperature < fluidPropertiesStore.freezeT
 	);
+	let flowInfinity = $derived(inputStore.inletTemperature === inputStore.outletTemperature);
 
 	// Initialize standard values
 	//let flowRateSeries = $state(flowRateSeriesData[0]);
 	//let powerSeries = $state(powerData[0]);
 	let roughness = $derived(inputStore.pipeSeries.roughness);
-
-	let temperatureLimitsAllowed = $state(true);
 
 	$effect(() => {
 		if (inputStore.flowPriority) {
@@ -373,24 +372,29 @@
 							) * 100}%, transparent)"
 						>
 							<Table.Cell class="font-medium text-center">{inputStore.pipeSeries.dn[i]}</Table.Cell>
-							<Table.Cell class="text-center ">
-								<div class="flex justify-center items-center gap-x-1 relative w-fit mx-auto">
-									{pipe.velocity.toFixed(2)}
-									{#if pipe.reynoldsNumber < inputStore.TRANSITIONLIMIT}<CircleAlert
-											size="16px"
-											class="absolute left-full translate-x-2 opacity-25"
-										/>{:else}{/if}
-								</div></Table.Cell
+							<Table.Cell class="text-center table-cell relative">
+								{#if temperatureError || flowInfinity}<span
+										transition:fly
+										class="absolute left-1/2 top-1/2 -translate-y-1/2 -translate-x-1/2 align-center w-[56px] rounded-md h-[22px] bg-muted animate-pulse"
+									></span>{:else}
+									<div class="flex justify-center items-center gap-x-1 relative w-fit mx-auto">
+										{pipe.velocity.toFixed(2)}
+										{#if pipe.reynoldsNumber < inputStore.TRANSITIONLIMIT}<CircleAlert
+												size="16px"
+												class="absolute left-full translate-x-2 opacity-25"
+											/>{:else}{/if}
+									</div>
+								{/if}</Table.Cell
 							>
 
 							<Table.Cell class="text-center md:table-cell hidden relative"
-								>{#if temperatureError}<span
+								>{#if temperatureError || flowInfinity}<span
 										transition:fly
 										class="absolute left-1/2 top-1/2 -translate-y-1/2 -translate-x-1/2 align-center w-[56px] rounded-md h-[22px] bg-muted animate-pulse"
 									></span>{:else}<span transition:fly>{pipe.reynoldsNumber.toFixed(0)}</span>{/if}
 							</Table.Cell>
 							<Table.Cell class="text-center table-cell relative">
-								{#if temperatureError}<span
+								{#if temperatureError || flowInfinity}<span
 										transition:fly
 										class="absolute left-1/2 top-1/2 -translate-y-1/2 -translate-x-1/2 align-center w-[56px] rounded-md h-[22px] bg-muted animate-pulse"
 									></span>{:else}<span transition:fly>{pipe.pressureDrop.toFixed(0)}</span>{/if}
