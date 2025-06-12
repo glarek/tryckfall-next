@@ -355,7 +355,7 @@
 							{#if !useRectangular}
 								<Table.Cell class="font-medium text-center"
 									><input
-										class="w-[50px] text-center no-spinner"
+										class="w-[40px] text-center no-spinner"
 										type="number"
 										bind:value={ductSeries.dn[i]}
 										onfocus={(e) => {

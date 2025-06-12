@@ -166,7 +166,7 @@
 						°C.
 					</span>
 				</div>
-			{:else}
+			{:else if !temperatureError && !fluidPropertiesStore.isLoading}
 				<div transition:slide>
 					<div class="flex w-full max-w-sm flex-col gap-1.5 pb-4">
 						<Label for="supply">Vätskeflöde</Label>
@@ -373,7 +373,7 @@
 						>
 							<Table.Cell class="font-medium text-center">{inputStore.pipeSeries.dn[i]}</Table.Cell>
 							<Table.Cell class="text-center table-cell relative">
-								{#if temperatureError || flowInfinity}<span
+								{#if temperatureError || flowInfinity || fluidPropertiesStore.isLoading}<span
 										transition:fly
 										class="absolute left-1/2 top-1/2 -translate-y-1/2 -translate-x-1/2 align-center w-[56px] rounded-md h-[22px] bg-muted animate-pulse"
 									></span>{:else}
@@ -388,13 +388,13 @@
 							>
 
 							<Table.Cell class="text-center md:table-cell hidden relative"
-								>{#if temperatureError || flowInfinity}<span
+								>{#if temperatureError || flowInfinity || fluidPropertiesStore.isLoading}<span
 										transition:fly
 										class="absolute left-1/2 top-1/2 -translate-y-1/2 -translate-x-1/2 align-center w-[56px] rounded-md h-[22px] bg-muted animate-pulse"
 									></span>{:else}<span transition:fly>{pipe.reynoldsNumber.toFixed(0)}</span>{/if}
 							</Table.Cell>
 							<Table.Cell class="text-center table-cell relative">
-								{#if temperatureError || flowInfinity}<span
+								{#if temperatureError || flowInfinity || fluidPropertiesStore.isLoading}<span
 										transition:fly
 										class="absolute left-1/2 top-1/2 -translate-y-1/2 -translate-x-1/2 align-center w-[56px] rounded-md h-[22px] bg-muted animate-pulse"
 									></span>{:else}<span transition:fly>{pipe.pressureDrop.toFixed(0)}</span>{/if}

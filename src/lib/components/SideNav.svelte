@@ -1,11 +1,11 @@
 <script>
 	import { ModeWatcher, toggleMode } from 'mode-watcher';
 	import { House, Gauge, CloudDrizzle, Toilet } from '@lucide/svelte';
+	import { IdaIce } from '$lib/icons/index';
 	let { class: additionalClasses = '', ...restProps } = $props();
 	import NavigationMenuLink from '$lib/components/NavigationMenuLink.svelte';
 	import MenuLink from '$lib/components/MenuLink.svelte';
 	import { base } from '$app/paths';
-
 </script>
 
 <ModeWatcher />
@@ -29,6 +29,8 @@
 			<MenuLink link="{base}/spillvatten/flode">Flöde</MenuLink>
 			<MenuLink link="{base}/spillvatten/fettavskiljare">Fettavskiljare</MenuLink>
 		</NavigationMenuLink>
+		<NavigationMenuLink buttonText="Skript - IDA ICE" icon={IdaIce} link="{base}/ida-ice-skript"
+		></NavigationMenuLink>
 	</ul>
 	<span class="flex justify-center">En del av...</span>
 </div>
