@@ -57,10 +57,7 @@
 		{#if children}
 			<Collapsible.Content forceMount>
 				{#if open}
-					<div
-						class="ml-4 border-l left-6 pl-4 my-2 pt-0 pb-1 space-y-1 font-medium"
-						transition:slide
-					>
+					<div class="ml-1 left-6 pl-4 my-2 pt-0 pb-1 font-medium" transition:slide>
 						{@render children?.()}
 					</div>
 				{/if}

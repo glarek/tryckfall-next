@@ -8,8 +8,8 @@
 </script>
 
 <li
-	class="text-muted-foreground hover:text-foreground {activeLink
-		? 'text-primary hover:text-primary'
+	class="text-muted-foreground hover:text-foreground hover:border-foreground border-l-2 py-0.5 pl-3 {activeLink
+		? 'text-primary border-primary'
 		: ''}"
 >
 	<a href={link} onclick={() => setShowNavbar(false)}>{@render children()}</a>

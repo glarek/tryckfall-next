@@ -3,7 +3,6 @@
 	import { onMount } from 'svelte'
 	import { inputStore } from './inputStore.svelte.js'; // Import the store
 	import { fluidPropertiesStore } from './fluidPropertiesStore.svelte.js'; // Import the store
-
 	import { base } from '$app/paths';
 
 	let coolPropModule = null; // To hold the loaded CoolProp Module

@@ -20,7 +20,7 @@
 	// --- We load program related modules ---
 	import CoolProp from './components/AirCoolProp.svelte'; // Import the new component
 	import { airPropertiesStore } from '../luft/components/airPropertiesStore.js'; // Import the air properties store
-	import { inputStore } from '../luft/components/inputStore.js'; // Import the air properties store
+	import { inputStore } from './components/inputStore.svelte.js'; // Import the air properties store
 	import { calculatePressureDrop, colebrook } from '../components/calculations.js'; // Import the pressure drop calculation function
 	import { smartRound } from '$lib/utils/smartRound.js';
 
@@ -37,39 +37,37 @@
 	// --- State Variables ---
 
 	// Initialize standard values
-	let flowRateSeries = $state(flowRateSeriesData[0]);
-	let powerSeries = $state(powerData[0]);
-	let ductSeries = $state(ductSeriesData[0]);
-	let roughness = $derived(ductSeries.roughness);
-	let TRANSITIONLIMIT = 2300;
-	let TRANSITION_INTERVAL = 500;
-	let flowRateM3s = $state(0.02); // Flow rate in m³/s
-	let powerW = $state(0); // Power in Watts
-	let flowPriority = $state(true); // Flow rate priority for calculations
+	//let flowRateSeries = $state(flowRateSeriesData[0]);
+	//let powerSeries = $state(powerData[0]);
+	//let ductSeries = $state(ductSeriesData[0]);
+	let roughness = $derived(inputStore.ductSeries.roughness);
+	//let flowRateM3s = $state(0.02); // Flow rate in m³/s
+	//let powerW = $state(0); // Power in Watts
+	//let flowPriority = $state(true); // Flow rate priority for calculations
 
 	$effect(() => {
-		if (flowPriority) {
+		if (inputStore.flowPriority) {
 			// If flow rate is prioritized, calculate power based on flow rate
-			powerW =
-				flowRateM3s *
+			inputStore.powerW =
+				inputStore.flowRateM3s *
 				$airPropertiesStore.airDensity *
 				$airPropertiesStore.specificHeatCapacity *
-				($inputStore.inletTemperature - $inputStore.outletTemperature);
+				(inputStore.inletTemperature - inputStore.outletTemperature);
 		} else {
 			// If power is prioritized, calculate flow rate based on power
-			flowRateM3s =
-				powerW /
+			inputStore.flowRateM3s =
+				inputStore.powerW /
 				($airPropertiesStore.airDensity *
 					$airPropertiesStore.specificHeatCapacity *
-					($inputStore.inletTemperature - $inputStore.outletTemperature));
+					(inputStore.inletTemperature - inputStore.outletTemperature));
 		}
 	});
 
 	let ductArray = $derived.by(() => {
 		if (!useRectangular) {
-			return ductSeries.dn.map((dnValue) => {
+			return inputStore.ductSeries.dn.map((dnValue) => {
 				var diameter = dnValue / 1000; // Convert DN to meters
-				const velocity = Math.abs(flowRateM3s) / (Math.PI * Math.pow(diameter / 2, 2)); // Calculate velocity in m/s
+				const velocity = Math.abs(inputStore.flowRateM3s) / (Math.PI * Math.pow(diameter / 2, 2)); // Calculate velocity in m/s
 				const hydraulicDiameter = diameter; // For circular ducts, hydraulic diameter is the same as diameter
 				const reynoldsNumber =
 					(velocity * hydraulicDiameter) / $airPropertiesStore.kinematicViscosity; // Calculate Reynolds number
@@ -81,15 +79,16 @@
 					velocity,
 					reynoldsNumber,
 					frictionFactor,
-					TRANSITIONLIMIT,
-					TRANSITION_INTERVAL
+					inputStore.TRANSITIONLIMIT,
+					inputStore.TRANSITION_INTERVAL
 				);
 				return { dn: dnValue, diameter, velocity, reynoldsNumber, frictionFactor, pressureDrop };
 			});
 		} else {
-			return ductSeries.rect.map((rectValue) => {
+			return inputStore.ductSeries.rect.map((rectValue) => {
 				var diameter = (2 * rectValue[0] * rectValue[1]) / (rectValue[0] + rectValue[1]) / 1000; // Convert DN to meters
-				const velocity = Math.abs(flowRateM3s) / ((rectValue[0] * rectValue[1]) / 1000000); // Calculate velocity in m/s
+				const velocity =
+					Math.abs(inputStore.flowRateM3s) / ((rectValue[0] * rectValue[1]) / 1000000); // Calculate velocity in m/s
 				const hydraulicDiameter = diameter; // For circular ducts, hydraulic diameter is the same as diameter
 				const reynoldsNumber =
 					(velocity * hydraulicDiameter) / $airPropertiesStore.kinematicViscosity; // Calculate Reynolds number
@@ -101,8 +100,8 @@
 					velocity,
 					reynoldsNumber,
 					frictionFactor,
-					TRANSITIONLIMIT,
-					TRANSITION_INTERVAL
+					inputStore.TRANSITIONLIMIT,
+					inputStore.TRANSITION_INTERVAL
 				);
 				return {
 					rect: rectValue,
@@ -135,11 +134,12 @@
 				<Label for="material">Kanalmaterial</Label>
 				<Select.Root
 					type="single"
-					bind:value={ductSeries.name}
+					bind:value={inputStore.ductSeries.name}
 					onValueChange={(name) =>
-						(ductSeries = ductSeriesData.find((d) => d.name === name) ?? ductSeriesData[0])}
+						(inputStore.ductSeries =
+							ductSeriesData.find((d) => d.name === name) ?? ductSeriesData[0])}
 				>
-					<Select.Trigger class="w-[220px]">{ductSeries.name}</Select.Trigger>
+					<Select.Trigger class="w-[220px]">{inputStore.ductSeries.name}</Select.Trigger>
 					<Select.Content>
 						<Select.Label>Kanalmaterial</Select.Label>
 						{#each ductSeriesData as option}
@@ -156,7 +156,7 @@
 							type="number"
 							class="md:w-[80px]"
 							id="supply"
-							bind:value={$inputStore.inletTemperature}
+							bind:value={inputStore.inletTemperature}
 						/>
 						<span>°C</span>
 					</div>
@@ -169,7 +169,7 @@
 							type="number"
 							class="md:w-[80px]"
 							id="return"
-							bind:value={$inputStore.outletTemperature}
+							bind:value={inputStore.outletTemperature}
 						/>
 						<span>°C</span>
 					</div>
@@ -180,29 +180,29 @@
 				<div class="flex flex-row gap-x-2">
 					<Input
 						type="number"
-						class="w-full md:w-[120px] {!flowPriority ? 'text-muted-foreground' : ''}"
+						class="w-full md:w-[120px] {!inputStore.flowPriority ? 'text-muted-foreground' : ''}"
 						id="flowrate"
 						bind:value={
 							() => {
-								if (flowRateM3s === null) {
+								if (inputStore.flowRateM3s === null) {
 									return null;
 								}
-								const displayValue = flowRateM3s / flowRateSeries.value;
-								return flowPriority
+								const displayValue = inputStore.flowRateM3s / inputStore.flowRateSeries.value;
+								return inputStore.flowPriority
 									? parseFloat(displayValue.toPrecision(12))
 									: smartRound(displayValue, 3);
 							},
 							(v) => {
 								if (v === null) {
-									flowRateM3s = null;
+									inputStore.flowRateM3s = null;
 								} else {
-									flowRateM3s = v * flowRateSeries.value;
+									inputStore.flowRateM3s = v * inputStore.flowRateSeries.value;
 								}
 							}
 						}
 						onfocus={(e) => {
 							if (!e.target) return;
-							flowPriority = true;
+							inputStore.flowPriority = true;
 							tick().then(() => {
 								e.target.select();
 							});
@@ -210,12 +210,12 @@
 					/>
 					<Select.Root
 						type="single"
-						bind:value={flowRateSeries.label}
+						bind:value={inputStore.flowRateSeries.label}
 						onValueChange={(label) =>
-							(flowRateSeries =
+							(inputStore.flowRateSeries =
 								flowRateSeriesData.find((d) => d.label === label) ?? flowRateSeriesData[0])}
 					>
-						<Select.Trigger class="w-[80px]">{flowRateSeries.label}</Select.Trigger>
+						<Select.Trigger class="w-[80px]">{inputStore.flowRateSeries.label}</Select.Trigger>
 						<Select.Content>
 							<Select.Label>Enheter</Select.Label>
 							{#each flowRateSeriesData as option}
@@ -230,26 +230,26 @@
 				<div class="flex flex-row gap-x-2">
 					<Input
 						type="number"
-						class="w-full md:w-[120px] {flowPriority ? 'text-muted-foreground' : ''}"
+						class="w-full md:w-[120px] {inputStore.flowPriority ? 'text-muted-foreground' : ''}"
 						id="power"
 						bind:value={
 							() => {
-								if (powerW === null) return null;
-								const displayValue = powerW / powerSeries.value;
-								return !flowPriority
+								if (inputStore.powerW === null) return null;
+								const displayValue = inputStore.powerW / inputStore.powerSeries.value;
+								return !inputStore.flowPriority
 									? parseFloat(displayValue.toPrecision(12))
 									: smartRound(displayValue, 3);
 							},
 							(v) => {
 								if (v === null) {
-									powerW = null;
+									inputStore.powerW = null;
 								} else {
-									power((powerW = v * powerSeries.value));
+									power((inputStore.powerW = v * inputStore.powerSeries.value));
 								}
 							}
 						}
 						onfocus={(e) => {
-							flowPriority = false;
+							inputStore.flowPriority = false;
 							tick().then(() => {
 								e.target.select();
 							});
@@ -257,11 +257,11 @@
 					/>
 					<Select.Root
 						type="single"
-						bind:value={powerSeries.label}
+						bind:value={inputStore.powerSeries.label}
 						onValueChange={(label) =>
-							(powerSeries = powerData.find((d) => d.label === label) ?? powerData[0])}
+							(inputStore.powerSeries = powerData.find((d) => d.label === label) ?? powerData[0])}
 					>
-						<Select.Trigger class="w-[80px]">{powerSeries.label}</Select.Trigger>
+						<Select.Trigger class="w-[80px]">{inputStore.powerSeries.label}</Select.Trigger>
 						<Select.Content>
 							<Select.Label>Enheter</Select.Label>
 							{#each powerData as option}
@@ -295,7 +295,7 @@
 								id="supply"
 								max={100}
 								min={0}
-								bind:value={$inputStore.relativeHumidity}
+								bind:value={inputStore.relativeHumidity}
 							/>
 							<span>%</span>
 						</div>
@@ -305,7 +305,7 @@
 							>Värmekapacitet: {$airPropertiesStore.specificHeatCapacity.toFixed(0)} J/kg·K</Label
 						>
 						<Label for="density">Densitet: {$airPropertiesStore.airDensity.toFixed(3)} kg/m³</Label>
-						<Label for="roughness">Råhet: {ductSeries.roughness} mm</Label>
+						<Label for="roughness">Råhet: {inputStore.ductSeries.roughness} mm</Label>
 					</div>
 				</div>
 			</Card.Content>
@@ -357,7 +357,7 @@
 									><input
 										class="w-[40px] text-center no-spinner"
 										type="number"
-										bind:value={ductSeries.dn[i]}
+										bind:value={inputStore.ductSeries.dn[i]}
 										onfocus={(e) => {
 											e.target.select();
 										}}
@@ -368,7 +368,7 @@
 									><input
 										class="w-[40px] text-center no-spinner"
 										type="number"
-										bind:value={ductSeries.rect[i][0]}
+										bind:value={inputStore.ductSeries.rect[i][0]}
 										onfocus={(e) => {
 											e.target.select();
 										}}
@@ -379,7 +379,7 @@
 									><input
 										class="w-[40px] text-center no-spinner"
 										type="number"
-										bind:value={ductSeries.rect[i][1]}
+										bind:value={inputStore.ductSeries.rect[i][1]}
 										onfocus={(e) => {
 											e.target.select();
 										}}
