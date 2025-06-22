@@ -23,7 +23,7 @@
 
 	// --- We load program related modules ---
 	import CoolProp from './components/PipeCoolProp.svelte'; // Import the new component
-	import { fluidPropertiesStore } from '../ror/components/fluidPropertiesStore.svelte.js'; // Import the air properties store
+	import { fluidPropertiesStore } from './components/fluidPropertiesStore.svelte.js'; // Import the air properties store
 	import { inputStore } from './components/inputStore.svelte.js'; // Import the fluid properties store
 	import { calculatePressureDrop, colebrook } from '../components/calculations.js'; // Import the pressure drop calculation function
 
@@ -326,12 +326,21 @@
 					<div
 						class="p-2 mt-4 rounded-md flex w-full max-w-sm flex-col gap-2.5 font-mono text-xs bg-foreground/2 dark:bg-foreground/5 text-foreground"
 					>
-						<span
-							>Värmekapacitet: {fluidPropertiesStore.specificHeatCapacity.toFixed(0)} J/kg·K</span
-						>
-						<span>Densitet: {fluidPropertiesStore.density.toFixed(3)} kg/m³ </span><span>
-							Råhet: {inputStore.pipeSeries.roughness} mm
-						</span>
+						{#if temperatureError || fluidPropertiesStore.isLoading}
+							Beräkningsfel!
+						{:else}
+							<span></span>
+							<span>Fryspunkt: {fluidPropertiesStore.freezeT.toFixed(1)} °C</span>
+							<span
+								>Värmekapacitet: {fluidPropertiesStore.specificHeatCapacity.toFixed(0)} J/kg·K</span
+							>
+							<span>Densitet: {fluidPropertiesStore.density.toFixed(3)} kg/m³ </span><span>
+								Råhet: {inputStore.pipeSeries.roughness} mm
+							</span>
+							<span
+								>Dynamisk viskositet: {(fluidPropertiesStore.dynamicViscosity * 1000).toFixed(3)} mPa·s</span
+							>
+						{/if}
 					</div>
 				</div>
 			</Card.Content>

@@ -1,17 +1,17 @@
-<script>
+<script lang="ts">
 	// prettier-ignore
 	import { onMount } from 'svelte'
 	import { inputStore } from './inputStore.svelte.js'; // Import the store
-	import { airPropertiesStore } from './airPropertiesStore.js'; // Import the store
+	import { airPropertiesStore } from './airPropertiesStore.svelte.js'; // Import the store
 	import { base } from '$app/paths';
 
 	// --- Constants ---
 	const ZERO_CELSIUS_KELVIN = 273.15;
 	const AIR_PRESSURE = 101325; // Standard atmospheric pressure in Pa
 
-	let coolPropModule = null; // To hold the loaded CoolProp Module
+	let coolPropModule = null as any; // To hold the loaded CoolProp Module
 	let isCoolPropReady = false;
-	let assignedRuntimeInitializedCallback = null; // Store the function we assign for cleanup
+	let assignedRuntimeInitializedCallback = null as any; // Store the function we assign for cleanup
 
 	function calculateAirProperties() {
 		// Read input values directly from the store
@@ -68,31 +68,27 @@
 			const kinematicVisc = D > 0 ? V / D : 0;
 
 			// Update the store with calculated values
-			airPropertiesStore.update((store) => ({
-				...store,
-				enthalpy: H,
-				specificHeatCapacity: Cp,
-				dewPoint: Tdp,
-				wetBulb: Twb,
-				airDensity: D,
-				dynamicViscosity: V,
-				kinematicViscosity: kinematicVisc,
-				error: null // Clear any previous error
-			}));
+			inputStore.calcTemperature = avgTempC;
+			airPropertiesStore.enthalpy = H;
+			airPropertiesStore.specificHeatCapacity = Cp;
+			airPropertiesStore.dewPoint = Tdp;
+			airPropertiesStore.wetBulb = Twb;
+			airPropertiesStore.airDensity = D;
+			airPropertiesStore.dynamicViscosity = V;
+			airPropertiesStore.kinematicViscosity = kinematicVisc;
+			airPropertiesStore.error = null; // Clear any previous error);
 		} catch (error) {
 			console.error('Error during CoolProp calculation:', error);
 			// Update store with error state and potentially reset outputs
-			airPropertiesStore.update((store) => ({
-				...store,
-				error: error.message || 'Calculation failed'
-			}));
+			airPropertiesStore.error = error.message || 'Calculation failed';
 		}
 	}
 
 	// --- CoolProp Initialization ---
 	onMount(() => {
 		// Indicate loading state in the store
-		airPropertiesStore.update((store) => ({ ...store, isLoading: true, error: null }));
+		airPropertiesStore.isLoading = true;
+		airPropertiesStore.error = null;
 
 		const checkCoolProp = () => {
 			// Checks if 'Module' exists and is ready
@@ -100,7 +96,7 @@
 				console.log('CoolProp module already initialized.');
 				coolPropModule = Module; // Assigns the global Module to a local variable
 				isCoolPropReady = true;
-				airPropertiesStore.update((store) => ({ ...store, isLoading: false }));
+				airPropertiesStore.isLoading = false;
 				calculateAirProperties();
 			} else if (typeof Module !== 'undefined' && Module.onRuntimeInitialized) {
 				// Define the callback function separately for cleanup
@@ -108,7 +104,7 @@
 					console.log('CoolProp runtime initialized.');
 					coolPropModule = Module;
 					isCoolPropReady = true;
-					airPropertiesStore.update((store) => ({ ...store, isLoading: false }));
+					airPropertiesStore.isLoading = false;
 					calculateAirProperties();
 					assignedRuntimeInitializedCallback = null; // Clear reference after execution
 				};

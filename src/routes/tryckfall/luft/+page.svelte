@@ -21,7 +21,7 @@
 
 	// --- We load program related modules ---
 	import CoolProp from './components/AirCoolProp.svelte'; // Import the new component
-	import { airPropertiesStore } from '../luft/components/airPropertiesStore.js'; // Import the air properties store
+	import { airPropertiesStore } from './components/airPropertiesStore.svelte.js'; // Import the air properties store
 	import { inputStore } from './components/inputStore.svelte.js'; // Import the air properties store
 	import { calculatePressureDrop, colebrook } from '../components/calculations.js'; // Import the pressure drop calculation function
 	import { smartRound } from '$lib/utils/smartRound.js';
@@ -35,6 +35,7 @@
 	// --- Local UI states ---
 	let propertiesVisible = $state(false);
 	let useRectangular = $state(false);
+	let flowInfinity = $derived(inputStore.inletTemperature === inputStore.outletTemperature);
 
 	// --- State Variables ---
 
@@ -52,15 +53,15 @@
 			// If flow rate is prioritized, calculate power based on flow rate
 			inputStore.powerW =
 				(inputStore.flowRateM3s ?? 0) *
-				$airPropertiesStore.airDensity *
-				$airPropertiesStore.specificHeatCapacity *
+				airPropertiesStore.airDensity *
+				airPropertiesStore.specificHeatCapacity *
 				(inputStore.inletTemperature - inputStore.outletTemperature);
 		} else {
 			// If power is prioritized, calculate flow rate based on power
 			inputStore.flowRateM3s =
 				(inputStore.powerW ?? 0) /
-				($airPropertiesStore.airDensity *
-					$airPropertiesStore.specificHeatCapacity *
+				(airPropertiesStore.airDensity *
+					airPropertiesStore.specificHeatCapacity *
 					(inputStore.inletTemperature - inputStore.outletTemperature));
 		}
 	});
@@ -73,11 +74,11 @@
 					Math.abs(inputStore.flowRateM3s ?? 0) / (Math.PI * Math.pow(diameter / 2, 2)); // Calculate velocity in m/s
 				const hydraulicDiameter = diameter; // For circular ducts, hydraulic diameter is the same as diameter
 				const reynoldsNumber =
-					(velocity * hydraulicDiameter) / $airPropertiesStore.kinematicViscosity; // Calculate Reynolds number
+					(velocity * hydraulicDiameter) / airPropertiesStore.kinematicViscosity; // Calculate Reynolds number
 				const frictionFactor = colebrook(reynoldsNumber, roughness / (hydraulicDiameter * 1000)); // Calculate friction factor using Colebrook equation
 				const pressureDrop = calculatePressureDrop(
-					$airPropertiesStore.dynamicViscosity,
-					$airPropertiesStore.airDensity,
+					airPropertiesStore.dynamicViscosity,
+					airPropertiesStore.airDensity,
 					hydraulicDiameter,
 					velocity,
 					reynoldsNumber,
@@ -94,11 +95,11 @@
 					Math.abs(inputStore.flowRateM3s ?? 0) / ((rectValue[0] * rectValue[1]) / 1000000); // Calculate velocity in m/s
 				const hydraulicDiameter = diameter; // For circular ducts, hydraulic diameter is the same as diameter
 				const reynoldsNumber =
-					(velocity * hydraulicDiameter) / $airPropertiesStore.kinematicViscosity; // Calculate Reynolds number
+					(velocity * hydraulicDiameter) / airPropertiesStore.kinematicViscosity; // Calculate Reynolds number
 				const frictionFactor = colebrook(reynoldsNumber, roughness / (hydraulicDiameter * 1000)); // Calculate friction factor using Colebrook equation
 				const pressureDrop = calculatePressureDrop(
-					$airPropertiesStore.dynamicViscosity,
-					$airPropertiesStore.airDensity,
+					airPropertiesStore.dynamicViscosity,
+					airPropertiesStore.airDensity,
 					hydraulicDiameter,
 					velocity,
 					reynoldsNumber,
@@ -303,12 +304,20 @@
 							class="max-w-[100%] pt-2 mt-8"
 						/>
 					</div>
-					<div class="flex w-full max-w-sm flex-col gap-2.5">
-						<Label for="thermal-capacity"
-							>Värmekapacitet: {$airPropertiesStore.specificHeatCapacity.toFixed(0)} J/kg·K</Label
-						>
-						<Label for="density">Densitet: {$airPropertiesStore.airDensity.toFixed(3)} kg/m³</Label>
-						<Label for="roughness">Råhet: {inputStore.ductSeries.roughness} mm</Label>
+					<div
+						class="p-2 mt-4 rounded-md flex w-full max-w-sm flex-col gap-2.5 font-mono text-xs bg-foreground/2 dark:bg-foreground/5 text-foreground"
+					>
+						{#if airPropertiesStore.isLoading}
+							Beräkningsfel!
+						{:else}
+							<span>Beräkningstemperatur: {inputStore.calcTemperature.toFixed(1)} °C</span>
+							<span>Daggpunkt: {airPropertiesStore.dewPoint.toFixed(1)} °C</span>
+							<span>Våta temperaturen: {airPropertiesStore.wetBulb.toFixed(1)} °C</span>
+							<span>Densitet: {airPropertiesStore.airDensity.toFixed(3)} kg/m³</span>
+							<span
+								>Värmekapacitet: {(airPropertiesStore.specificHeatCapacity / 1000).toFixed(3)} kJ/(kg/K)</span
+							>
+						{/if}
 					</div>
 				</div>
 			</Card.Content>
@@ -400,12 +409,36 @@
 									/></Table.Cell
 								>
 							{/if}
-							<Table.Cell class="text-center">{smartRound(duct.velocity, 3)}</Table.Cell>
-							<Table.Cell class="text-center md:block hidden"
-								>{smartRound(duct.reynoldsNumber, 0)}</Table.Cell
-							>
-							<Table.Cell class="text-center overflow-x-clip">
-								{smartRound(duct.pressureDrop, 3)}
+							<Table.Cell class="text-center relative">
+								{#if airPropertiesStore.isLoading || flowInfinity}
+									<span
+										transition:fly
+										class="absolute left-1/2 top-1/2 -translate-y-1/2 -translate-x-1/2 align-center w-[56px] rounded-md h-[22px] bg-muted animate-pulse"
+									></span>
+								{:else}
+									<span transition:fly>{smartRound(duct.velocity, 3)}</span>
+								{/if}
+							</Table.Cell>
+
+							<Table.Cell class="text-center md:table-cell hidden relative">
+								{#if airPropertiesStore.isLoading || flowInfinity}
+									<span
+										transition:fly
+										class="absolute left-1/2 top-1/2 -translate-y-1/2 -translate-x-1/2 align-center w-[56px] rounded-md h-[22px] bg-muted animate-pulse"
+									></span>
+								{:else}
+									<span transition:fly>{smartRound(duct.reynoldsNumber, 0)}</span>
+								{/if}
+							</Table.Cell>
+							<Table.Cell class="text-center overflow-x-clip relative">
+								{#if airPropertiesStore.isLoading || flowInfinity}
+									<span
+										transition:fly
+										class="absolute left-1/2 top-1/2 -translate-y-1/2 -translate-x-1/2 align-center w-[56px] rounded-md h-[22px] bg-muted animate-pulse"
+									></span>
+								{:else}
+									<span transition:fly>{duct.pressureDrop.toFixed(2)}</span>
+								{/if}
 							</Table.Cell>
 						</Table.Row>
 					{/each}

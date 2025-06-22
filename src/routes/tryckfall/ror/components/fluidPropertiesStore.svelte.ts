@@ -6,7 +6,7 @@ export const fluidPropertiesStore = $state({
 	enthalpy: 0,
 	specificHeatCapacity: 0,
 	density: 1000, // Sätt lämpliga defaultvärden
-	dynamicViscosity: 0,
+	dynamicViscosity: 0 as number,
 	kinematicViscosity: 0,
 	isLoading: true,
 	error: null,

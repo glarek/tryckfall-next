@@ -9,6 +9,7 @@ export const inputStore = $state({
 	// Input values (can have default starting points)
 	inletTemperature: 60, // Example default
 	outletTemperature: 30, // Example default
+	calcTemperature: 0,
 	fluidType: fluidSeriesData[0],
 	pipeSeries: pipeSeriesData[0],
 	concentration: 0,

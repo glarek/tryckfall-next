@@ -8,6 +8,7 @@ export const inputStore = $state({
 	// Input values (can have default starting points)
 	inletTemperature: 18, // Example default
 	outletTemperature: 24, // Example default
+	calcTemperature: 0,
 	relativeHumidity: 50, // Example default
 	flowRateSeries: flowRateSeriesData[0],
 	powerSeries: powerData[0],
