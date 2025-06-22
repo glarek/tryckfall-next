@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	// --- IMPORT DEFINITIONS ---
 	// --- We load UI-relevant modules here ---
 	import { slide, fly } from 'svelte/transition';
@@ -13,6 +13,8 @@
 	import { Input } from '$lib/components/ui/input/index.js';
 	import { Label } from '$lib/components/ui/label/index.js';
 	import { Switch } from '$lib/components/ui/switch/index.js';
+	import { SliderWithLabel } from '$lib/components/ui/slider/index.js';
+
 	import * as Table from '$lib/components/ui/table/index.js';
 
 	import { ChevronRight } from '@lucide/svelte';
@@ -49,14 +51,14 @@
 		if (inputStore.flowPriority) {
 			// If flow rate is prioritized, calculate power based on flow rate
 			inputStore.powerW =
-				inputStore.flowRateM3s *
+				(inputStore.flowRateM3s ?? 0) *
 				$airPropertiesStore.airDensity *
 				$airPropertiesStore.specificHeatCapacity *
 				(inputStore.inletTemperature - inputStore.outletTemperature);
 		} else {
 			// If power is prioritized, calculate flow rate based on power
 			inputStore.flowRateM3s =
-				inputStore.powerW /
+				(inputStore.powerW ?? 0) /
 				($airPropertiesStore.airDensity *
 					$airPropertiesStore.specificHeatCapacity *
 					(inputStore.inletTemperature - inputStore.outletTemperature));
@@ -67,7 +69,8 @@
 		if (!useRectangular) {
 			return inputStore.ductSeries.dn.map((dnValue) => {
 				var diameter = dnValue / 1000; // Convert DN to meters
-				const velocity = Math.abs(inputStore.flowRateM3s) / (Math.PI * Math.pow(diameter / 2, 2)); // Calculate velocity in m/s
+				const velocity =
+					Math.abs(inputStore.flowRateM3s ?? 0) / (Math.PI * Math.pow(diameter / 2, 2)); // Calculate velocity in m/s
 				const hydraulicDiameter = diameter; // For circular ducts, hydraulic diameter is the same as diameter
 				const reynoldsNumber =
 					(velocity * hydraulicDiameter) / $airPropertiesStore.kinematicViscosity; // Calculate Reynolds number
@@ -88,7 +91,7 @@
 			return inputStore.ductSeries.rect.map((rectValue) => {
 				var diameter = (2 * rectValue[0] * rectValue[1]) / (rectValue[0] + rectValue[1]) / 1000; // Convert DN to meters
 				const velocity =
-					Math.abs(inputStore.flowRateM3s) / ((rectValue[0] * rectValue[1]) / 1000000); // Calculate velocity in m/s
+					Math.abs(inputStore.flowRateM3s ?? 0) / ((rectValue[0] * rectValue[1]) / 1000000); // Calculate velocity in m/s
 				const hydraulicDiameter = diameter; // For circular ducts, hydraulic diameter is the same as diameter
 				const reynoldsNumber =
 					(velocity * hydraulicDiameter) / $airPropertiesStore.kinematicViscosity; // Calculate Reynolds number
@@ -201,10 +204,11 @@
 							}
 						}
 						onfocus={(e) => {
-							if (!e.target) return;
+							const target = e.target as HTMLInputElement | null;
+							if (!target) return;
 							inputStore.flowPriority = true;
 							tick().then(() => {
-								e.target.select();
+								target.select();
 							});
 						}}
 					/>
@@ -244,14 +248,16 @@
 								if (v === null) {
 									inputStore.powerW = null;
 								} else {
-									power((inputStore.powerW = v * inputStore.powerSeries.value));
+									inputStore.powerW = v * inputStore.powerSeries.value;
 								}
 							}
 						}
 						onfocus={(e) => {
+							const target = e.target as HTMLInputElement | null;
+							if (!target) return;
 							inputStore.flowPriority = false;
 							tick().then(() => {
-								e.target.select();
+								target.select();
 							});
 						}}
 					/>
@@ -288,17 +294,14 @@
 				<div transition:slide class="flex flex-col pt-2">
 					<div class="flex w-full max-w-sm flex-col gap-1.5">
 						<Label for="supply">Relativ fukt</Label>
-						<div class="flex flex-row items-center gap-x-2">
-							<Input
-								type="number"
-								class="w-[80px] mb-4"
-								id="supply"
-								max={100}
-								min={0}
-								bind:value={inputStore.relativeHumidity}
-							/>
-							<span>%</span>
-						</div>
+						<SliderWithLabel
+							type="single"
+							thumbLabel={inputStore.relativeHumidity.toFixed(0) + '%'}
+							bind:value={inputStore.relativeHumidity}
+							max={100}
+							step={1}
+							class="max-w-[100%] pt-2 mt-8"
+						/>
 					</div>
 					<div class="flex w-full max-w-sm flex-col gap-2.5">
 						<Label for="thermal-capacity"
@@ -359,7 +362,9 @@
 										type="number"
 										bind:value={inputStore.ductSeries.dn[i]}
 										onfocus={(e) => {
-											e.target.select();
+											const target = e.target as HTMLInputElement | null;
+											if (!target) return;
+											target.select();
 										}}
 									/></Table.Cell
 								>
@@ -370,7 +375,9 @@
 										type="number"
 										bind:value={inputStore.ductSeries.rect[i][0]}
 										onfocus={(e) => {
-											e.target.select();
+											const target = e.target as HTMLInputElement | null;
+											if (!target) return;
+											target.select();
 										}}
 									/></Table.Cell
 								>
@@ -381,17 +388,19 @@
 										type="number"
 										bind:value={inputStore.ductSeries.rect[i][1]}
 										onfocus={(e) => {
-											e.target.select();
+											const target = e.target as HTMLInputElement | null;
+											if (!target) return;
+											target.select();
 										}}
 									/></Table.Cell
 								>
 							{/if}
-							<Table.Cell class="text-center">{duct.velocity.toFixed(2)}</Table.Cell>
+							<Table.Cell class="text-center">{smartRound(duct.velocity, 2)}</Table.Cell>
 							<Table.Cell class="text-center md:block hidden"
-								>{duct.reynoldsNumber.toPrecision(5)}</Table.Cell
+								>{smartRound(duct.reynoldsNumber, 0)}</Table.Cell
 							>
 							<Table.Cell class="text-center overflow-x-clip">
-								{duct.pressureDrop.toFixed(2)}
+								{smartRound(duct.pressureDrop, 2)}
 							</Table.Cell>
 						</Table.Row>
 					{/each}

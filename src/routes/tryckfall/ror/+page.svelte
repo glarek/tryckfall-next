@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	// --- IMPORT DEFINITIONS ---
 	// --- We load UI-relevant modules here ---
 	import { slide, fly, crossfade, draw } from 'svelte/transition';
@@ -55,14 +55,14 @@
 		if (inputStore.flowPriority) {
 			// If flow rate is prioritized, calculate power based on flow rate
 			inputStore.powerW =
-				inputStore.flowRateM3s *
+				(inputStore.flowRateM3s ?? 0) *
 				fluidPropertiesStore.density *
 				fluidPropertiesStore.specificHeatCapacity *
 				(inputStore.inletTemperature - inputStore.outletTemperature);
 		} else {
 			// If power is prioritized, calculate flow rate based on power
 			inputStore.flowRateM3s =
-				inputStore.powerW /
+				(inputStore.powerW ?? 0) /
 				(fluidPropertiesStore.density *
 					fluidPropertiesStore.specificHeatCapacity *
 					(inputStore.inletTemperature - inputStore.outletTemperature));
@@ -72,7 +72,8 @@
 	let pipeArray = $derived.by(() => {
 		return inputStore.pipeSeries.dIn.map((dInValue) => {
 			const diameter = dInValue / 1000; // Convert DN to meters
-			const velocity = Math.abs(inputStore.flowRateM3s) / (Math.PI * Math.pow(diameter / 2, 2)); // Calculate velocity in m/s
+			const velocity =
+				Math.abs(inputStore.flowRateM3s ?? 0) / (Math.PI * Math.pow(diameter / 2, 2)); // Calculate velocity in m/s
 			const hydraulicDiameter = diameter; // For circular pipes, hydraulic diameter is the same as diameter
 			const reynoldsNumber =
 				(velocity * hydraulicDiameter) / fluidPropertiesStore.kinematicViscosity; // Calculate Reynolds number
@@ -197,10 +198,11 @@
 									}
 								}
 								onfocus={(e) => {
-									if (!e.target) return;
+									const target = e.target as HTMLInputElement | null;
+									if (!target) return;
 									inputStore.flowPriority = true;
 									tick().then(() => {
-										e.target.select();
+										target.select();
 									});
 								}}
 							/>
@@ -245,9 +247,11 @@
 									}
 								}
 								onfocus={(e) => {
+									const target = e.target as HTMLInputElement | null;
+									if (!target) return;
 									inputStore.flowPriority = false;
 									tick().then(() => {
-										e.target.select();
+										target.select();
 									});
 								}}
 							/>
@@ -367,12 +371,9 @@
 				<Table.Body>
 					{#each pipeArray as pipe, i}
 						<Table.Row
-							style="color: color-mix(in srgb, var(--foreground) {getBellCurveValue(
-								0.2,
-								1,
-								0.8,
-								pipe.pressureDrop / 100
-							) * 100}%, transparent)"
+							style="color: color-mix(in oklch, var(--foreground) var(--background) {(
+								getBellCurveValue(0.2, 1, 0.8, pipe.pressureDrop / 100) * 100
+							).toFixed(0)}%)"
 						>
 							<Table.Cell class="font-medium text-center">{inputStore.pipeSeries.dn[i]}</Table.Cell>
 							<Table.Cell class="text-center table-cell relative">

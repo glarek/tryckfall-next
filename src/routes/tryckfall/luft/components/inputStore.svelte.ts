@@ -12,8 +12,8 @@ export const inputStore = $state({
 	flowRateSeries: flowRateSeriesData[0],
 	powerSeries: powerData[0],
 	ductSeries: ductSeriesData[0],
-	flowRateM3s: 0.02,
-	powerW: 0,
+	flowRateM3s: 0.02 as number | null,
+	powerW: 0 as number | null,
 	flowPriority: true, // Flow rate priority for calculations
 
 	TRANSITIONLIMIT: 2300,

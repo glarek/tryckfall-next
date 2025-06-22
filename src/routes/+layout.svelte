@@ -45,14 +45,17 @@
 			: '-translate-x-full'} lg:translate-x-0 z-40"
 		style="height: calc(100dvh - {navBarHeight}px);"
 	/>
-	<div
+	<button
+		type="button"
 		id="overlay"
+		aria-label="Close sidebar overlay"
 		class="fixed inset-0 lg:hidden bg-black/50 z-30 duration-200 transition-all ease-in-out {getShowNavbar()
 			? 'no-doc-scroll visible opacity-100 backdrop-blur-xs'
 			: 'invisible opacity-0'}"
 		style="top: {navBarHeight}px"
 		onclick={() => setShowNavbar(false)}
-	></div>
+		tabindex="0"
+	></button>
 	<main
 		class="flex lg:w-195 lg:flex-none flex-1 flex-col py-4 px-4 lg:border-r-1 border-dashed max-w-screen"
 		style="min-height: calc(100dvh - {navBarHeight}px); height: 100%"
