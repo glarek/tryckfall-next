@@ -14,9 +14,8 @@
 	import * as Select from '$lib/components/ui/select/index.js';
 	import { Input } from '$lib/components/ui/input/index.js';
 	import { Label } from '$lib/components/ui/label/index.js';
-	import { Switch } from '$lib/components/ui/switch/index.js';
 	import { SliderWithLabel } from '$lib/components/ui/slider/index.js';
-
+	import { Switch } from '$lib/components/ui/switch/index.js';
 	import * as Table from '$lib/components/ui/table/index.js';
 
 	import { ChevronRight, CircleAlert, TriangleAlert } from '@lucide/svelte';
@@ -44,6 +43,19 @@
 			inputStore.inletTemperature < fluidPropertiesStore.freezeT ||
 			inputStore.outletTemperature < fluidPropertiesStore.freezeT
 	);
+	const temperatureAverageError = $derived(() => {
+		const isHeating = inputStore.inletTemperature > inputStore.outletTemperature;
+		const isCooling = inputStore.inletTemperature < inputStore.outletTemperature;
+		if (inputStore.logMeanT) {
+			if (isHeating && inputStore.surroundingTemperature >= inputStore.outletTemperature) {
+				return true;
+			}
+			if (isCooling && inputStore.surroundingTemperature <= inputStore.outletTemperature) {
+				return true;
+			}
+		}
+		return false;
+	});
 	let flowInfinity = $derived(inputStore.inletTemperature === inputStore.outletTemperature);
 
 	// Initialize standard values
@@ -103,6 +115,8 @@
 <!-- Instantiate CoolProp component (renders nothing, just runs logic) -->
 <CoolProp />
 
+{temperatureAverageError() ? 'error' : 'ok'}
+
 <div class="flex flex-col md:flex-row gap-6 items-start">
 	<Card.Root class="flex w-full md:w-[290px] gap-y-0">
 		<Card.Header class="pb-4">
@@ -156,6 +170,28 @@
 					</div>
 				</div>
 			</div>
+
+			<div class="flex md:max-w-sm flex-col gap-1.5 pb-4">
+				<div class="flex items-center space-x-2">
+					<Switch bind:checked={inputStore.logMeanT} id="logarithmic-mean-temperature" />
+					<Label for="logarithmic-mean-temperature">Logaritmisk medeltemperatur</Label>
+				</div>
+			</div>
+
+			{#if inputStore.logMeanT}
+				<div transition:slide class="flex flex-col space-y-2">
+					<Label for="surrounding-temperature">Omgivningstemperatur</Label>
+					<div class="pb-4 flex flex-row items-center gap-x-2">
+						<Input
+							type="number"
+							class="md:w-[80px]"
+							id="return"
+							bind:value={inputStore.surroundingTemperature}
+						/>
+						<span>°C</span>
+					</div>
+				</div>
+			{/if}
 			{#if temperatureError}
 				<div
 					transition:slide
@@ -329,7 +365,8 @@
 						{#if temperatureError || fluidPropertiesStore.isLoading}
 							Beräkningsfel!
 						{:else}
-							<span></span>
+							<span>Beräkningstemperatur: {fluidPropertiesStore.calcTemp.toFixed(1)} °C</span>
+
 							<span>Fryspunkt: {fluidPropertiesStore.freezeT.toFixed(1)} °C</span>
 							<span
 								>Värmekapacitet: {fluidPropertiesStore.specificHeatCapacity.toFixed(0)} J/kg·K</span

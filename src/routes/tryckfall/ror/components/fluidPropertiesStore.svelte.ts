@@ -11,5 +11,7 @@ export const fluidPropertiesStore = $state({
 	isLoading: true,
 	error: null,
 	freezeT: 0,
-	maxT: 100
+	maxT: 100,
+	calcTemp: 0,
+	fluidProcess: 'heating'
 });

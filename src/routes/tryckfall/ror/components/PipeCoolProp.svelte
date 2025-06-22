@@ -28,8 +28,22 @@
 		console.log(fluidTypeInputValue);
 
 		try {
-			const avgTempC = (inputStore.inletTemperature + inputStore.outletTemperature) / 2;
-			const avgTempK = avgTempC + inputStore.ZERO_CELSIUS_KELVIN;
+			// Calculate LMTD using surroundingTemperature, inletTemperature, and outletTemperature
+			const T_hot_in = inputStore.inletTemperature + inputStore.ZERO_CELSIUS_KELVIN;
+			const T_cold_in = inputStore.surroundingTemperature + inputStore.ZERO_CELSIUS_KELVIN;
+			const T_hot_out = inputStore.outletTemperature + inputStore.ZERO_CELSIUS_KELVIN;
+			const T_cold_out = inputStore.surroundingTemperature + inputStore.ZERO_CELSIUS_KELVIN;
+
+			let avgTempK;
+			if (inputStore.logMeanT) {
+				const deltaT1 = T_hot_in - T_cold_in;
+				const deltaT2 = T_hot_out - T_cold_out;
+				avgTempK = (deltaT1 - deltaT2) / Math.log(deltaT1 / deltaT2) + T_cold_in;
+			} else {
+				avgTempK =
+					(inputStore.inletTemperature + inputStore.outletTemperature) / 2 +
+					inputStore.ZERO_CELSIUS_KELVIN;
+			}
 
 			// Calculate properties using HAPropsSI and PropsSI
 			const H = coolPropModule.PropsSI(
@@ -99,6 +113,7 @@
 			fluidPropertiesStore.error = null; // Clear any previous error
 			fluidPropertiesStore.freezeT = freezeT - inputStore.ZERO_CELSIUS_KELVIN;
 			fluidPropertiesStore.maxT = maxT - inputStore.ZERO_CELSIUS_KELVIN;
+			fluidPropertiesStore.calcTemp = avgTempK - inputStore.ZERO_CELSIUS_KELVIN;
 		} catch (error) {
 			console.error('Error during CoolProp calculation:', error);
 			// Update store with error state and potentially reset outputs
@@ -154,6 +169,7 @@
 	// Use $effect.pre to ensure inputs are stable before calculating
 	$effect.pre(() => {
 		const _dependencies = [
+			inputStore.surroundingTemperature,
 			inputStore.fluidType.value,
 			inputStore.concentration,
 			inputStore.inletTemperature,

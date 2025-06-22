@@ -8,7 +8,9 @@ import powerData from './power.json';
 export const inputStore = $state({
 	// Input values (can have default starting points)
 	inletTemperature: 60, // Example default
-	outletTemperature: 30, // Example default
+	outletTemperature: 30, // Example
+	logMeanT: false,
+	surroundingTemperature: 21,
 	calcTemperature: 0,
 	fluidType: fluidSeriesData[0],
 	pipeSeries: pipeSeriesData[0],

@@ -14,6 +14,7 @@
 	import { Label } from '$lib/components/ui/label/index.js';
 	import { Switch } from '$lib/components/ui/switch/index.js';
 	import { SliderWithLabel } from '$lib/components/ui/slider/index.js';
+	import * as RadioGroup from '$lib/components/ui/radio-group/index.js';
 
 	import * as Table from '$lib/components/ui/table/index.js';
 
@@ -34,7 +35,6 @@
 	// --- VARIABLE DEFINITIONS ---
 	// --- Local UI states ---
 	let propertiesVisible = $state(false);
-	let useRectangular = $state(false);
 	let flowInfinity = $derived(inputStore.inletTemperature === inputStore.outletTemperature);
 
 	// --- State Variables ---
@@ -67,7 +67,7 @@
 	});
 
 	let ductArray = $derived.by(() => {
-		if (!useRectangular) {
+		if (!inputStore.useRectangular) {
 			return inputStore.ductSeries.dn.map((dnValue) => {
 				var diameter = dnValue / 1000; // Convert DN to meters
 				const velocity =
@@ -131,8 +131,16 @@
 		</Card.Header>
 		<Card.Content class="flex flex-col">
 			<div class="flex w-full max-w-sm flex-row gap-x-3 items-center pb-4">
-				<Label for="material">Använd rektangulära kanaler?</Label>
-				<Switch bind:checked={useRectangular}></Switch>
+				<RadioGroup.Root bind:value={inputStore.useRectangular}>
+					<div class="flex items-center space-x-2">
+						<RadioGroup.Item value={false} id="option-one" />
+						<Label for="option-one">Cirkulära kanaler</Label>
+					</div>
+					<div class="flex items-center space-x-2">
+						<RadioGroup.Item value={true} id="option-two" />
+						<Label for="option-two">Rektangulära kanaler</Label>
+					</div>
+				</RadioGroup.Root>
 			</div>
 			<div class="flex w-full max-w-sm flex-col gap-1.5 pb-4">
 				<Label for="material">Kanalmaterial</Label>
@@ -300,7 +308,7 @@
 							thumbLabel={inputStore.relativeHumidity.toFixed(0) + '%'}
 							bind:value={inputStore.relativeHumidity}
 							max={100}
-							step={1}
+							step={5}
 							class="max-w-[100%] pt-2 mt-8"
 						/>
 					</div>
@@ -333,7 +341,7 @@
 			<Table.Root>
 				<Table.Header>
 					<Table.Row>
-						{#if !useRectangular}
+						{#if !inputStore.useRectangular}
 							<Table.Head class="text-center font-semibold"
 								>DN<br /><span class="text-muted-foreground italic text-xs">mm</span></Table.Head
 							>
@@ -369,7 +377,7 @@
 							) * 100}%"
 							class="hover:text-foreground! transition-none"
 						>
-							{#if !useRectangular}
+							{#if !inputStore.useRectangular}
 								<Table.Cell class="font-medium text-center"
 									><input
 										class="w-[40px] text-center no-spinner"

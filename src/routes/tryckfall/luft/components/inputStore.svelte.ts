@@ -16,6 +16,7 @@ export const inputStore = $state({
 	flowRateM3s: 0.02 as number | null,
 	powerW: 0 as number | null,
 	flowPriority: true, // Flow rate priority for calculations
+	useRectangular: false,
 
 	TRANSITIONLIMIT: 2300,
 	TRANSITION_INTERVAL: 500
