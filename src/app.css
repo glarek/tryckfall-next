@@ -4,11 +4,14 @@
 
 @import '@fontsource-variable/dm-sans';
 @import '@fontsource-variable/inter';
+@import '@fontsource-variable/jetbrains-mono';
 
 @custom-variant dark (&:is(.dark *));
 
 :root {
 	--font-sans: 'DM Sans Variable', sans-serif;
+	--font-mono: 'JetBrains Mono Variable', monospace;
+	--font-inter: 'Inter Variable', sans-serif;
 	--radius: 0.5rem;
 	--background: oklch(1 0 0);
 	--foreground: oklch(0.141 0.005 285.823);

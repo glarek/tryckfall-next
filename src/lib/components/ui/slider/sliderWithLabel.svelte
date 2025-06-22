@@ -50,11 +50,11 @@ get along, so we shut typescript up by casting `value` to `never`.
 			<SliderPrimitive.Thumb
 				data-slot="slider-thumb"
 				index={thumb}
-				class="border-primary bg-background ring-ring/50 focus-visible:outline-hidden block size-4 shrink-0 rounded-full border shadow-sm transition-[color,box-shadow] hover:ring-4 focus-visible:ring-4 disabled:pointer-events-none disabled:opacity-50"
+				class="border-primary bg-background dark:bg-muted ring-ring/50 focus-visible:outline-hidden block size-4 shrink-0 rounded-full border shadow-sm transition-[color,box-shadow] hover:ring-4 focus-visible:ring-4 disabled:pointer-events-none disabled:opacity-50"
 			/>
 			<SliderPrimitive.ThumbLabel
 				index={thumb}
-				class="w-fit h-fit p-1 text-xs border-foreground-secondary bg-background ring-ring/50 focus-visible:outline-hidden block size-4 rounded-sm border shadow-sm "
+				class="w-fit h-fit p-1 text-xs border-foreground-secondary bg-background dark:bg-input/30 ring-ring/50 focus-visible:outline-hidden block size-4 rounded-sm border shadow-sm "
 				>{thumbLabel ?? ''}</SliderPrimitive.ThumbLabel
 			>
 		{/each}

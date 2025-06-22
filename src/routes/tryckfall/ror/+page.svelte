@@ -319,12 +319,15 @@
 						</div>
 					{/if}
 
-					<div class="pt-4 flex w-full max-w-sm flex-col gap-2.5">
-						<Label for="thermal-capacity"
-							>Värmekapacitet: {fluidPropertiesStore.specificHeatCapacity.toFixed(0)} J/kg·K</Label
+					<div
+						class="p-2 mt-4 rounded-md flex w-full max-w-sm flex-col gap-2.5 font-mono text-xs bg-foreground/2 dark:bg-foreground/5 text-foreground"
+					>
+						<span
+							>Värmekapacitet: {fluidPropertiesStore.specificHeatCapacity.toFixed(0)} J/kg·K</span
 						>
-						<Label for="density">Densitet: {fluidPropertiesStore.density.toFixed(3)} kg/m³</Label>
-						<Label for="roughness">Råhet: {inputStore.pipeSeries.roughness} mm</Label>
+						<span>Densitet: {fluidPropertiesStore.density.toFixed(3)} kg/m³ </span><span>
+							Råhet: {inputStore.pipeSeries.roughness} mm
+						</span>
 					</div>
 				</div>
 			</Card.Content>
