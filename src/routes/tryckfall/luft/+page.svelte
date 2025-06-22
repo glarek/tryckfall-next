@@ -352,8 +352,13 @@
 				<Table.Body>
 					{#each ductArray as duct, i}
 						<Table.Row
-							class="hover:!opacity-100"
-							style="opacity: {getBellCurveValue(0.2, 1, 0.8, duct.pressureDrop)}"
+							style="color: color-mix(in oklch, var(--background), var(--foreground) {getBellCurveValue(
+								0.2,
+								1,
+								0.8,
+								isNaN(duct.pressureDrop) ? 0 : duct.pressureDrop
+							) * 100}%"
+							class="hover:text-foreground! transition-none"
 						>
 							{#if !useRectangular}
 								<Table.Cell class="font-medium text-center"
@@ -395,12 +400,12 @@
 									/></Table.Cell
 								>
 							{/if}
-							<Table.Cell class="text-center">{smartRound(duct.velocity, 2)}</Table.Cell>
+							<Table.Cell class="text-center">{smartRound(duct.velocity, 3)}</Table.Cell>
 							<Table.Cell class="text-center md:block hidden"
 								>{smartRound(duct.reynoldsNumber, 0)}</Table.Cell
 							>
 							<Table.Cell class="text-center overflow-x-clip">
-								{smartRound(duct.pressureDrop, 2)}
+								{smartRound(duct.pressureDrop, 3)}
 							</Table.Cell>
 						</Table.Row>
 					{/each}

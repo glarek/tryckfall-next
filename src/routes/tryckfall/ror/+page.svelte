@@ -371,9 +371,15 @@
 				<Table.Body>
 					{#each pipeArray as pipe, i}
 						<Table.Row
-							style="color: color-mix(in oklch, var(--foreground) var(--background) {(
-								getBellCurveValue(0.2, 1, 0.8, pipe.pressureDrop / 100) * 100
+							style="color: color-mix(in oklch, var(--background), var(--foreground) {(
+								getBellCurveValue(
+									0.2,
+									1,
+									0.8,
+									(isNaN(pipe.pressureDrop) ? 0 : pipe.pressureDrop) / 100
+								) * 100
 							).toFixed(0)}%)"
+							class="hover:text-foreground! transition-none"
 						>
 							<Table.Cell class="font-medium text-center">{inputStore.pipeSeries.dn[i]}</Table.Cell>
 							<Table.Cell class="text-center table-cell relative">
