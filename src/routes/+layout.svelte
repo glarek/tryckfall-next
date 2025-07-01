@@ -1,18 +1,24 @@
 <script>
-	let { children } = $props();
-	import { onNavigate, afterNavigate } from '$app/navigation';
-	import { tick } from 'svelte';
+	import { onNavigate, afterNavigate, invalidate } from '$app/navigation';
 	import '../app.css';
-	import { ModeWatcher, toggleMode } from 'mode-watcher';
-	import { Moon, Sun, Menu } from '@lucide/svelte';
-	import Logo from '../lib/icons/logo.svelte';
-	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import TopNav from '$lib/components/TopNav.svelte';
 	import SideNav from '$lib/components/SideNav.svelte';
 	import { getShowNavbar, toggleNavbar, setShowNavbar } from '$lib/utils/navBarState.svelte.js';
-	import { get } from 'svelte/store';
+
+	import { onMount } from 'svelte';
+	let { data, children } = $props();
+	let { session, supabase } = $derived(data);
 
 	let navBarHeight = 50;
+
+	onMount(() => {
+		const { data } = supabase.auth.onAuthStateChange((_, newSession) => {
+			if (newSession?.expires_at !== session?.expires_at) {
+				invalidate('supabase:auth');
+			}
+		});
+		return () => data.subscription.unsubscribe();
+	});
 
 	onNavigate((navigation) => {
 		if (!document.startViewTransition) return;
