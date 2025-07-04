@@ -9,6 +9,8 @@
 	let { data, children } = $props();
 	let { session, supabase } = $derived(data);
 
+	let loggedIn = $derived(session !== null);
+
 	let navBarHeight = 50;
 
 	onMount(() => {
@@ -39,7 +41,7 @@
 	});
 </script>
 
-<TopNav mainClass="z-50" navClass="lg:w-5xl w-full" style="height: {navBarHeight}px" />
+<TopNav {loggedIn} mainClass="z-50" navClass="lg:w-5xl w-full" style="height: {navBarHeight}px" />
 <div
 	id="main-container"
 	class="relative flex flex-row justify-center w-dvw overflow-y-scroll"

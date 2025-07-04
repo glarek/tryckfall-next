@@ -28,5 +28,9 @@ export const actions: Actions = {
 		} else {
 			redirect(303, '/private');
 		}
+	},
+	logout: async ({ locals: { supabase } }) => {
+		await supabase.auth.signOut();
+		redirect(303, '/');
 	}
 };

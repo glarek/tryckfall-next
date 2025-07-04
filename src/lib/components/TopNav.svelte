@@ -4,7 +4,12 @@
 	import Logo from '$lib/icons/logo.svelte';
 	import { getShowNavbar, toggleNavbar } from '$lib/utils/navBarState.svelte.js';
 	import { base } from '$app/paths';
-	let { mainClass: mainClasses = '', navClass: navClasses = '', ...restProps } = $props();
+	let {
+		mainClass: mainClasses = '',
+		navClass: navClasses = '',
+		loggedIn: loggedIn = false,
+		...restProps
+	} = $props();
 </script>
 
 <ModeWatcher />
@@ -15,15 +20,15 @@
 >
 	<nav class="flex items-center pl-4 pr-4 py-4 justify-between {navClasses}">
 		<Logo class="fill-foreground h-6 self-center" />
-		<ul class="flex flex-row space-x-4 items-center font-semibold">
+		<ul class="flex flex-row space-x-4 items-center">
 			<li class="hover:text-muted-foreground transition-colors hidden md:flex">
-				<a href="{base}/tryckfall">Tryckfall</a>
-			</li>
-			<li class="hover:text-muted-foreground transition-colors hidden md:flex">
-				<a href="{base}/om">Om</a>
-			</li>
-			<li class="hover:text-muted-foreground transition-colors hidden md:flex">
-				<a href="{base}/kontakt">Kontakt</a>
+				{#if loggedIn}
+					<form method="POST" action="{base}/auth?/logout">
+						<button type="submit" class="font-semibold cursor-pointer">Logga ut</button>
+					</form>
+				{:else}
+					<a href="{base}/auth" class="font-semibold">Logga in</a>
+				{/if}
 			</li>
 			<button
 				class="items-center justify-center w-7 h-7 relative lg:hidden group cursor-pointer"

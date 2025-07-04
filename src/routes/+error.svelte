@@ -1,7 +1,7 @@
 <div class="text-center py-32 max-w-2xl mx-auto">
 	<h1 class="text-5xl font-semibold tracking-tighter text-balance text-primary sm:text-7xl">404</h1>
 	<p class="mt-8 text-lg font-medium text-pretty text-gray-500 sm:text-xl/8 gap-x-2">
-		<span>Denna del är under uppbyggnad...</span>
+		<span>Något gick fel, försök igen!</span>
 	</p>
 </div>
 <div

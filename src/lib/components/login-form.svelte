@@ -16,7 +16,7 @@
 </script>
 
 <div class={cn('flex flex-col gap-6', className)} bind:this={ref} {...restProps}>
-	<form>
+	<form method="POST" action="?/login">
 		<div class="flex flex-col gap-6">
 			<div class="flex flex-col items-center gap-2">
 				<a href="##" class="flex flex-col items-center gap-2 font-medium">
@@ -34,9 +34,19 @@
 			<div class="flex flex-col gap-6">
 				<div class="grid gap-3">
 					<Label for="email-{id}">E-post</Label>
-					<Input id="email-{id}" type="email" placeholder="m@example.com" required />
+					<Input id="email-{id}" type="email" name="email" placeholder="m@example.com" required />
+				</div>
+				<div class="grid gap-3">
+					<Label for="password-{id}">Lösenord</Label>
+					<Input id="password-{id}" name="password" type="password" required />
 				</div>
 				<Button type="submit" class="w-full cursor-pointer">Logga in</Button>
+				<Button
+					type="submit"
+					formaction="?/signup"
+					class="text-muted-foreground hover:text-foreground hover:border-primary hover:bg-background bg-background border-foreground[1/2] border-1 w-full cursor-pointer"
+					>Registrera</Button
+				>
 			</div>
 			<div
 				class="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t"
