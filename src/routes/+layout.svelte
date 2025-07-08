@@ -65,7 +65,7 @@
 		tabindex="0"
 	></button>
 	<main
-		class="flex lg:w-195 lg:flex-none flex-1 flex-col py-4 px-4 lg:border-r-1 border-dashed max-w-screen"
+		class="flex lg:w-195 lg:flex-none flex-1 flex-col lg:border-r-1 border-dashed max-w-screen"
 		style="min-height: calc(100dvh - {navBarHeight}px); height: 100%"
 	>
 		{@render children()}

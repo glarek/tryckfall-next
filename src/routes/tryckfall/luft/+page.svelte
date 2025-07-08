@@ -18,7 +18,7 @@
 
 	import * as Table from '$lib/components/ui/table/index.js';
 
-	import { ChevronRight } from '@lucide/svelte';
+	import { ChevronRight, ThermometerSnowflake, ThermometerSun } from '@lucide/svelte';
 
 	// --- We load program related modules ---
 	import CoolProp from './components/AirCoolProp.svelte'; // Import the new component
@@ -123,14 +123,14 @@
 <!-- Instantiate CoolProp component (renders nothing, just runs logic) -->
 <CoolProp />
 
-<div class="flex flex-col md:flex-row gap-6 items-start">
-	<Card.Root class="flex w-full md:w-[290px] gap-y-0">
-		<Card.Header class="pb-4">
-			<Card.Title>Inställningar</Card.Title>
-			<Card.Description>Ange inställningar för att beräkna tryckfall i kanaler.</Card.Description>
-		</Card.Header>
-		<Card.Content class="flex flex-col">
-			<div class="flex w-full max-w-sm flex-row gap-x-3 items-center pb-4">
+<div
+	class="h-full grid md:grid-cols-[300px_auto] grid-cols-1 md:divide-x-1 md:border-b-1 border-dashed md:divide-y-0 divide-y-1 divide-dashed md:flex-row items-start"
+>
+	<div class="w-full h-full p-4">
+		<h1>Inställningar</h1>
+		<p>Ange inställningar för att beräkna tryckfall i kanaler.</p>
+		<div class="flex flex-col">
+			<div class="flex w-full flex-row gap-x-3 items-center pb-4">
 				<RadioGroup.Root bind:value={inputStore.useRectangular}>
 					<div class="flex items-center space-x-2">
 						<RadioGroup.Item value={false} id="option-one" />
@@ -142,7 +142,7 @@
 					</div>
 				</RadioGroup.Root>
 			</div>
-			<div class="flex w-full max-w-sm flex-col gap-1.5 pb-4">
+			<div class="flex w-full flex-col gap-2 pb-4">
 				<Label for="material">Kanalmaterial</Label>
 				<Select.Root
 					type="single"
@@ -160,13 +160,13 @@
 					</Select.Content>
 				</Select.Root>
 			</div>
-			<div class="flex flex-row gap-x-5">
-				<div class="flex md:max-w-sm flex-col gap-1.5 pb-4">
+			<div class="grid grid-cols-2 gap-2 pb-4">
+				<div class="flex flex-col gap-2">
 					<Label for="supply">Tilluft</Label>
-					<div class="flex flex-row items-center gap-x-2">
+					<div class="grid grid-cols-[auto_30px] gap-2 items-center">
 						<Input
 							type="number"
-							class="md:w-[80px]"
+							class="w-full"
 							id="supply"
 							bind:value={inputStore.inletTemperature}
 						/>
@@ -174,12 +174,12 @@
 					</div>
 				</div>
 
-				<div class="flex md:max-w-sm flex-col gap-1.5">
+				<div class="flex flex-col gap-2">
 					<Label for="supply">Frånluft</Label>
-					<div class="flex flex-row items-center gap-x-2">
+					<div class="grid grid-cols-[auto_30px] gap-2 items-center">
 						<Input
 							type="number"
-							class="md:w-[80px]"
+							class="w-full"
 							id="return"
 							bind:value={inputStore.outletTemperature}
 						/>
@@ -187,12 +187,12 @@
 					</div>
 				</div>
 			</div>
-			<div class="flex w-full max-w-sm flex-col gap-1.5 pb-4">
+			<div class="flex w-full flex-col gap-2 pb-4">
 				<Label for="supply">Luftflöde</Label>
-				<div class="flex flex-row gap-x-2">
+				<div class="grid grid-cols-[auto_60px] gap-x-2">
 					<Input
 						type="number"
-						class="w-full md:w-[120px] {!inputStore.flowPriority ? 'text-muted-foreground' : ''}"
+						class={!inputStore.flowPriority ? 'text-muted-foreground' : ''}
 						id="flowrate"
 						bind:value={
 							() => {
@@ -228,7 +228,7 @@
 							(inputStore.flowRateSeries =
 								flowRateSeriesData.find((d) => d.label === label) ?? flowRateSeriesData[0])}
 					>
-						<Select.Trigger class="w-[80px]">{inputStore.flowRateSeries.label}</Select.Trigger>
+						<Select.Trigger>{inputStore.flowRateSeries.label}</Select.Trigger>
 						<Select.Content>
 							<Select.Label>Enheter</Select.Label>
 							{#each flowRateSeriesData as option}
@@ -238,12 +238,12 @@
 					</Select.Root>
 				</div>
 			</div>
-			<div class="flex w-full max-w-sm flex-col gap-1.5 pb-4">
+			<div class="flex w-full flex-col gap-2 pb-4">
 				<Label for="power">Effekt</Label>
-				<div class="flex flex-row gap-x-2">
+				<div class="grid grid-cols-[auto_60px] gap-x-2">
 					<Input
 						type="number"
-						class="w-full md:w-[120px] {inputStore.flowPriority ? 'text-muted-foreground' : ''}"
+						class={inputStore.flowPriority ? 'text-muted-foreground' : ''}
 						id="power"
 						bind:value={
 							() => {
@@ -276,7 +276,7 @@
 						onValueChange={(label) =>
 							(inputStore.powerSeries = powerData.find((d) => d.label === label) ?? powerData[0])}
 					>
-						<Select.Trigger class="w-[80px]">{inputStore.powerSeries.label}</Select.Trigger>
+						<Select.Trigger>{inputStore.powerSeries.label}</Select.Trigger>
 						<Select.Content>
 							<Select.Label>Enheter</Select.Label>
 							{#each powerData as option}
@@ -286,172 +286,169 @@
 					</Select.Root>
 				</div>
 			</div>
-		</Card.Content>
-		<Card.Header>
-			<Card.Title
+		</div>
+
+		<h1>
+			<button
 				onclick={() => (propertiesVisible = !propertiesVisible)}
 				class="cursor-pointer flex flex-row items-center gap-x-2 text-muted-foreground hover:text-foreground transition-colors"
-				>Avancerade inställningar <ChevronRight
+			>
+				Avancerade inställningar <ChevronRight
 					size={16}
 					class="{propertiesVisible ? 'rotate-90' : ''} transition-all"
-				/></Card.Title
-			>
-		</Card.Header>
+				/>
+			</button>
+		</h1>
 
 		{#if propertiesVisible}
-			<Card.Content>
-				<div transition:slide class="flex flex-col pt-2">
-					<div class="flex w-full max-w-sm flex-col gap-1.5">
-						<Label for="supply">Relativ fukt</Label>
-						<SliderWithLabel
-							type="single"
-							thumbLabel={inputStore.relativeHumidity.toFixed(0) + '%'}
-							bind:value={inputStore.relativeHumidity}
-							max={100}
-							step={5}
-							class="max-w-[100%] pt-2 mt-8"
-						/>
-					</div>
-					<div
-						class="p-2 mt-4 rounded-md flex w-full max-w-sm flex-col gap-2.5 font-mono text-xs bg-foreground/2 dark:bg-foreground/5 text-foreground"
+			<div transition:slide class="flex flex-col pt-2">
+				<div class="flex w-full flex-col gap-1.5">
+					<Label for="supply">Relativ fukt</Label>
+					<SliderWithLabel
+						type="single"
+						thumbLabel={inputStore.relativeHumidity.toFixed(0) + '%'}
+						bind:value={inputStore.relativeHumidity}
+						max={100}
+						step={5}
+						class="max-w-[100%] pt-2 mt-8"
+					/>
+				</div>
+				<div
+					class="p-2 mt-4 rounded-md flex w-full flex-col gap-2.5 font-mono text-xs bg-foreground/2 dark:bg-foreground/5 text-foreground"
+				>
+					{#if airPropertiesStore.isLoading}
+						Beräkningsfel!
+					{:else}
+						<span>Beräkningstemperatur: {inputStore.calcTemperature.toFixed(1)} °C</span>
+						<span>Daggpunkt: {airPropertiesStore.dewPoint.toFixed(1)} °C</span>
+						<span>Våta temperaturen: {airPropertiesStore.wetBulb.toFixed(1)} °C</span>
+						<span>Densitet: {airPropertiesStore.airDensity.toFixed(3)} kg/m³</span>
+						<span
+							>Värmekapacitet: {(airPropertiesStore.specificHeatCapacity / 1000).toFixed(3)} kJ/(kg/K)</span
+						>
+					{/if}
+				</div>
+			</div>
+		{/if}
+	</div>
+
+	<div class="w-full h-full p-4">
+		<h1 class="inline-flex gap-x-2">Resultat</h1>
+		<p>Beräknade tryckfall och hastigheter.</p>
+
+		<Table.Root>
+			<Table.Header>
+				<Table.Row>
+					{#if !inputStore.useRectangular}
+						<Table.Head class="text-center font-semibold"
+							>DN<br /><span class="text-muted-foreground italic text-xs">mm</span></Table.Head
+						>
+					{:else}
+						<Table.Head class="text-center font-semibold"
+							>Bredd<br /><span class="text-muted-foreground italic text-xs">mm</span></Table.Head
+						>
+						<Table.Head class="text-center font-semibold">×</Table.Head>
+						<Table.Head class="text-center font-semibold"
+							>Höjd<br /><span class="text-muted-foreground italic text-xs">mm</span></Table.Head
+						>{/if}
+					<Table.Head class="text-center font-semibold"
+						>Hastighet <br /><span class="text-muted-foreground italic text-xs">m/s</span
+						></Table.Head
 					>
-						{#if airPropertiesStore.isLoading}
-							Beräkningsfel!
+					<Table.Head class="text-center font-semibold hidden md:block"
+						>Reynolds <br />tal</Table.Head
+					>
+					<Table.Head class="text-center font-semibold"
+						>Tryckfall<br /><span class="text-muted-foreground italic text-xs">Pa/m</span
+						></Table.Head
+					>
+				</Table.Row>
+			</Table.Header>
+			<Table.Body>
+				{#each ductArray as duct, i}
+					<Table.Row
+						style="color: color-mix(in oklch, var(--background), var(--foreground) {getBellCurveValue(
+							0.2,
+							1,
+							0.8,
+							isNaN(duct.pressureDrop) ? 0 : duct.pressureDrop
+						) * 100}%"
+						class="hover:text-foreground! transition-none"
+					>
+						{#if !inputStore.useRectangular}
+							<Table.Cell class="font-medium text-center"
+								><input
+									class="w-[40px] text-center no-spinner"
+									type="number"
+									bind:value={inputStore.ductSeries.dn[i]}
+									onfocus={(e) => {
+										const target = e.target as HTMLInputElement | null;
+										if (!target) return;
+										target.select();
+									}}
+								/></Table.Cell
+							>
 						{:else}
-							<span>Beräkningstemperatur: {inputStore.calcTemperature.toFixed(1)} °C</span>
-							<span>Daggpunkt: {airPropertiesStore.dewPoint.toFixed(1)} °C</span>
-							<span>Våta temperaturen: {airPropertiesStore.wetBulb.toFixed(1)} °C</span>
-							<span>Densitet: {airPropertiesStore.airDensity.toFixed(3)} kg/m³</span>
-							<span
-								>Värmekapacitet: {(airPropertiesStore.specificHeatCapacity / 1000).toFixed(3)} kJ/(kg/K)</span
+							<Table.Cell class="font-medium text-center"
+								><input
+									class="w-[40px] text-center no-spinner"
+									type="number"
+									bind:value={inputStore.ductSeries.rect[i][0]}
+									onfocus={(e) => {
+										const target = e.target as HTMLInputElement | null;
+										if (!target) return;
+										target.select();
+									}}
+								/></Table.Cell
+							>
+							<Table.Cell class="font-medium text-center">×</Table.Cell>
+							<Table.Cell class="font-medium text-center"
+								><input
+									class="w-[40px] text-center no-spinner"
+									type="number"
+									bind:value={inputStore.ductSeries.rect[i][1]}
+									onfocus={(e) => {
+										const target = e.target as HTMLInputElement | null;
+										if (!target) return;
+										target.select();
+									}}
+								/></Table.Cell
 							>
 						{/if}
-					</div>
-				</div>
-			</Card.Content>
-		{/if}
-	</Card.Root>
-
-	<Card.Root class="flex w-full md:flex-1">
-		<Card.Header>
-			<Card.Title>Resultat</Card.Title>
-			<Card.Description>Beräknade tryckfall och hastigheter.</Card.Description>
-		</Card.Header>
-		<Card.Content>
-			<Table.Root>
-				<Table.Header>
-					<Table.Row>
-						{#if !inputStore.useRectangular}
-							<Table.Head class="text-center font-semibold"
-								>DN<br /><span class="text-muted-foreground italic text-xs">mm</span></Table.Head
-							>
-						{:else}
-							<Table.Head class="text-center font-semibold"
-								>Bredd<br /><span class="text-muted-foreground italic text-xs">mm</span></Table.Head
-							>
-							<Table.Head class="text-center font-semibold">×</Table.Head>
-							<Table.Head class="text-center font-semibold"
-								>Höjd<br /><span class="text-muted-foreground italic text-xs">mm</span></Table.Head
-							>{/if}
-						<Table.Head class="text-center font-semibold"
-							>Hastighet <br /><span class="text-muted-foreground italic text-xs">m/s</span
-							></Table.Head
-						>
-						<Table.Head class="text-center font-semibold hidden md:block"
-							>Reynolds <br />tal</Table.Head
-						>
-						<Table.Head class="text-center font-semibold"
-							>Tryckfall<br /><span class="text-muted-foreground italic text-xs">Pa/m</span
-							></Table.Head
-						>
-					</Table.Row>
-				</Table.Header>
-				<Table.Body>
-					{#each ductArray as duct, i}
-						<Table.Row
-							style="color: color-mix(in oklch, var(--background), var(--foreground) {getBellCurveValue(
-								0.2,
-								1,
-								0.8,
-								isNaN(duct.pressureDrop) ? 0 : duct.pressureDrop
-							) * 100}%"
-							class="hover:text-foreground! transition-none"
-						>
-							{#if !inputStore.useRectangular}
-								<Table.Cell class="font-medium text-center"
-									><input
-										class="w-[40px] text-center no-spinner"
-										type="number"
-										bind:value={inputStore.ductSeries.dn[i]}
-										onfocus={(e) => {
-											const target = e.target as HTMLInputElement | null;
-											if (!target) return;
-											target.select();
-										}}
-									/></Table.Cell
-								>
+						<Table.Cell class="text-center relative">
+							{#if airPropertiesStore.isLoading || flowInfinity}
+								<span
+									transition:fly
+									class="absolute left-1/2 top-1/2 -translate-y-1/2 -translate-x-1/2 align-center w-[56px] rounded-md h-[22px] bg-muted animate-pulse"
+								></span>
 							{:else}
-								<Table.Cell class="font-medium text-center"
-									><input
-										class="w-[40px] text-center no-spinner"
-										type="number"
-										bind:value={inputStore.ductSeries.rect[i][0]}
-										onfocus={(e) => {
-											const target = e.target as HTMLInputElement | null;
-											if (!target) return;
-											target.select();
-										}}
-									/></Table.Cell
-								>
-								<Table.Cell class="font-medium text-center">×</Table.Cell>
-								<Table.Cell class="font-medium text-center"
-									><input
-										class="w-[40px] text-center no-spinner"
-										type="number"
-										bind:value={inputStore.ductSeries.rect[i][1]}
-										onfocus={(e) => {
-											const target = e.target as HTMLInputElement | null;
-											if (!target) return;
-											target.select();
-										}}
-									/></Table.Cell
-								>
+								<span transition:fly>{smartRound(duct.velocity, 3)}</span>
 							{/if}
-							<Table.Cell class="text-center relative">
-								{#if airPropertiesStore.isLoading || flowInfinity}
-									<span
-										transition:fly
-										class="absolute left-1/2 top-1/2 -translate-y-1/2 -translate-x-1/2 align-center w-[56px] rounded-md h-[22px] bg-muted animate-pulse"
-									></span>
-								{:else}
-									<span transition:fly>{smartRound(duct.velocity, 3)}</span>
-								{/if}
-							</Table.Cell>
+						</Table.Cell>
 
-							<Table.Cell class="text-center md:table-cell hidden relative">
-								{#if airPropertiesStore.isLoading || flowInfinity}
-									<span
-										transition:fly
-										class="absolute left-1/2 top-1/2 -translate-y-1/2 -translate-x-1/2 align-center w-[56px] rounded-md h-[22px] bg-muted animate-pulse"
-									></span>
-								{:else}
-									<span transition:fly>{smartRound(duct.reynoldsNumber, 0)}</span>
-								{/if}
-							</Table.Cell>
-							<Table.Cell class="text-center overflow-x-clip relative">
-								{#if airPropertiesStore.isLoading || flowInfinity}
-									<span
-										transition:fly
-										class="absolute left-1/2 top-1/2 -translate-y-1/2 -translate-x-1/2 align-center w-[56px] rounded-md h-[22px] bg-muted animate-pulse"
-									></span>
-								{:else}
-									<span transition:fly>{duct.pressureDrop.toFixed(2)}</span>
-								{/if}
-							</Table.Cell>
-						</Table.Row>
-					{/each}
-				</Table.Body>
-			</Table.Root>
-		</Card.Content>
-	</Card.Root>
+						<Table.Cell class="text-center md:table-cell hidden relative">
+							{#if airPropertiesStore.isLoading || flowInfinity}
+								<span
+									transition:fly
+									class="absolute left-1/2 top-1/2 -translate-y-1/2 -translate-x-1/2 align-center w-[56px] rounded-md h-[22px] bg-muted animate-pulse"
+								></span>
+							{:else}
+								<span transition:fly>{smartRound(duct.reynoldsNumber, 0)}</span>
+							{/if}
+						</Table.Cell>
+						<Table.Cell class="text-center overflow-x-clip relative">
+							{#if airPropertiesStore.isLoading || flowInfinity}
+								<span
+									transition:fly
+									class="absolute left-1/2 top-1/2 -translate-y-1/2 -translate-x-1/2 align-center w-[56px] rounded-md h-[22px] bg-muted animate-pulse"
+								></span>
+							{:else}
+								<span transition:fly>{duct.pressureDrop.toFixed(2)}</span>
+							{/if}
+						</Table.Cell>
+					</Table.Row>
+				{/each}
+			</Table.Body>
+		</Table.Root>
+	</div>
 </div>

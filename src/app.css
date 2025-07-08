@@ -31,6 +31,8 @@
 	--border: oklch(0.92 0.004 286.32);
 	--input: oklch(0.92 0.004 286.32);
 	--ring: oklch(0.623 0.214 259.815);
+	--cool: oklch(0.71 0.1624 244.25);
+	--heat: oklch(66.022% 0.22708 30.854);
 	--chart-1: oklch(0.646 0.222 41.116);
 	--chart-2: oklch(0.6 0.118 184.704);
 	--chart-3: oklch(0.398 0.07 227.392);
@@ -107,6 +109,8 @@
 	--color-border: var(--border);
 	--color-input: var(--input);
 	--color-ring: var(--ring);
+	--color-heat: var(--heat);
+	--color-cool: var(--cool);
 	--color-chart-1: var(--chart-1);
 	--color-chart-2: var(--chart-2);
 	--color-chart-3: var(--chart-3);
@@ -129,6 +133,14 @@
 
 	body {
 		@apply bg-background text-foreground;
+	}
+
+	h1 {
+		@apply text-lg font-semibold tracking-tighter mb-0;
+	}
+
+	p {
+		@apply text-sm mb-4;
 	}
 }
 
