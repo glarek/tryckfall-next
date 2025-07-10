@@ -5,12 +5,12 @@
 	import { page } from '$app/state';
 	import { base } from '$app/paths';
 	import { setShowNavbar } from '$lib/utils/navBarState.svelte.js';
+	import MenuLink from '$lib/components/MenuLink.svelte';
 
 	let {
 		open = $bindable(false),
-		// ref = $bindable(null), // ref användes inte i mallen
 		buttonText,
-		children = null, // Snippet för innehållet i den expanderbara sektionen
+		childrenLinks = [],
 		icon, // Svelte-komponent för ikonen bredvid knapptexten
 		link,
 		...restProps
@@ -18,11 +18,10 @@
 	let activeLink = $derived(
 		page.url.pathname.replace(base, '').split('/')[1] == link.replace(base, '').split('/')[1]
 	);
-	let test = page.url.pathname;
 </script>
 
 <Collapsible.Root class="flex w-full flex-col items-start" bind:open {...restProps}>
-	{#if !children}
+	{#if childrenLinks.length === 0}
 		<Collapsible.Trigger class="w-full {activeLink ? 'text-primary' : ''}">
 			<a
 				href={link}
@@ -46,21 +45,20 @@
 					{buttonText}
 				</div>
 
-				{#if children}
-					<ChevronRight
-						size={16}
-						class="transform transition-transform duration-200 {open ? 'rotate-90' : ''}"
-					/>
-				{/if}
+				<ChevronRight
+					size={16}
+					class="transform transition-transform duration-200 {open ? 'rotate-90' : ''}"
+				/>
 			</span>
 		</Collapsible.Trigger>
-		{#if children}
-			<Collapsible.Content forceMount>
-				{#if open}
-					<div class="ml-1 left-6 pl-4 my-2 pt-0 pb-1 font-medium" transition:slide>
-						{@render children?.()}
-					</div>
-				{/if}
-			</Collapsible.Content>
-		{/if}{/if}
+		<Collapsible.Content forceMount>
+			{#if open}
+				<div class="ml-1 left-6 pl-4 my-2 pt-0 pb-1 font-medium" transition:slide>
+					{#each childrenLinks as childLink}
+						<MenuLink link="{base}{childLink.href}">{childLink.title}</MenuLink>
+					{/each}
+				</div>
+			{/if}
+		</Collapsible.Content>
+	{/if}
 </Collapsible.Root>

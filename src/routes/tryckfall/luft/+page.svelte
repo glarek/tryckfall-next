@@ -288,7 +288,7 @@
 			</div>
 		</div>
 
-		<h1>
+		<h2>
 			<button
 				onclick={() => (propertiesVisible = !propertiesVisible)}
 				class="cursor-pointer flex flex-row items-center gap-x-2 text-muted-foreground hover:text-foreground transition-colors"
@@ -298,7 +298,7 @@
 					class="{propertiesVisible ? 'rotate-90' : ''} transition-all"
 				/>
 			</button>
-		</h1>
+		</h2>
 
 		{#if propertiesVisible}
 			<div transition:slide class="flex flex-col pt-2">

@@ -136,11 +136,36 @@
 	}
 
 	h1 {
-		@apply text-lg font-semibold tracking-tighter mb-0;
+		@apply text-2xl font-semibold tracking-tighter;
+	}
+
+	h2 {
+		@apply text-lg font-semibold tracking-tighter;
 	}
 
 	p {
-		@apply text-sm mb-4;
+		@apply text-sm mb-2 mt-1 tracking-tight;
+	}
+
+	u {
+		@apply font-semibold decoration-primary decoration-2;
+	}
+
+	hr {
+		@apply my-2;
+	}
+
+	.table-tryckfall th,
+	.table-tryckfall td {
+		@apply p-2;
+	}
+
+	.table-tryckfall thead {
+		@apply bg-foreground/[2%];
+	}
+
+	.table-tryckfall tr {
+		@apply even:bg-foreground/[2%];
 	}
 }
 

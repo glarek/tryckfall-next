@@ -3,9 +3,14 @@
 	import '../app.css';
 	import TopNav from '$lib/components/TopNav.svelte';
 	import SideNav from '$lib/components/SideNav.svelte';
+	import { navLinks } from '$lib/config/navigation';
+
 	import { getShowNavbar, toggleNavbar, setShowNavbar } from '$lib/utils/navBarState.svelte.js';
 
 	import { onMount } from 'svelte';
+	import { page } from '$app/state';
+	import { derived } from 'svelte/store';
+
 	let { data, children } = $props();
 	let { session, supabase } = $derived(data);
 
