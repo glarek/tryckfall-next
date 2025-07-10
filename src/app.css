@@ -161,11 +161,11 @@
 	}
 
 	.table-tryckfall thead {
-		@apply bg-foreground/[2%];
+		@apply bg-foreground/[4%];
 	}
 
 	.table-tryckfall tr {
-		@apply even:bg-foreground/[2%];
+		@apply even:bg-foreground/[3%];
 	}
 }
 

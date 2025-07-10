@@ -17,10 +17,8 @@
 	);
 	let projectedArea = $state(100); // m²
 	let surfaceCoefficient = $state(1); // 0-1
-	let riskFactor = $state(0.5); // 0-1
-	let probableFlow = $derived(
-		smartRound(rainIntensity * projectedArea * surfaceCoefficient * riskFactor, 3)
-	);
+	let riskFactor = $state(1); // 0-1
+	let probableFlow = $derived(rainIntensity * projectedArea * surfaceCoefficient * riskFactor);
 </script>
 
 <div
@@ -37,7 +35,7 @@
 			<Input type="number" step="1" bind:value={duration} />
 			<span class="text-sm">minuter</span>
 			<Label>Regnintensitet</Label>
-			<Input type="number" disabled bind:value={rainIntensity} />
+			<Input type="number" disabled value={smartRound(rainIntensity, 3)} />
 			<span class="text-sm">l/sm²</span>
 			<hr class="col-span-full my-2 border-dashed" />
 			<Label>Projicerad yta</Label>
@@ -52,7 +50,7 @@
 			<hr class="col-span-full my-2 border-dashed" />
 			<Label class="font-semibold text-md">Sannolikt flöde</Label>
 			<span class="text-md font-semibold col-span-2">
-				{probableFlow}
+				{smartRound(probableFlow, 3)}
 				l/s
 			</span>
 		</div>
@@ -83,12 +81,12 @@
 			Ytkoefficient är ett värde som visar hur pass mycket en yta släpper igenom vatten. Ju högre
 			siffra detso mindre vattensläpper ytan igenom.
 		</p>
-		<table class="table-fixed text-sm border-spacing-2 border-collapse">
+		<table class="table-tryckfall table-fixed text-sm border-spacing-2 border-collapse w-full">
 			<thead class="border-b-1">
 				<tr>
-					<th class="text-left w-[200px]">Typ av yta</th>
-					<th>Area</th>
-					<th>Ytkoefficient</th>
+					<th class="text-left">Typ av yta</th>
+					<th class="w-[150px]">Area</th>
+					<th class="w-[100px]">Ytkoefficient</th>
 				</tr>
 			</thead>
 			<tbody class="text-center">
@@ -124,14 +122,46 @@
 
 		<p>
 			Ytkoefficient är ett värde som visar hur pass mycket en yta släpper igenom vatten. Ju högre
-			siffra detso mindre vattensläpper ytan igenom.
+			siffra desto mindre vattensläpper ytan igenom.
 		</p>
+
+		<table class="table-tryckfall table-fixed text-sm border-spacing-2 border-collapse w-full">
+			<thead class="border-b-1">
+				<tr>
+					<th class="text-left">Typ av avvattning</th>
+					<th class="w-[60px]">&Upsilon; </th>
+				</tr>
+			</thead>
+			<tbody class="text-center">
+				<tr>
+					<td class="text-left">Utvändig avvattning</td>
+					<td>0,3</td>
+				</tr>
+				<tr>
+					<td class="text-left"
+						>Utvändig avvattning där översvämning kan skapa problem som tex över ingångar till
+						offentliga byggnader.</td
+					>
+					<td>1,5</td>
+				</tr>
+				<tr>
+					<td class="text-left"
+						>Invändig avvattning eller där ovanligt kraftiga regn kan skapa läckage in i byggnaden.</td
+					>
+					<td>2,0</td>
+				</tr>
+				<tr>
+					<td class="text-left"
+						>Invändig avvattning där högt skydd krävs som sjukhus, byggnader som är kritiska för
+						kommunikation, byggnader med dyrbar konst, lager med varor som bildar giftiga gaser
+						eller blir brandfarliga vid kontakt med vatten.</td
+					>
+					<td>3,0</td>
+				</tr>
+			</tbody>
+		</table>
 	</div>
 </div>
 
 <style>
-	th,
-	td {
-		padding: 5px;
-	}
 </style>
