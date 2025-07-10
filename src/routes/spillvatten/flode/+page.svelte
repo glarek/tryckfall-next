@@ -1,18 +1,87 @@
-<script lang="ts">
+<script>
 	import { smartRound } from '$lib/utils/smartRound';
+	import { flip } from 'svelte/animate';
+	import { slide } from 'svelte/transition';
 
 	// -- We load layout-relevant modules here ---
 
 	import { Input } from '$lib/components/ui/input/index.js';
 	import { Label } from '$lib/components/ui/label/index.js';
+	import * as Select from '$lib/components/ui/select/index.js';
 
 	import { Toilet } from '@lucide/svelte';
 	import Washbasin from '$lib/icons/washbasin.svelte';
 	import Sink from '$lib/icons/sink.svelte';
+	import UtilitySink from '$lib/icons/utility-sink.svelte';
+	import UtilitySinkBig from '$lib/icons/utility-sink-big.svelte';
+	import FloorDrain from '$lib/icons/floor-drain.svelte';
 
-	let washbasinFlow = 0.3; // l/s
-	let toiletFlow = 1.8; // l/s
-	let sinkFlow = 0.6; // l/s
+	let sewageItems = $state([
+		{ id: 'washbasin', label: 'Tvättställ', icon: Washbasin, flow: 0.3 },
+		{ id: 'toilet', label: 'Vattenklosett', icon: Toilet, flow: 1.8 },
+		{ id: 'sink', label: 'Diskbänk', icon: Sink, flow: 0.6 },
+		{ id: 'utilitySink', label: 'Utslagsback', icon: UtilitySink, flow: 0.9 },
+		{ id: 'utilitySinkBig', label: 'Stor utslagsback', icon: UtilitySinkBig, flow: 1.2 },
+		{ id: 'floorDrain', label: 'Golvbrunn', icon: FloorDrain, flow: 1.5 }
+	]);
+
+	const frequencyFactors = [
+		{ value: 0.5, label: 'Intermittent drift' },
+		{ value: 0.7, label: 'Frekvent drift' },
+		{ value: 1, label: 'Kontinuerlig drift' },
+		{ value: 1.2, label: 'Speciell drift' }
+	];
+
+	let frequencyFactor = $state(1); // Standardvärde för frekvensfaktor
+
+	const triggerContent = $derived(
+		frequencyFactors.find((f) => f.value === frequencyFactor)?.label ?? 'Välj frekvens...'
+	);
+
+	// Skapa en Map för snabb åtkomst till sewageItem-data via id.
+	// Använd $derived för att göra den reaktiv. Den uppdateras om sewageItems ändras.
+	let sewageItemMap = $derived(new Map(sewageItems.map((item) => [item.id, item])));
+
+	let zones = $state([
+		{
+			id: 0,
+			name: 'Generell',
+			// Starta med ett tomt objekt. Värden läggs till reaktivt vid inmatning.
+			utilities: {}
+		}
+	]);
+
+	function addZone() {
+		const newId = zones.length > 0 ? Math.max(...zones.map((z) => z.id)) + 1 : 1;
+		zones.push({
+			id: newId,
+			name: `Zon ${newId}`,
+			utilities: {}
+		});
+	}
+
+	function totalFlow(utilites) {
+		let total = 0;
+		for (const [utilityId, count] of Object.entries(utilites)) {
+			const item = sewageItemMap.get(utilityId);
+			if (item) {
+				total += item.flow * count;
+			}
+		}
+		return smartRound(total, 3);
+	}
+
+	function probableFlow(utilites) {
+		let total = 0;
+		for (const [utilityId, count] of Object.entries(utilites)) {
+			const item = sewageItemMap.get(utilityId);
+			if (item) {
+				total += item.flow * count;
+			}
+		}
+		total = total ** 0.5 * frequencyFactor;
+		return smartRound(total, 3);
+	}
 </script>
 
 <div
@@ -20,154 +89,84 @@
 >
 	<div class="p-4">
 		<h1>Inställningar för enheter</h1>
+		<hr />
+		<h2>Spillvattenarmaturer</h2>
+		<div class="my-4 grid grid-cols-[34px_80px_60px_1fr] gap-4">
+			{#snippet sewageItem(item)}
+				<div class="border-1 bg-card shadow-2x inline-flex p-1 rounded-md h-fit">
+					<item.icon size={24} />
+				</div>
+				<Label>{item.label}</Label>
+				<Input
+					type="number"
+					bind:value={item.flow}
+					min={0}
+					max={10}
+					step={0.1}
+					class="ml-2 shadow-none"
+				/>
+				<Label>l/s</Label>
+			{/snippet}
 
-		<div class="grid grid-cols-[34px_80px_60px_1fr] gap-4">
-			<div class="border-1 bg-card shadow-2x inline-flex p-1 rounded-md">
-				<Washbasin size={24} />
-			</div>
-			<Label>Tvättställ</Label>
-			<Input
-				type="number"
-				bind:value={washbasinFlow}
-				min={1}
-				max={10}
-				step={0.1}
-				class="ml-2 shadow-none"
-			/>
-			<Label>l/s</Label>
-			<div class="border-1 bg-card shadow-2x inline-flex p-1 rounded-md">
-				<Toilet size={24} />
-			</div>
-			<Label>Vattenklosett</Label>
-			<Input
-				type="number"
-				bind:value={toiletFlow}
-				min={1}
-				max={10}
-				step={0.1}
-				class="ml-2 shadow-none"
-			/>
-			<Label>l/s</Label>
-			<div class="border-1 bg-card shadow-2x inline-flex p-1 rounded-md">
-				<Sink size={24} />
-			</div>
-			<Label>Diskho</Label>
-			<Input
-				type="number"
-				bind:value={sinkFlow}
-				min={1}
-				max={10}
-				step={0.1}
-				class="ml-2 shadow-none"
-			/>
-			<Label>l/s</Label>
+			{#each sewageItems as item}
+				{@render sewageItem(item)}
+			{/each}
 		</div>
+		<hr />
+		<Select.Root type="single" name="frequencyFactor" bind:value={frequencyFactor}>
+			<Select.Trigger class="w-[180px]">{triggerContent}</Select.Trigger>
+			<Select.Content>
+				<Select.Group>
+					<Select.Label>Frekvensfaktor</Select.Label>
+					{#each frequencyFactors as factor (factor.value)}
+						<Select.Item value={factor.value} label={factor.label}>
+							{factor.label}
+						</Select.Item>
+					{/each}
+				</Select.Group>
+			</Select.Content>
+		</Select.Root>
+		{frequencyFactor}
 	</div>
 	<div class="p-4">
-		<h1>Faktorer</h1>
-		<hr />
-		<h2>Regnintensitet</h2>
+		<h2>Zoner</h2>
+		{#each zones as zone (zone)}
+			<div transition:slide animate:flip class="border-1 p-4 rounded-xl relative mt-6 mb-4">
+				<input
+					class="left-4 -top-4 border-1 rounded-md bg-background w-fit px-2 py-0.5 text-sm font-medium"
+					bind:value={zone.name}
+				/>
 
-		<p>
-			Denna beräkning den något senare formeln för regnintensitet enligt Dahlström (2010). Den
-			större skillnaden är att regnintensiteten är något högre än vad som tidgiare brukat ansättas.
-			Praxis för dimensionering är att ansätta <u>10-årsregn</u> med en varaktighet om
-			<u>5 minuter</u>.
-		</p>
-		<hr />
-		<h2>Projicerad yta</h2>
+				{#snippet utilityItem(item, zone, utilityId)}
+					{#if item}
+						<div class="flex flex-col border-1 rounded-md items-center w-[40px]">
+							<div
+								class="justify-center bg-card shadow-inner-sm inline-flex p-1 rounded-t-md w-full relative"
+							>
+								<item.icon size={24} />
+							</div>
+							<input
+								type="number"
+								class="w-full text-center z-20 text-sm border-t-1 rounded-b-md rounded-t-none shadow-none h-8 p-0 no-spinner"
+								min={0}
+								placeholder=""
+								bind:value={zone.utilities[utilityId]}
+							/>
+						</div>
+					{/if}
+				{/snippet}
 
-		<p>Den horisontellt projicerade takyta som träffas av regnet.</p>
-		<div class="p-2 flex"></div>
-
-		<hr />
-		<h2>Ytkoefficient</h2>
-
-		<p>
-			Ytkoefficient är ett värde som visar hur pass mycket en yta släpper igenom vatten. Ju högre
-			siffra detso mindre vattensläpper ytan igenom.
-		</p>
-		<table class="table-tryckfall table-fixed text-sm border-spacing-2 border-collapse w-full">
-			<thead class="border-b-1">
-				<tr>
-					<th class="text-left">Typ av yta</th>
-					<th class="w-[150px]">Area</th>
-					<th class="w-[100px]">Ytkoefficient</th>
-				</tr>
-			</thead>
-			<tbody class="text-center">
-				<tr>
-					<td class="text-left">Trädgårdstomt</td>
-					<td>&lt; 1 500 m²</td>
-					<td>0,3</td>
-				</tr>
-				<tr>
-					<td class="text-left">Gräsytor</td>
-					<td>&ge; 1 500 m²</td>
-					<td>0,6</td>
-				</tr>
-				<tr>
-					<td class="text-left">Gräsyta på obehandlad mark</td>
-					<td>&ge; 1 500 m²</td>
-					<td>0,1</td>
-				</tr>
-				<tr>
-					<td class="text-left">Takyta och annan yta med tät beläggning t ex asfalt, betong</td>
-					<td>-</td>
-					<td>0,6</td>
-				</tr>
-				<tr>
-					<td class="text-left">Annan yta oavsett typ av beläggning</td>
-					<td>&lt; 1 500 m²</td>
-					<td>1,0</td>
-				</tr>
-			</tbody>
-		</table>
-		<hr />
-		<h2>Riskfaktor</h2>
-
-		<p>
-			Ytkoefficient är ett värde som visar hur pass mycket en yta släpper igenom vatten. Ju högre
-			siffra desto mindre vattensläpper ytan igenom.
-		</p>
-
-		<table class="table-tryckfall table-fixed text-sm border-spacing-2 border-collapse w-full">
-			<thead class="border-b-1">
-				<tr>
-					<th class="text-left">Typ av avvattning</th>
-					<th class="w-[60px]">&Upsilon; </th>
-				</tr>
-			</thead>
-			<tbody class="text-center">
-				<tr>
-					<td class="text-left">Utvändig avvattning</td>
-					<td>0,3</td>
-				</tr>
-				<tr>
-					<td class="text-left"
-						>Utvändig avvattning där översvämning kan skapa problem som tex över ingångar till
-						offentliga byggnader.</td
-					>
-					<td>1,5</td>
-				</tr>
-				<tr>
-					<td class="text-left"
-						>Invändig avvattning eller där ovanligt kraftiga regn kan skapa läckage in i byggnaden.</td
-					>
-					<td>2,0</td>
-				</tr>
-				<tr>
-					<td class="text-left"
-						>Invändig avvattning där högt skydd krävs som sjukhus, byggnader som är kritiska för
-						kommunikation, byggnader med dyrbar konst, lager med varor som bildar giftiga gaser
-						eller blir brandfarliga vid kontakt med vatten.</td
-					>
-					<td>3,0</td>
-				</tr>
-			</tbody>
-		</table>
+				<div class="flex flex-wrap gap-x-2 gap-y-2 mt-4">
+					{#each sewageItems as item}
+						{@render utilityItem(item, zone, item.id)}
+					{/each}
+				</div>
+				<Label class="mt-4">Normflöde {totalFlow(zone.utilities)} l/s</Label>
+				<Label class="mt-4">Sannolikt flöde {probableFlow(zone.utilities)} l/s</Label>
+			</div>
+		{/each}
 	</div>
+	<button class="bg-primary text-primary-foreground rounded-md p-2 mt-4" onclick={addZone}>
+		Lägg till zon
+	</button>
 </div>
-
-<style>
-</style>
