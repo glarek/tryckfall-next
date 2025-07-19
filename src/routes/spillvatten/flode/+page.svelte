@@ -8,8 +8,10 @@
 	import { Input } from '$lib/components/ui/input/index.js';
 	import { Label } from '$lib/components/ui/label/index.js';
 	import * as Select from '$lib/components/ui/select/index.js';
+	import * as Dialog from '$lib/components/ui/dialog/index.js';
+	import { Separator } from '$lib/components/ui/separator/index.js';
 
-	import { Toilet } from '@lucide/svelte';
+	import { Toilet, Settings } from '@lucide/svelte';
 	import Washbasin from '$lib/icons/washbasin.svelte';
 	import Sink from '$lib/icons/sink.svelte';
 	import UtilitySink from '$lib/icons/utility-sink.svelte';
@@ -46,6 +48,7 @@
 		{
 			id: 0,
 			name: 'Generell',
+			open: false,
 			// Starta med ett tomt objekt. Värden läggs till reaktivt vid inmatning.
 			utilities: {}
 		}
@@ -56,13 +59,25 @@
 		zones.push({
 			id: newId,
 			name: `Zon ${newId}`,
+			open: false,
 			utilities: {}
 		});
 	}
 
-	function totalFlow(utilites) {
+	function copyZone(zone) {
+		const newId = zones.length > 0 ? Math.max(...zones.map((z) => z.id)) + 1 : 1;
+		const newZone = {
+			id: newId,
+			name: `Zon ${newId}`,
+			open: false,
+			utilities: { ...zone.utilities }
+		};
+		zones.push(newZone);
+	}
+
+	function totalFlow(utilities) {
 		let total = 0;
-		for (const [utilityId, count] of Object.entries(utilites)) {
+		for (const [utilityId, count] of Object.entries(utilities)) {
 			const item = sewageItemMap.get(utilityId);
 			if (item) {
 				total += item.flow * count;
@@ -103,7 +118,7 @@
 					min={0}
 					max={10}
 					step={0.1}
-					class="ml-2 shadow-none"
+					class="ml-2 text-sm shadow-none"
 				/>
 				<Label>l/s</Label>
 			{/snippet}
@@ -131,38 +146,92 @@
 	<div class="p-4">
 		<h2>Zoner</h2>
 		{#each zones as zone (zone)}
-			<div transition:slide animate:flip class="border-1 p-4 rounded-xl relative mt-6 mb-4">
-				<input
-					class="left-4 -top-4 border-1 rounded-md bg-background w-fit px-2 py-0.5 text-sm font-medium"
-					bind:value={zone.name}
-				/>
+			<div
+				role="button"
+				tabindex="0"
+				transition:slide
+				animate:flip
+				class="border-1 p-4 rounded-xl mt-2 mb-4 hover:border-primary cursor-pointer"
+				onclick={() => (zone.open = true)}
+				onkeydown={(e) => {
+					if (e.key === 'Enter' || e.key === ' ') {
+						zone.open = true;
+					}
+				}}
+			>
+				<h2 class="text-center">{zone.name}</h2>
+				<Dialog.Root bind:open={zone.open}>
+					<Dialog.Content class="w-fit">
+						<Dialog.Header>
+							<Dialog.Title class="text-center"
+								><input
+									type="text"
+									class="text-center border-0"
+									bind:value={zone.name}
+								/></Dialog.Title
+							>
+							<Dialog.Description class="text-center">Ändra antal enheter.</Dialog.Description>
+						</Dialog.Header>
+						{#snippet editUtilities(item, zone, utilityId)}
+							{#if item}
+								<div class="justify-center bg-card border-1 p-1 rounded-md h-fit w-fit">
+									<item.icon size={24} />
+								</div>
+								{item.label}:
+								<Input
+									type="number"
+									bind:value={zone.utilities[item.id]}
+									min={0}
+									step={1}
+									class="ml-2 shadow-none m-0"
+								/>
+							{/if}
+						{/snippet}
+						<div class="grid grid-cols-[34px_120px_80px] gap-x-4 gap-y-2 text-sm items-center">
+							{#each sewageItems as item}
+								{@render editUtilities(item, zone, item.id)}
+							{/each}
+						</div>
+						<Separator />
+						<div class="grid grid-cols-2 gap-x-2 text-sm items-center">
+							<p class="text-right">Normflöde</p>
+							<p class=" font-semibold">{totalFlow(zone.utilities)} l/s</p>
+							<p class="text-right">Sannolikt flöde</p>
+							<p class=" font-semibold">{probableFlow(zone.utilities)} l/s</p>
+						</div>
+					</Dialog.Content>
+				</Dialog.Root>
 
 				{#snippet utilityItem(item, zone, utilityId)}
 					{#if item}
-						<div class="flex flex-col border-1 rounded-md items-center w-[40px]">
-							<div
-								class="justify-center bg-card shadow-inner-sm inline-flex p-1 rounded-t-md w-full relative"
-							>
+						<div
+							class="flex flex-col justify-center border-1 rounded-md items-center h-fit relative"
+						>
+							<div class="justify-center bg-card inline-flex p-1 rounded-md w-full">
 								<item.icon size={24} />
 							</div>
-							<input
-								type="number"
-								class="w-full text-center z-20 text-sm border-t-1 rounded-b-md rounded-t-none shadow-none h-8 p-0 no-spinner"
-								min={0}
-								placeholder=""
-								bind:value={zone.utilities[utilityId]}
-							/>
+							{#if zone.utilities[item.id]}
+								<div
+									class="absolute flex justify-center items-center border-primary -right-[6px] rounded-full -bottom-[6px] border-1 bg-card text-xs w-[18px] h-[18px]"
+								>
+									{zone.utilities[item.id]}
+								</div>
+							{/if}
 						</div>
 					{/if}
 				{/snippet}
 
-				<div class="flex flex-wrap gap-x-2 gap-y-2 mt-4">
+				<div class="flex flex-wrap gap-x-2 gap-y-2 mt-2 justify-center">
 					{#each sewageItems as item}
 						{@render utilityItem(item, zone, item.id)}
 					{/each}
 				</div>
-				<Label class="mt-4">Normflöde {totalFlow(zone.utilities)} l/s</Label>
-				<Label class="mt-4">Sannolikt flöde {probableFlow(zone.utilities)} l/s</Label>
+				<div class="grid grid-cols-2 gap-x-2 gap-y-1 mt-4 text-sm items-center">
+					<span class="text-right">Normflöde</span>
+					<span class=" font-semibold">{totalFlow(zone.utilities)} l/s</span>
+					<span class="text-right">Sannolikt flöde</span>
+					<span class=" font-semibold">{probableFlow(zone.utilities)} l/s</span>
+				</div>
 			</div>
 		{/each}
 	</div>
