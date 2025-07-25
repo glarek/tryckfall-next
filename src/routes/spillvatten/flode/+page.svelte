@@ -44,9 +44,6 @@
 			'Välj frekvens...'
 	);
 
-	let totalZoneFlow = $derived(zones.reduce((total, zone) => total + totalFlow(zone.utilities), 0));
-	let totalZoneProbableFlow = $derived(totalZoneFlow ** 0.5 * frequencyFactor);
-
 	// Skapa en Map för snabb åtkomst till sewageItem-data via id.
 	// Använd $derived för att göra den reaktiv. Den uppdateras om sewageItems ändras.
 	let sewageItemMap = $derived(new Map(sewageItems.map((item) => [item.id, item])));
@@ -112,6 +109,9 @@
 		total = total ** 0.5 * frequencyFactor;
 		return smartRound(total, 3);
 	}
+
+	let totalZoneFlow = $derived(zones.reduce((total, zone) => total + totalFlow(zone.utilities), 0));
+	let totalZoneProbableFlow = $derived(totalZoneFlow ** 0.5 * frequencyFactor);
 </script>
 
 <div

@@ -47,7 +47,7 @@
 	});
 </script>
 
-<Toaster position="bottom-left" />
+<Toaster position="top-left" />
 
 <TopNav {loggedIn} mainClass="z-50" navClass="lg:w-5xl w-full" style="height: {navBarHeight}px" />
 <div
