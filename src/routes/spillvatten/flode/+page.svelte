@@ -11,7 +11,7 @@
 	import { Separator } from '$lib/components/ui/separator/index.js';
 	import * as Tabs from '$lib/components/ui/tabs/index.js';
 	import { Button } from '$lib/components/ui/button/index.js';
-	import { Toaster } from '$lib/components/ui/sonner/index.js';
+	import { toast } from 'svelte-sonner';
 
 	import { Toilet, Settings, X, Copy } from '@lucide/svelte';
 	import Washbasin from '$lib/icons/washbasin.svelte';
@@ -19,8 +19,6 @@
 	import UtilitySink from '$lib/icons/utility-sink.svelte';
 	import UtilitySinkBig from '$lib/icons/utility-sink-big.svelte';
 	import FloorDrain from '$lib/icons/floor-drain.svelte';
-	import { toast } from 'svelte-sonner';
-	import { Time } from '@internationalized/date';
 
 	let sewageItems = $state([
 		{ id: 'washbasin', label: 'Tvättställ', icon: Washbasin, flow: 0.3 },
@@ -116,12 +114,11 @@
 	}
 </script>
 
-<Toaster position="top-center" />
 <div
 	class="grid md:grid-cols-[16fr_16fr] grid-rows-1 divide-dashed md:divide-x-1 md:divide-y-0 divide-y-1 md:border-b-1 border-dashed"
 >
 	<div class="p-4">
-		<Tabs.Root bind:value={calculationType} class="w-[400px]">
+		<Tabs.Root bind:value={calculationType}>
 			<Tabs.List>
 				<Tabs.Trigger value="zones">Beräkna zoner</Tabs.Trigger>
 				<Tabs.Trigger value="flow">Beräkna flöde</Tabs.Trigger>
@@ -285,7 +282,7 @@
 							{@render utilityItem(item, zone, item.id)}
 						{/each}
 					</div>
-					<div class="grid grid-cols-2 gap-x-2 gap-y-1 mt-4 text-sm items-center">
+					<div class="grid grid-cols-[1fr_1fr] gap-x-2 gap-y-1 mt-4 text-sm items-center">
 						<span class="text-right">Normflöde</span>
 						<span class=" font-semibold">{totalFlow(zone.utilities)} l/s</span>
 						<span class="text-right">Sannolikt flöde</span>

@@ -4,6 +4,7 @@
 	import TopNav from '$lib/components/TopNav.svelte';
 	import SideNav from '$lib/components/SideNav.svelte';
 	import { navLinks } from '$lib/config/navigation';
+	import { Toaster } from '$lib/components/ui/sonner/index.js';
 
 	import { getShowNavbar, toggleNavbar, setShowNavbar } from '$lib/utils/navBarState.svelte.js';
 
@@ -45,6 +46,8 @@
 		}
 	});
 </script>
+
+<Toaster position="bottom-left" />
 
 <TopNav {loggedIn} mainClass="z-50" navClass="lg:w-5xl w-full" style="height: {navBarHeight}px" />
 <div
