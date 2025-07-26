@@ -1,5 +1,6 @@
 <script>
 	import { ModeWatcher, toggleMode } from 'mode-watcher';
+	import MenuIcon from '$lib/icons/menu-icon.svelte';
 	import { Moon, Sun, Menu } from '@lucide/svelte';
 	import Logo from '$lib/icons/logo.svelte';
 	import { getShowNavbar, toggleNavbar } from '$lib/utils/navBarState.svelte.js';
@@ -20,7 +21,7 @@
 >
 	<nav class="flex items-center pl-4 pr-4 py-4 justify-between {navClasses}">
 		<Logo class="fill-foreground h-6 self-center" />
-		<ul class="flex flex-row space-x-4 items-center">
+		<ul class="flex flex-row gap-x-4 items-center">
 			<li class="hover:text-muted-foreground transition-colors hidden md:flex">
 				{#if loggedIn}
 					<form method="POST" action="{base}/auth?/logout">
@@ -30,12 +31,7 @@
 					<a href="{base}/auth" class="font-semibold">Logga in</a>
 				{/if}
 			</li>
-			<button
-				class="items-center justify-center w-7 h-7 relative lg:hidden group cursor-pointer"
-				onclick={toggleNavbar}
-			>
-				<Menu class="transition-colors" />
-			</button>
+
 			<button
 				class="items-center justify-center w-7 h-7 relative group cursor-pointer"
 				onclick={toggleMode}
@@ -46,6 +42,12 @@
 				<Sun
 					class="transition-all group-hover:text-yellow-400 absolute opacity-0 invisible dark:visible dark:opacity-100 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
 				/>
+			</button>
+			<button
+				class="items-center justify-center w-7 h-7 relative lg:hidden group cursor-pointer"
+				onclick={toggleNavbar}
+			>
+				<MenuIcon menuOpen={getShowNavbar()} />
 			</button>
 		</ul>
 	</nav>
