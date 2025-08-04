@@ -44,7 +44,7 @@
 				/>
 			</button>
 			<button
-				class="items-center justify-center w-7 h-7 relative lg:hidden group cursor-pointer"
+				class="items-center justify-center w-7 h-7 relative lg:hidden group cursor-pointer hover:text-muted-foreground"
 				onclick={toggleNavbar}
 			>
 				<MenuIcon menuOpen={getShowNavbar()} />

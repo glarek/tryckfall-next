@@ -85,8 +85,8 @@
 			<thead class="border-b-1">
 				<tr>
 					<th class="text-left">Typ av yta</th>
-					<th class="w-[150px]">Area</th>
-					<th class="w-[100px]">Ytkoefficient</th>
+					<th class="w-fit">Area</th>
+					<th class="w-fit">Ytkoefficient</th>
 				</tr>
 			</thead>
 			<tbody class="text-center">

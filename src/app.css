@@ -136,10 +136,14 @@
 	}
 
 	h1 {
-		@apply text-2xl font-semibold tracking-tighter;
+		@apply text-4xl font-semibold tracking-tighter;
 	}
 
 	h2 {
+		@apply text-2xl font-semibold tracking-tighter;
+	}
+
+	h3 {
 		@apply text-lg font-semibold tracking-tighter;
 	}
 
@@ -166,6 +170,10 @@
 
 	.table-tryckfall tr {
 		@apply even:bg-foreground/[3%];
+	}
+
+	article li {
+		@apply text-sm list-disc list-outside ml-8 my-1;
 	}
 }
 
