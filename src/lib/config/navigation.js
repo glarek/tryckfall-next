@@ -1,4 +1,4 @@
-import { House, Gauge, CloudDrizzle, Toilet } from '@lucide/svelte';
+import { House, Gauge, CloudDrizzle, Toilet, BookText } from '@lucide/svelte';
 import { IdaIce } from '$lib/icons/index';
 
 export const navLinks = [
@@ -57,6 +57,12 @@ export const navLinks = [
 		title: 'Skript - IDA ICE',
 		href: '/ida-ice-skript',
 		icon: IdaIce,
+		children: []
+	},
+	{
+		title: 'Wiki',
+		href: '/wiki',
+		icon: BookText,
 		children: []
 	}
 ];

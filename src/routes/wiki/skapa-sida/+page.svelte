@@ -8,7 +8,8 @@
 	import { Label } from '$lib/components/ui/label/index.js';
 	import * as Dialog from '$lib/components/ui/dialog/index.js';
 	import * as Select from '$lib/components/ui/select/index.js';
-	import { PenLine, Trash2, Wand } from '@lucide/svelte';
+	import { Wand, SquarePlus } from '@lucide/svelte';
+	import { toast } from 'svelte-sonner';
 
 	import { Carta, MarkdownEditor, Markdown } from 'carta-md';
 	import { attachment } from '@cartamd/plugin-attachment';
@@ -22,6 +23,7 @@
 	import '$lib/styles/github.scss';
 
 	import slugify from '@sindresorhus/slugify';
+	import { error } from '@sveltejs/kit';
 
 	let { data, form } = $props();
 
@@ -30,23 +32,13 @@
 	let uploadError = $state('');
 	let isSubmitting = $state(false);
 
-	let categoryList = $state(data.categories);
-	let value = $state(data.cleanPages.content || '');
-	let slug = $state(data.cleanPages.slug || '');
-	let title = $state(data.cleanPages.title || '');
-	let category = $state(data.cleanPages.category.toString() || '');
+	let categoryList = $state(data.categories ?? []);
+	let value = $state('# Min nya sida');
+	let slug = $state('min-nya-sida');
+	let title = $state('Min nya sida');
+	let category = $state(1);
 	let dialogOpen = $state(false);
 	let isUserAdmin = data.isUserAdmin || false;
-
-	let edited = $derived.by(() => {
-		value;
-		slug;
-		title;
-		category;
-		return true;
-	});
-
-	edited = false;
 
 	const carta = new Carta({
 		sanitizer: false,
@@ -122,7 +114,6 @@
 	>
 	<div class="relative">
 		<Input
-			onchange={() => (edited = true)}
 			autocomplete="off"
 			autocorrect="off"
 			class=" font-mono mb-4 text-pink-500"
@@ -154,11 +145,6 @@
 
 	<div class="markdown mt-0 mx-0 mb-4 relative">
 		<MarkdownEditor {carta} bind:value theme="github" mode="tabs" />
-		{#if edited}
-			<div class="transition-all absolute -bottom-3 p-1 right-2 bg-primary rounded-full">
-				<PenLine size={20} />
-			</div>
-		{/if}
 	</div>
 {:else}
 	<div class="markdown">
@@ -168,83 +154,38 @@
 {#if isUserAdmin}
 	<form
 		method="POST"
-		action="?/update"
+		action="?/save"
 		use:enhance={() => {
-			isSubmitting = true; // Sätt "laddar"-status innan formuläret skickas
-
+			isSubmitting = true;
 			return async ({ result, update }) => {
-				if (result.type === 'success' && result.data?.success) {
-					const newSlug = result.data.newSlug;
-
-					// Navigera till den nya sidan och ERSÄTT historiken
-					await goto(`/wiki/${newSlug}`, { replaceState: true });
-					isSubmitting = false; // Återställ "laddar"-status
-					edited = false; // Återställ redigeringsstatus
-				} else {
-					// Om det inte var en success-redirect, låt SvelteKit hantera det som vanligt
-					// (t.ex. för att visa felmeddelanden som returnerades med `fail`)
-					await update();
+				console.log('SVAR FRÅN SERVERN:', result);
+				if (result.type === 'failure') {
+					if (result.data?.code === '23505') {
+						toast.warning(`Slugen '${slug}' är redan upptagen.`);
+					} else {
+						toast.error(`Ett fel uppstod: ${result.data?.error || 'Okänt fel'}`);
+					}
 				}
+				if (result.type === 'redirect') {
+					goto(result.location);
+					return;
+				}
+				isSubmitting = false;
 			};
 		}}
 	>
-		<input type="hidden" name="content" {value} />
+		<input type="hidden" name="content" bind:value />
 		<input type="hidden" name="slug" bind:value={slug} />
 		<input type="hidden" name="title" bind:value={title} />
 		<input type="hidden" name="category" bind:value={category} />
 
-		<Button
-			class="cursor-pointer"
-			type="submit"
-			disabled={isSubmitting || !edited}
-			variant="outline"
-		>
-			{isSubmitting ? 'Sparar...' : 'Spara ändringar'}
-			<PenLine class="ml-0" size={16} />
+		<Button class="cursor-pointer" type="submit" variant="outline" disabled={isSubmitting}>
+			{#if isSubmitting}
+				Sparar...
+			{:else}
+				Skapa sida
+				<SquarePlus class="ml-2" size={16} />
+			{/if}
 		</Button>
 	</form>
-
-	<Button
-		onclick={() => (dialogOpen = true)}
-		class="cursor-pointer mt-2 border-destructive/[20%]"
-		variant="outline"
-	>
-		Ta bort sida
-		<Trash2 class="ml-0" size={16} />
-	</Button>
-
-	<Dialog.Root bind:open={dialogOpen}>
-		<Dialog.Trigger class="modal" disabled={isSubmitting}></Dialog.Trigger>
-		<Dialog.Content>
-			<Dialog.Header>
-				<Dialog.Title>Är du helt säker?</Dialog.Title>
-				<Dialog.Description>
-					Denna åtgärd kan inte ångras. Detta kommer permanent att ta bort sidan från databasen!
-					<div class="grid grid-cols-[1fr_1fr] gap-2">
-						<Button
-							onclick={() => (dialogOpen = false)}
-							class=" cursor-pointer mt-2 w-full"
-							variant="outline">Ångra!</Button
-						>
-						<form
-							method="POST"
-							action="?/delete"
-							use:enhance={() => {
-								isSubmitting = true; // Sätt "laddar"-status innan formuläret skickas
-								return async ({ update }) => {
-									// Körs när servern har svarat
-									await update();
-									isSubmitting = false;
-								};
-							}}
-						>
-							<Button type="submit" class="mt-2 w-full cursor-pointer" variant="destructive"
-								>Ta bort sida!</Button
-							>
-						</form>
-					</div>
-				</Dialog.Description>
-			</Dialog.Header>
-		</Dialog.Content>
-	</Dialog.Root>
 {/if}

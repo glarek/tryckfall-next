@@ -135,6 +135,10 @@
 		@apply bg-background text-foreground;
 	}
 
+	main {
+		@apply p-6;
+	}
+
 	h1 {
 		@apply text-4xl font-semibold tracking-tighter;
 	}
@@ -159,20 +163,32 @@
 		@apply my-2;
 	}
 
-	.table-tryckfall th,
-	.table-tryckfall td {
+	mark {
+		@apply bg-primary/[50%] dark:text-foreground p-0.5;
+	}
+
+	.markdown {
+		@apply m-6;
+	}
+
+	.markdown table {
+		@apply text-sm;
+	}
+
+	.markdown th,
+	.markdown td {
 		@apply p-2;
 	}
 
-	.table-tryckfall thead {
+	.markdown thead {
 		@apply bg-foreground/[4%];
 	}
 
-	.table-tryckfall tr {
+	.markdown tr {
 		@apply even:bg-foreground/[3%];
 	}
 
-	article li {
+	.markdown li {
 		@apply text-sm list-disc list-outside ml-8 my-1;
 	}
 }
@@ -186,5 +202,23 @@
 	.no-spinner::-webkit-inner-spin-button {
 		margin: 0;
 		-webkit-appearance: none;
+	}
+
+	.carta-theme__default {
+		--text-color: var(--text-color) !important;
+	}
+
+	html.dark .carta-theme__default {
+		--border-color: var(--border-color-dark);
+		--selection-color: var(--selection-color-dark);
+		--focus-outline: var(--focus-outline-dark);
+		--hover-color: var(--hover-color-dark);
+		--caret-color: var(--caret-color-dark);
+		--text-color: var(--text-color-dark);
+	}
+
+	html.dark .shiki,
+	html.dark .shiki span {
+		color: var(--shiki-dark) !important;
 	}
 }

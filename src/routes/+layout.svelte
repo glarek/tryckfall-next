@@ -8,8 +8,6 @@
 	import { getShowNavbar, toggleNavbar, setShowNavbar } from '$lib/utils/navBarState.svelte.js';
 
 	import { onMount } from 'svelte';
-	import { page } from '$app/state';
-	import { derived } from 'svelte/store';
 
 	let { data, children } = $props();
 	let { session, supabase } = $derived(data);
@@ -46,7 +44,7 @@
 	});
 </script>
 
-<Toaster position="top-left" />
+<Toaster richColors position="top-left" />
 
 <TopNav {loggedIn} mainClass="z-50" navClass="lg:w-5xl w-full" style="height: {navBarHeight}px" />
 <div
@@ -71,10 +69,10 @@
 		onclick={() => setShowNavbar(false)}
 		tabindex="0"
 	></button>
-	<main
+	<div
 		class="flex lg:w-195 lg:flex-none flex-1 flex-col lg:border-r-1 border-dashed max-w-screen"
 		style="min-height: calc(100dvh - {navBarHeight}px); height: 100%"
 	>
 		{@render children()}
-	</main>
+	</div>
 </div>

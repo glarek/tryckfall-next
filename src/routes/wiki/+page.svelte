@@ -1,39 +1,50 @@
 <script lang="ts">
-	// Importera typerna för bättre autokomplettering och säkerhet
 	import type { PageData } from './$types';
+	let { data }: { data: PageData } = $props();
 
-	// Den nya metoden med Svelte 5 Runes
-	const { data } = $props<{ data: PageData }>();
+	import { SquarePlus } from '@lucide/svelte';
+
+	import * as Card from '$lib/components/ui/card/index.js';
+	import { Button } from '$lib/components/ui/button/index.js';
 </script>
 
-<h1>Blogg</h1>
-
-<div class="posts-grid">
-	{#each data.posts as post (post._id)}
-		<a href="/wiki/{post.slug.current}" class="post-card">
-			<h2>{post.title}</h2>
-			{#if post.publishedAt}
-				<p>Publicerad: {new Date(post.publishedAt).toLocaleDateString()}</p>
-			{/if}
-		</a>
+{#if data.groupedPages.length === 0}
+	<p>Hittade inga sidor.</p>
+{:else}
+	{#each data.groupedPages as group}
+		<Card.Root class="gap-0 w-full max-w-sm">
+			<Card.Header>
+				<Card.Title>
+					<h2 id={group.categoryTitle.toLowerCase()}>{group.categoryTitle}</h2>
+				</Card.Title>
+			</Card.Header>
+			<Card.Content>
+				<ul>
+					{#each group.pages as page}
+						<li
+							class="pl-4 text-muted-foreground hover:text-foreground hover:border-foreground border-l-2"
+						>
+							<a href="/wiki/{page.slug}">{page.title}</a>
+						</li>
+					{/each}
+				</ul></Card.Content
+			>
+		</Card.Root>
 	{/each}
-</div>
+{/if}
 
-<style>
-	.posts-grid {
-		display: grid;
-		gap: 1rem;
-		grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-	}
-	.post-card {
-		border: 1px solid #ccc;
-		padding: 1rem;
-		border-radius: 8px;
-		text-decoration: none;
-		color: inherit;
-		transition: transform 0.2s ease-in-out;
-	}
-	.post-card:hover {
-		transform: translateY(-5px);
-	}
-</style>
+<div class="grid grid-cols-[1fr_1fr] w-fit gap-x-6">
+	<a href="./skapa-sida">
+		<Button variant="outline" class="my-4 cursor-pointer w-full ">
+			<SquarePlus />
+			Skapa ny sida
+		</Button>
+	</a>
+
+	<a href="./skapa-kategori">
+		<Button variant="outline" class="my-4 cursor-pointer w-full">
+			<SquarePlus />
+			Skapa ny kategori
+		</Button>
+	</a>
+</div>

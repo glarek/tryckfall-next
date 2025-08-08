@@ -340,7 +340,7 @@
 			onclick={() => (propertiesVisible = !propertiesVisible)}
 			class="cursor-pointer flex flex-row items-center gap-x-2 text-muted-foreground hover:text-foreground transition-colors"
 		>
-			<h2>Avancerade inställningar</h2>
+			<h3>Avancerade inställningar</h3>
 			<ChevronRight size={16} class="{propertiesVisible ? 'rotate-90' : ''} transition-all" />
 		</button>
 
