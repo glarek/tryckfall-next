@@ -1,7 +1,8 @@
 export const config = {
 	isr: {
 		// Revalidate every 60 seconds
-		expiration: 60
+		expiration: 60,
+		bypassToken: 'REPLACE_ME_WITH_SECRET_VALUE'
 	}
 };
 
