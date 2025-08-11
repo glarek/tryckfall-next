@@ -38,8 +38,6 @@ export async function load({ locals: { supabase } }) {
 	// Sortera kategorierna i bokstavsordning
 	groupedPages.sort((a, b) => a.categoryTitle.localeCompare(b.categoryTitle));
 
-	console.log(groupedPages);
-
 	// 4. Returnera den färdig-grupperade datan
 	return { groupedPages };
 }

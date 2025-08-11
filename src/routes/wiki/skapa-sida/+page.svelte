@@ -24,6 +24,7 @@
 
 	import slugify from '@sindresorhus/slugify';
 	import { error } from '@sveltejs/kit';
+	import { onMount } from 'svelte';
 
 	let { data, form } = $props();
 
@@ -38,7 +39,19 @@
 	let title = $state('Min nya sida');
 	let category = $state(1);
 	let dialogOpen = $state(false);
-	let isUserAdmin = data.isUserAdmin || false;
+
+	let isUserAdmin = $state(false);
+
+	onMount(() => {
+		// This fetch happens only in the browser.
+		fetch('/api/?checkadmin')
+			.then((res) => res.json())
+			.then((authData) => {
+				if (authData.isAdmin) {
+					isUserAdmin = true;
+				}
+			});
+	});
 
 	const carta = new Carta({
 		sanitizer: false,
@@ -97,6 +110,8 @@
 		categoryList.find((f) => f.id === Number(category))?.title ?? 'Välj kategori'
 	);
 </script>
+
+{isUserAdmin}
 
 {#if isUserAdmin}
 	<Label class="mb-2" for="title">Sidans titel</Label>
