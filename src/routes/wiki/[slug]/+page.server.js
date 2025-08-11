@@ -2,7 +2,7 @@ export const config = {
 	isr: {
 		// Revalidate every 60 seconds
 		expiration: 60,
-		bypassToken: 'REPLACE_ME_WITH_SECRET_VALUE'
+		bypassToken: '153167d1-87cf-407f-8ee5-243d292ef3e8'
 	}
 };
 
