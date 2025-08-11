@@ -1,5 +1,3 @@
-import { error as svelteError } from '@sveltejs/kit';
-
 export const config = {
 	isr: {
 		// Revalidate every 60 seconds
@@ -26,7 +24,8 @@ export async function load({ params, locals: { supabase } }) {
 		.single();
 
 	if (error) {
-		throw svelteError(404, 'Sidan hittades inte');
+		console.error('Fel vid hämtning av data:', error);
+		return;
 	}
 
 	// Steg 2: Transformera datan för att "platta till" kategorin
