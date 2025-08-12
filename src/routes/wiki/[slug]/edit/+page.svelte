@@ -169,7 +169,7 @@
 				const newSlug = result.data.newSlug;
 
 				// Navigera till den nya sidan och ERSÄTT historiken
-				await goto(`/wiki/${newSlug}`, { replaceState: true });
+				toast.success('Ändringar sparades!');
 				isSubmitting = false; // Återställ "laddar"-status
 				edited = false; // Återställ redigeringsstatus
 			} else {
