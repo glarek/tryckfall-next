@@ -46,6 +46,7 @@
 {#await postPromise}
 	Laddar...
 {:then post}
+	Titeln är {post.Title}
 	<div class="markdown relative">
 		<Markdown {carta} value={post.content} />
 		{#if isUserAdmin}

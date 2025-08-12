@@ -16,12 +16,7 @@ const config = {
 			remoteFunctions: true
 		}
 	},
-	extensions: ['.svelte'],
-	compilerOptions: {
-		experimental: {
-			async: true
-		}
-	}
+	extensions: ['.svelte']
 };
 
 export default config;
