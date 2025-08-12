@@ -35,7 +35,7 @@
 		"prettier": "^3.4.2",
 		"prettier-plugin-svelte": "^3.3.3",
 		"sass-embedded": "^1.90.0",
-		"svelte": "^5.0.0",
+		"svelte": "^5.38.1",
 		"svelte-check": "^4.0.0",
 		"svelte-sonner": "^1.0.5",
 		"tailwind-merge": "^3.3.0",
@@ -68,6 +68,7 @@
 		"github-markdown-css": "^5.8.1",
 		"remark-inline-svg": "^1.1.1",
 		"tailwindcss": "^4.1.7",
-		"tailwindcss-animated": "^2.0.0"
+		"tailwindcss-animated": "^2.0.0",
+		"valibot": "^1.1.0"
 	}
 }

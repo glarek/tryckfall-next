@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { getPost } from './edit.remote.js';
 	import { onMount } from 'svelte';
 	import { scale } from 'svelte/transition';
 
@@ -14,10 +15,11 @@
 
 	import '$lib/styles/github.scss';
 
-	let { data, form } = $props();
+	let { params } = $props();
 
-	let value = $state(data.cleanPages.content || '');
-	let slug = $state(data.cleanPages.slug || '');
+	const postPromise = getPost(params.slug);
+
+	let slug = $state(params.slug || '');
 
 	let isUserAdmin = $state(false);
 
@@ -41,13 +43,17 @@
 	});
 </script>
 
-<div class="markdown relative">
-	<Markdown {carta} {value} />
-	{#if isUserAdmin}
-		<a
-			transition:scale
-			href={`/wiki/${slug}/edit`}
-			class="absolute top-0 right-0 bg-primary rounded-full p-2"><PenLine /></a
-		>
-	{/if}
-</div>
+{#await postPromise}
+	Laddar...
+{:then post}
+	<div class="markdown relative">
+		<Markdown {carta} value={post.content} />
+		{#if isUserAdmin}
+			<a
+				transition:scale
+				href={`/wiki/${slug}/edit`}
+				class="absolute top-0 right-0 bg-primary rounded-full p-2"><PenLine /></a
+			>
+		{/if}
+	</div>
+{/await}
