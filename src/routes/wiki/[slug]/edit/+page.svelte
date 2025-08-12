@@ -165,20 +165,17 @@
 		isSubmitting = true; // Sätt "laddar"-status innan formuläret skickas
 
 		return async ({ result, update, error }) => {
-			if (result.type === 'success' && result.data?.success) {
-				const newSlug = result.data.newSlug;
-
-				// Navigera till den nya sidan och ERSÄTT historiken
-				toast.success('Ändringar sparades!');
-				isSubmitting = false; // Återställ "laddar"-status
-				edited = false; // Återställ redigeringsstatus
+			if (result.type === 'redirect') {
+				await goto(result.location, { invalidateAll: true });
+				toast.success('Ändringar sparades och sidan laddades om!');
+				edited = false;
+			} else if (result.type === 'failure') {
+				// Hantera fel som returnerats med `fail`
+				toast.error(result.data?.error || 'Ett okänt fel inträffade.');
+				await update(); // Låt SvelteKit uppdatera `form`-prop
 			} else {
-				toast.error(result?.data.error || 'Ett okänt fel inträffade.');
-
-				// Om det inte var en success-redirect, låt SvelteKit hantera det som vanligt
-				// (t.ex. för att visa felmeddelanden som returnerades med `fail`)
+				// Fånga andra fall, t.ex. om du glömmer redirect
 				await update();
-				isSubmitting = false; // Återställ "laddar"-status
 			}
 		};
 	}}

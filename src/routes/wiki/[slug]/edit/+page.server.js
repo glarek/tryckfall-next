@@ -1,4 +1,4 @@
-// src/routes/posts/[slug]/+page.server.js
+// src/routes/posts/[slug]/edit/+page.server.js
 
 import { redirect, fail } from '@sveltejs/kit';
 import { IMAGE_UPLOAD_TOKEN } from '$env/static/private';
@@ -68,7 +68,7 @@ export const actions = {
 			return fail(500, { error: error.message });
 		}
 
-		return { success: true, newSlug: slug };
+		redirect(303, `/wiki/${slug}?refresh=${Date.now()}`);
 	},
 
 	delete: async ({ params, locals: { supabase } }) => {
