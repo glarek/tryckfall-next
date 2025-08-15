@@ -21,8 +21,6 @@ export const getPost = query(
 
 		post = { ...post, category: post.category?.title };
 
-		console.log(post);
-
 		if (dbError) {
 			error(404, 'Inlägget hittades inte');
 		}

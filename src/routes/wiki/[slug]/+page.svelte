@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { getPost } from '../wiki.remote';
 	import { onMount } from 'svelte';
 	import { scale } from 'svelte/transition';
 
@@ -15,11 +14,11 @@
 
 	import '$lib/styles/github.scss';
 
-	let { params } = $props();
+	let { data } = $props();
 
-	const postPromise = getPost(params.slug);
+	console.log(data.post);
 
-	let slug = $state(params.slug || '');
+	//let slug = $state(params.slug || '');
 
 	let isUserAdmin = $state(false);
 
@@ -43,20 +42,16 @@
 	});
 </script>
 
-{#await postPromise}
-	Laddar...
-{:then post}
-	<div class="markdown relative">
-		<div class=" font-mono text-sm bg-muted w-fit p-1 rounded-md">
-			{post.category} > {post.title}
-		</div>
-		<Markdown {carta} value={post.content} />
-		{#if isUserAdmin}
-			<a
-				transition:scale
-				href={`/wiki/${slug}/edit`}
-				class="absolute top-0 right-0 bg-primary rounded-full p-2"><PenLine /></a
-			>
-		{/if}
+<div class="markdown relative">
+	<div class=" font-mono text-sm bg-muted w-fit p-1 rounded-md">
+		{data.post.category} > {data.post.title}
 	</div>
-{/await}
+	<Markdown {carta} value={data.post.content} />
+	{#if isUserAdmin}
+		<a
+			transition:scale
+			href={`/wiki/${data.slug}/edit`}
+			class="absolute top-0 right-0 bg-primary rounded-full p-2"><PenLine /></a
+		>
+	{/if}
+</div>
