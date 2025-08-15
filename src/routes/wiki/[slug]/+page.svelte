@@ -43,8 +43,9 @@
 </script>
 
 <div class="markdown relative">
-	<div class=" font-mono text-sm bg-muted w-fit p-1 rounded-md">
-		{data.post.category} > {data.post.title}
+	<div class=" relative font-mono text-sm bg-muted w-fit p-1 rounded-md pb-3 mb-2">
+		{data.post.category} > {data.post.title}<br />
+		<span class="absolute -pt-2 text-[8px] text-foreground/50">{data.time}</span>
 	</div>
 	<Markdown {carta} value={data.post.content} />
 	{#if isUserAdmin}

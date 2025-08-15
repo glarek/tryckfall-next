@@ -3,20 +3,25 @@ import { getPost } from '../wiki.remote';
 
 export const config = {
 	isr: {
-		expiration: false,
+		expiration: 60000,
 		bypassToken: REVALIDATION_SECRET
 	}
 };
 
 export const load = async (event) => {
 	const slug = event.params.slug;
-	console.log('------------Slug är', slug, '------------');
 	const post = await getPost(slug);
+	const now = new Date();
+	const time = now
+		.toLocaleString('sv-SE', { timeZone: 'Europe/Stockholm' })
+		.slice(0, 19)
+		.replace('T', ' ');
 
 	console.log('Post data:', post);
 
 	return {
 		post,
+		time,
 		slug
 	};
 };
