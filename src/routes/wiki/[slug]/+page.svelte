@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { getPost } from './edit.remote.js';
+	import { getPost } from '../wiki.remote';
 	import { onMount } from 'svelte';
 	import { scale } from 'svelte/transition';
 
@@ -46,8 +46,10 @@
 {#await postPromise}
 	Laddar...
 {:then post}
-	Titeln är {post.Title}
 	<div class="markdown relative">
+		<div class=" font-mono text-sm bg-muted w-fit p-1 rounded-md">
+			{post.category} > {post.title}
+		</div>
 		<Markdown {carta} value={post.content} />
 		{#if isUserAdmin}
 			<a

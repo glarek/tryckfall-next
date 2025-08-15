@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { getPageDataForEdit } from '../edit.remote';
+	import { getPageDataForEdit } from '../../wiki.remote';
 	import EditForm from './editForm.svelte'; // Vi skapar denna snart
 
 	let { params } = $props();

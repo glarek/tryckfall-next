@@ -1,6 +1,8 @@
 import { form, command, query, getRequestEvent } from '$app/server';
 import { fail, error, redirect } from '@sveltejs/kit';
+
 import { IMAGE_UPLOAD_TOKEN } from '$env/static/private';
+import { REVALIDATION_SECRET } from '$env/static/private';
 import * as v from 'valibot'; // Vi använder Valibot för validering som rekommenderat [cite: 22]
 
 export const getPost = query(
@@ -11,11 +13,15 @@ export const getPost = query(
 
 		const { supabase } = event.locals;
 
-		const { data: post, error: dbError } = await supabase
+		let { data: post, error: dbError } = await supabase
 			.from('wiki-pages')
-			.select('slug, title, content')
+			.select('slug, title, content, category:wiki-categories(title)')
 			.eq('slug', slug)
 			.single();
+
+		post = { ...post, category: post.category?.title };
+
+		console.log(post);
 
 		if (dbError) {
 			error(404, 'Inlägget hittades inte');
@@ -60,6 +66,7 @@ export const getPageDataForEdit = query(
 // Ersätter `actions.update`
 export const updatePost = form(async (formData) => {
 	const event = getRequestEvent();
+
 	if (!event) throw error(500, 'Could not get request event');
 	const { supabase } = event.locals;
 
@@ -67,7 +74,10 @@ export const updatePost = form(async (formData) => {
 	const title = formData.get('title');
 	const slug = formData.get('slug');
 	const category_id = Number(formData.get('category'));
-	const originalSlug = event.url.searchParams.get('slug'); // Vi måste få ursprunglig slug på annat sätt
+	const originalSlug = formData.get('originalSlug'); // Vi måste få ursprunglig slug på annat sätt
+
+	console.log(event.url.searchParams);
+	console.log('originalSlug:', originalSlug);
 
 	if (!slug) return fail(400, { message: 'Slug får inte vara tom.' });
 
@@ -77,12 +87,25 @@ export const updatePost = form(async (formData) => {
 		.eq('slug', originalSlug);
 
 	if (updateError) {
-		// ... din felhantering ...
+		console.log(updateError);
 		return fail(500, { message: updateError.message });
 	}
 
 	// Omdirigera till den uppdaterade sidan med cache-busting
-	redirect(303, `/wiki/${slug}?refresh=${Date.now()}`);
+	// GET request to the updated slug page (optional, e.g. for cache-busting or preloading)
+
+	try {
+		await event.fetch(`/wiki/${slug}`, {
+			method: 'HEAD',
+			headers: {
+				'x-prerender-revalidate': `${REVALIDATION_SECRET}`
+			}
+		});
+	} catch (e) {
+		console.warn('Could not prefetch updated wiki page:', e);
+	}
+	event.cookies.set('__prerender_bypass', REVALIDATION_SECRET, { path: '/' });
+	redirect(303, `/wiki/${slug}`);
 });
 
 // Ersätter `actions.delete`

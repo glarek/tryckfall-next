@@ -2,6 +2,7 @@
 	import { enhance } from '$app/forms';
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
+	import { updatePost } from '../../wiki.remote';
 
 	import { Button } from '$lib/components/ui/button/index.js';
 	import { Input } from '$lib/components/ui/input/index.js';
@@ -31,6 +32,7 @@
 
 	let categoryList = $state(data.categories);
 	let value = $state(data.cleanPages.content || '');
+	const oldSlug = data.cleanPages.slug || '';
 	let slug = $state(data.cleanPages.slug || '');
 	let title = $state(data.cleanPages.title || '');
 	let category = $state(data.cleanPages.category.toString() || '');
@@ -158,32 +160,12 @@
 	{/if}
 </div>
 
-<form
-	method="POST"
-	action="?/update"
-	use:enhance={() => {
-		isSubmitting = true; // Sätt "laddar"-status innan formuläret skickas
-
-		return async ({ result, update, error }) => {
-			if (result.type === 'redirect') {
-				await goto(result.location, { invalidateAll: true });
-				toast.success('Ändringar sparades och sidan laddades om!');
-				edited = false;
-			} else if (result.type === 'failure') {
-				// Hantera fel som returnerats med `fail`
-				toast.error(result.data?.error || 'Ett okänt fel inträffade.');
-				await update(); // Låt SvelteKit uppdatera `form`-prop
-			} else {
-				// Fånga andra fall, t.ex. om du glömmer redirect
-				await update();
-			}
-		};
-	}}
->
+<form {...updatePost} onsubmit={() => (isSubmitting = true)}>
 	<input type="hidden" name="content" {value} />
-	<input type="hidden" name="slug" bind:value={slug} />
-	<input type="hidden" name="title" bind:value={title} />
-	<input type="hidden" name="category" bind:value={category} />
+	<input type="hidden" name="slug" value={slug} />
+	<input type="hidden" name="title" value={title} />
+	<input type="hidden" name="category" value={category} />
+	<input type="hidden" name="originalSlug" value={oldSlug} />
 
 	<Button class="cursor-pointer" type="submit" disabled={isSubmitting || !edited} variant="outline">
 		{isSubmitting ? 'Sparar...' : 'Spara ändringar'}
