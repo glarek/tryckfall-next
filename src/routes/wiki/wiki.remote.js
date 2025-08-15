@@ -102,7 +102,8 @@ export const updatePost = form(async (formData) => {
 	} catch (e) {
 		console.warn('Could not prefetch updated wiki page:', e);
 	}
-	event.cookies.set('__prerender_bypass', REVALIDATION_SECRET, { path: '/' });
+	//Only use if you want to enable an "always on" preview of the page with the cookie
+	//event.cookies.set('__prerender_bypass', REVALIDATION_SECRET, { path: '/' });
 	redirect(303, `/wiki/${slug}`);
 });
 
