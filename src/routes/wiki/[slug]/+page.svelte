@@ -20,8 +20,6 @@
 
 	//let slug = $state(params.slug || '');
 
-	let isUserAdmin = $state(false);
-
 	const carta = new Carta({
 		sanitizer: false,
 		gfmOptions: {
@@ -30,16 +28,7 @@
 		extensions: [imsize(), emoji(), code(), subscript()]
 	});
 
-	onMount(() => {
-		// This fetch happens only in the browser.
-		fetch('/api/check-admin')
-			.then((res) => res.json())
-			.then((authData) => {
-				if (authData.isUserAdmin) {
-					isUserAdmin = true;
-				}
-			});
-	});
+	const isUserAdmin = data?.role === 'admin';
 </script>
 
 <div class="markdown relative">

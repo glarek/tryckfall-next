@@ -46,10 +46,17 @@
 
 <Toaster richColors position="top-left" />
 
-<TopNav {loggedIn} mainClass="z-50" navClass="lg:w-5xl w-full" style="height: {navBarHeight}px" />
+<header>
+	<TopNav
+		{loggedIn}
+		mainClass="z-50"
+		navClass="lg:w-5xl w-full"
+		style="height: {navBarHeight}px;"
+	/>
+</header>
 <div
 	id="main-container"
-	class="relative flex flex-row justify-center w-dvw overflow-y-scroll"
+	class="relative flex flex-row justify-center overflow-y-scroll w-dvw"
 	style="max-height: calc(100dvh - {navBarHeight}px)"
 >
 	<SideNav
@@ -70,9 +77,53 @@
 		tabindex="0"
 	></button>
 	<div
-		class="flex lg:w-195 lg:flex-none flex-1 flex-col lg:border-r-1 border-dashed max-w-screen"
-		style="min-height: calc(100dvh - {navBarHeight}px); height: 100%"
+		id="main-content"
+		class="flex lg:w-195 lg:flex-none flex-1 flex-col lg:border-r-1 border-dashed w-full"
+		style="min-height: calc(100dvh - {navBarHeight}px); height: 100%; "
 	>
-		{@render children()}
+		<div style="view-transition-name: slide">{@render children()}</div>
 	</div>
 </div>
+
+<style>
+	@keyframes fade-in {
+		from {
+			opacity: 0;
+		}
+	}
+
+	@keyframes fade-out {
+		to {
+			opacity: 0;
+		}
+	}
+
+	@keyframes slide-from-right {
+		from {
+			transform: translatey(-30px);
+		}
+	}
+
+	@keyframes slide-to-left {
+		to {
+			transform: translateY(30px);
+		}
+	}
+
+	:root::view-transition-old(root),
+	:root::view-transition-new(root) {
+		animation: none !important;
+	}
+
+	:root::view-transition-old(slide) {
+		animation:
+			90ms cubic-bezier(0.4, 0, 1, 1) both fade-out,
+			300ms cubic-bezier(0.4, 0, 0.2, 1) both slide-to-left;
+	}
+
+	:root::view-transition-new(slide) {
+		animation:
+			210ms cubic-bezier(0, 0, 0.2, 1) 90ms both fade-in,
+			300ms cubic-bezier(0.4, 0, 0.2, 1) both slide-from-right;
+	}
+</style>

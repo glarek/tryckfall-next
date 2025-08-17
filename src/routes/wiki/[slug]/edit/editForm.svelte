@@ -1,7 +1,5 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import { goto } from '$app/navigation';
-	import { onMount } from 'svelte';
 	import { updatePost } from '../../wiki.remote';
 
 	import { Button } from '$lib/components/ui/button/index.js';
@@ -11,7 +9,7 @@
 	import * as Select from '$lib/components/ui/select/index.js';
 	import { toast } from 'svelte-sonner';
 
-	import { PenLine, Trash2, Wand } from '@lucide/svelte';
+	import { PenLine, Trash2, Wand, LoaderCircle } from '@lucide/svelte';
 
 	import { Carta, MarkdownEditor } from 'carta-md';
 	import { attachment } from '@cartamd/plugin-attachment';
@@ -168,8 +166,12 @@
 	<input type="hidden" name="originalSlug" value={oldSlug} />
 
 	<Button class="cursor-pointer" type="submit" disabled={isSubmitting || !edited} variant="outline">
+		{#if isSubmitting}
+			<LoaderCircle class="ml-0 animate-spin" size={16} />
+		{:else}
+			<PenLine class="ml-0" size={16} />
+		{/if}
 		{isSubmitting ? 'Sparar...' : 'Spara ändringar'}
-		<PenLine class="ml-0" size={16} />
 	</Button>
 </form>
 
