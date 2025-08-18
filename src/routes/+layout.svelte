@@ -15,6 +15,7 @@
 	let loggedIn = $derived(session !== null);
 
 	let navBarHeight = 50;
+	let navigating = $state(false);
 
 	onMount(() => {
 		const { data } = supabase.auth.onAuthStateChange((_, newSession) => {
@@ -27,6 +28,7 @@
 
 	onNavigate((navigation) => {
 		if (!document.startViewTransition) return;
+		navigating = true;
 
 		return new Promise((resolve) => {
 			document.startViewTransition(async () => {
@@ -41,8 +43,11 @@
 		if (mainContainer) {
 			mainContainer.scrollTop = 0;
 		}
+		navigating = false;
 	});
 </script>
+
+{navigating ? 'Navigerar...' : 'Klar'}
 
 <Toaster richColors position="top-left" />
 
@@ -78,7 +83,7 @@
 	></button>
 	<div
 		id="main-content"
-		class="flex lg:w-195 lg:flex-none flex-1 flex-col lg:border-r-2 border-dashed w-full"
+		class="flex lg:w-195 lg:flex-none flex-1 flex-col lg:border-r-1 border-dashed w-full"
 		style="min-height: calc(100dvh - {navBarHeight}px); height: 100%; "
 	>
 		<div style="view-transition-name: slide">{@render children()}</div>

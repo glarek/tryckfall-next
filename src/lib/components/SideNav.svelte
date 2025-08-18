@@ -9,7 +9,7 @@
 <ModeWatcher />
 
 <div
-	class="flex justify-between border-r-2 lg:border-l-2 border-dashed px-4 py-4 font-semibold bg-background {additionalClasses} "
+	class="flex justify-between border-r-1 lg:border-l-1 border-dashed px-4 py-4 font-semibold bg-background {additionalClasses} "
 	{...restProps}
 >
 	<ul class="flex flex-col">
