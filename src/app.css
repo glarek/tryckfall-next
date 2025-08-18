@@ -5,32 +5,37 @@
 @import '@fontsource-variable/dm-sans';
 @import '@fontsource-variable/inter';
 @import '@fontsource-variable/jetbrains-mono';
+@import '@fontsource-variable/reddit-sans';
+@import '@fontsource-variable/rethink-sans';
+@import '@fontsource/dm-serif-display';
+@import '@fontsource-variable/bricolage-grotesque';
 
 @custom-variant dark (&:is(.dark *));
 
 :root {
-	--font-sans: 'DM Sans Variable', sans-serif;
+	--font-serif: 'DM Serif Display', serif;
+	--font-sans: 'Rethink Sans Variable', sans-serif;
 	--font-mono: 'JetBrains Mono Variable', monospace;
 	--font-inter: 'Inter Variable', sans-serif;
 	--radius: 0.5rem;
-	--background: oklch(1 0 0);
+	--background: oklch(99.972% 0.00121 107.853);
 	--foreground: oklch(0.141 0.005 285.823);
 	--card: oklch(1 0 0);
 	--card-foreground: oklch(0.141 0.005 285.823);
 	--popover: oklch(1 0 0);
 	--popover-foreground: oklch(0.141 0.005 285.823);
-	--primary: oklch(0.71 0.1624 244.25);
-	--primary-foreground: oklch(0.97 0.014 254.604);
+	--primary: oklch(70.457% 0.19028 353.443);
+	--primary-foreground: oklch(100% 0.00011 271.152);
 	--secondary: oklch(0.967 0.001 286.375);
 	--secondary-foreground: oklch(0.21 0.006 285.885);
-	--muted: oklch(0.967 0.001 286.375);
+	--muted: oklch(97.357% 0.01744 339.579);
 	--muted-foreground: oklch(0.552 0.016 285.938);
 	--accent: oklch(0.967 0.001 286.375);
 	--accent-foreground: oklch(0.21 0.006 285.885);
 	--destructive: oklch(0.577 0.245 27.325);
-	--border: oklch(0.92 0.004 286.32);
-	--input: oklch(0.92 0.004 286.32);
-	--ring: oklch(0.623 0.214 259.815);
+	--border: oklch(64.895% 0.26389 358.718 / 0.089);
+	--input: oklch(86.193% 0.06476 348.012);
+	--ring: oklch(86.193% 0.06476 348.012);
 	--cool: oklch(0.71 0.1624 244.25);
 	--heat: oklch(66.022% 0.22708 30.854);
 	--chart-1: oklch(0.646 0.222 41.116);
@@ -140,15 +145,15 @@
 	}
 
 	h1 {
-		@apply text-4xl font-semibold tracking-tighter;
+		@apply font-serif text-4xl font-semibold;
 	}
 
 	h2 {
-		@apply text-2xl font-semibold tracking-tighter;
+		@apply font-serif text-2xl font-semibold;
 	}
 
 	h3 {
-		@apply text-lg font-semibold tracking-tighter;
+		@apply font-serif text-lg font-semibold;
 	}
 
 	p {

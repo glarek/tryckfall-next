@@ -17,7 +17,7 @@
 
 <div
 	{...restProps}
-	class="flex flex-col border-b-1 top-0 items-center justify-center bg-background shadow-xs {mainClasses}"
+	class="flex flex-col border-b-2 border-dashed top-0 items-center justify-center bg-background {mainClasses}"
 >
 	<nav class="flex items-center pl-4 pr-4 py-4 justify-between {navClasses}">
 		<Logo class="fill-foreground h-6 self-center" />

@@ -1,20 +1,20 @@
-// src/routes/+page.server.js (eller motsvarande)
+import { REVALIDATION_SECRET } from '$env/static/private';
+import { getPosts } from './wiki.remote';
+import { error as svelteError } from '@sveltejs/kit';
 
-export async function load({ locals: { supabase } }) {
-	// 1. Hämta alla sidor och inkludera kategorins namn
-	const { data: pagesData, error } = await supabase
-		.from('wiki-pages')
-		.select('slug, title, category:wiki-categories(title)');
-
-	if (error) {
-		console.error('Det uppstod ett fel:', error);
-		// Kasta ett fel för att visa SvelteKits inbyggda felsida
-		// throw error(500, 'Kunde inte ladda innehållet.');
-		return { groupedPages: [] }; // Eller returnera en tom array vid fel
+export const config = {
+	isr: {
+		expiration: 60000,
+		bypassToken: REVALIDATION_SECRET,
+		allowQuery: ['search']
 	}
+};
+
+export const load = async () => {
+	const posts = await getPosts();
 
 	// 2. Gruppera sidorna efter kategori med reduce
-	const groupedByTitle = pagesData.reduce((acc, page) => {
+	const groupedByTitle = posts.reduce((acc, page) => {
 		// Hämta kategorins titel. Använd en fallback om en sida saknar kategori.
 		const categoryTitle = page.category?.title || 'Okategoriserad';
 
@@ -40,4 +40,4 @@ export async function load({ locals: { supabase } }) {
 
 	// 4. Returnera den färdig-grupperade datan
 	return { groupedPages };
-}
+};

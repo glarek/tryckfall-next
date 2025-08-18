@@ -5,6 +5,24 @@ import { IMAGE_UPLOAD_TOKEN } from '$env/static/private';
 import { REVALIDATION_SECRET } from '$env/static/private';
 import * as v from 'valibot'; // Vi använder Valibot för validering som rekommenderat [cite: 22]
 
+export const getPosts = query(async () => {
+	const event = getRequestEvent();
+	if (!event) throw error(500, 'Server error');
+
+	const { supabase } = event.locals;
+
+	let { data: posts, error: dbError } = await supabase
+		.from('wiki-pages')
+		.select('slug, title, content, category:wiki-categories(title)');
+
+	if (dbError) {
+		console.error('Det uppstod ett fel:', dbError);
+		throw error(500, 'Kunde inte hämta inlägg.');
+	}
+
+	return posts;
+});
+
 export const getPost = query(
 	v.string(), // Validerar att `slug` är en sträng
 	async (slug) => {
@@ -94,6 +112,12 @@ export const updatePost = form(async (formData) => {
 
 	try {
 		await event.fetch(`/wiki/${slug}`, {
+			method: 'HEAD',
+			headers: {
+				'x-prerender-revalidate': `${REVALIDATION_SECRET}`
+			}
+		});
+		await event.fetch(`/wiki/`, {
 			method: 'HEAD',
 			headers: {
 				'x-prerender-revalidate': `${REVALIDATION_SECRET}`
