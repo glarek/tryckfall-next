@@ -1,5 +1,5 @@
 <script>
-	import { onNavigate, afterNavigate, invalidate } from '$app/navigation';
+	import { beforeNavigate, onNavigate, afterNavigate, invalidate } from '$app/navigation';
 	import '../app.css';
 	import TopNav from '$lib/components/TopNav.svelte';
 	import SideNav from '$lib/components/SideNav.svelte';
@@ -26,9 +26,13 @@
 		return () => data.subscription.unsubscribe();
 	});
 
+	beforeNavigate(async () => {
+		navigating = true;
+		return;
+	});
+
 	onNavigate((navigation) => {
 		if (!document.startViewTransition) return;
-		navigating = true;
 
 		return new Promise((resolve) => {
 			document.startViewTransition(async () => {
