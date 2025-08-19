@@ -3,7 +3,7 @@
 	import type { PageData } from './$types';
 	let { data }: { data: PageData } = $props();
 
-	import { SquarePlus, ChevronRight } from '@lucide/svelte';
+	import { Plus, ChevronRight } from '@lucide/svelte';
 
 	import * as Card from '$lib/components/ui/card/index.js';
 	import { Button } from '$lib/components/ui/button/index.js';
@@ -16,14 +16,31 @@
 	);
 </script>
 
+<div class="p-4 border-b-1 border-dashed">
+	<h1>Enkel information för <mark>VVS</mark> och <mark>energi.</mark></h1>
+	<p>
+		Dessa dokument innehåller erfarenhetsbaserad information och tumregler inom VVS och energi.
+		Innehållet är inte granskat eller kvalitetskontrollerat och ska betraktas som vägledande.
+	</p>
+	<p>
+		Dokumentet uppdateras kontinuerligt. Förslag till ändringar och kompletteringar kan skickas till
+		<span class="email"
+			><a href="mailto:adrian.larek@gritprojects.se">adrian.larek@gritprojects.se</a></span
+		>.
+	</p>
+</div>
+
 {#if data.groupedPages.length === 0}
 	<p>Hittade inga sidor.</p>
 {:else}
-	<div class="flex flex-wrap flex-col divide-y-1 divide-dashed">
+	<div class="flex flex-wrap flex-col divide-y-1 divide-dashed border-b-1 border-dashed">
 		{#each groups as group}
 			<div class="p-4">
-				<button class="cursor-pointer" on:click={() => (group.shown = !group.shown)}>
-					<h2 class=" inline-flex items-center" id={group.categoryTitle.toLowerCase()}>
+				<button class="cursor-pointer" onclick={() => (group.shown = !group.shown)}>
+					<h2
+						class="hover:underline decoration-input underline-offset-5 inline-flex items-center"
+						id={group.categoryTitle.toLowerCase()}
+					>
 						{group.categoryTitle}<ChevronRight
 							class="ml-1 {group.shown ? 'rotate-90 transition-transform' : 'transition-transform'}"
 						/>
@@ -46,18 +63,22 @@
 	</div>
 {/if}
 
-<div class="grid grid-cols-[1fr_1fr] w-fit gap-x-6">
-	<a href="./skapa-sida">
-		<Button variant="outline" class="my-4 cursor-pointer w-full ">
-			<SquarePlus />
-			Skapa ny sida
-		</Button>
+<div class="flex flex-col">
+	<a href="/wiki/skapa-sida">
+		<button
+			class="hover:text-primary p-4 inline-flex gap-x-2 items-center center cursor-pointer w-full border-b-1 border-dashed"
+		>
+			<Plus />
+			<h2>Skapa ny sida</h2>
+		</button>
 	</a>
 
-	<a href="./skapa-kategori">
-		<Button variant="outline" class="my-4 cursor-pointer w-full">
-			<SquarePlus />
-			Skapa ny kategori
-		</Button>
+	<a href="skapa-kategori">
+		<button
+			class="hover:text-primary p-4 inline-flex gap-x-2 items-center cursor-pointer w-full border-b-1 border-dashed"
+		>
+			<Plus />
+			<h2>Skapa ny kategori</h2>
+		</button>
 	</a>
 </div>

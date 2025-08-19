@@ -47,10 +47,31 @@ export const getPost = query(
 	}
 );
 
+export const getCategories = query(async () => {
+	const event = getRequestEvent();
+	if (!event) throw error(500, 'Could not get request event');
+
+	const { supabase } = event.locals;
+
+	console.log('--- Getting categories ---');
+
+	const { data: role } = await supabase.rpc('get_user_role');
+	if (role !== 'admin') {
+		redirect(303, '/auth');
+	}
+
+	const { data: categories } = await supabase.from('wiki-categories').select('id, title');
+
+	console.log(categories);
+
+	return { categories };
+});
+
 // Ersätter din gamla `load`-funktion
 export const getPageDataForEdit = query(
 	v.string(), // Validerar att `slug` är en sträng [cite: 26]
 	async (slug) => {
+		const timeStamp = Date.now();
 		const event = getRequestEvent();
 		if (!event) throw error(500, 'Could not get request event');
 
@@ -75,9 +96,46 @@ export const getPageDataForEdit = query(
 		}
 
 		const cleanPages = { ...data, category: data.category?.id || 'Okategoriserad' };
-		return { cleanPages, categories };
+		return { cleanPages, categories, timeStamp };
 	}
 );
+
+export const createPost = form(async (formData) => {
+	const event = getRequestEvent();
+	if (!event) throw error(500, 'Could not get request event');
+	const { supabase } = event.locals;
+
+	const content = formData.get('content');
+	const title = formData.get('title');
+	const slug = formData.get('slug');
+	const category_id = Number(formData.get('category'));
+
+	if (!slug) return fail(400, { message: 'Slug får inte vara tom.' });
+
+	const { error: createError } = await supabase
+		.from('wiki-pages')
+		.insert({ content, title, slug, category_id });
+
+	if (createError) {
+		return fail(500, { message: createError.message });
+	}
+
+	try {
+		const revalidationPromises = [
+			event.fetch(`/wiki/`, {
+				method: 'HEAD',
+				headers: { 'x-prerender-revalidate': `${REVALIDATION_SECRET}` }
+			})
+		];
+
+		// Vänta på att BÅDA anropen slutförs parallellt
+		await Promise.all(revalidationPromises);
+
+		console.log('Revalidation complete for both endpoints.');
+	} catch (e) {
+		console.warn('Could not revalidate wiki pages:', e);
+	}
+});
 
 // Ersätter `actions.update`
 export const updatePost = form(async (formData) => {
@@ -92,9 +150,6 @@ export const updatePost = form(async (formData) => {
 	const category_id = Number(formData.get('category'));
 	const originalSlug = formData.get('originalSlug'); // Vi måste få ursprunglig slug på annat sätt
 
-	console.log(event.url.searchParams);
-	console.log('originalSlug:', originalSlug);
-
 	if (!slug) return fail(400, { message: 'Slug får inte vara tom.' });
 
 	const { error: updateError } = await supabase
@@ -103,7 +158,6 @@ export const updatePost = form(async (formData) => {
 		.eq('slug', originalSlug);
 
 	if (updateError) {
-		console.log(updateError);
 		return fail(500, { message: updateError.message });
 	}
 
@@ -111,24 +165,27 @@ export const updatePost = form(async (formData) => {
 	// GET request to the updated slug page (optional, e.g. for cache-busting or preloading)
 
 	try {
-		await event.fetch(`/wiki/${slug}`, {
-			method: 'HEAD',
-			headers: {
-				'x-prerender-revalidate': `${REVALIDATION_SECRET}`
-			}
-		});
-		await event.fetch(`/wiki/`, {
-			method: 'HEAD',
-			headers: {
-				'x-prerender-revalidate': `${REVALIDATION_SECRET}`
-			}
-		});
+		const revalidationPromises = [
+			event.fetch(`/wiki/${slug}`, {
+				method: 'HEAD',
+				headers: { 'x-prerender-revalidate': `${REVALIDATION_SECRET}` }
+			}),
+			event.fetch(`/wiki/`, {
+				method: 'HEAD',
+				headers: { 'x-prerender-revalidate': `${REVALIDATION_SECRET}` }
+			})
+		];
+
+		// Vänta på att BÅDA anropen slutförs parallellt
+		await Promise.all(revalidationPromises);
+
+		console.log('Revalidation complete for both endpoints.');
 	} catch (e) {
-		console.warn('Could not prefetch updated wiki page:', e);
+		console.warn('Could not revalidate wiki pages:', e);
 	}
+
 	//Only use if you want to enable an "always on" preview of the page with the cookie
 	//event.cookies.set('__prerender_bypass', REVALIDATION_SECRET, { path: '/' });
-	redirect(303, `/wiki/${slug}`);
 });
 
 // Ersätter `actions.delete`

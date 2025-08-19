@@ -51,44 +51,30 @@
 	});
 </script>
 
-{navigating ? 'Navigerar...' : 'Klar'}
-
 <Toaster richColors position="top-left" />
 
-<header>
-	<TopNav
-		{loggedIn}
-		mainClass="z-50"
-		navClass="lg:w-5xl w-full"
-		style="height: {navBarHeight}px;"
-	/>
+<header class="z-50 sticky top-0">
+	<TopNav {loggedIn} mainClass="h-[3rem]" navClass="lg:w-5xl w-full" />
 </header>
-<div
-	id="main-container"
-	class="relative flex flex-row justify-center overflow-y-scroll w-dvw"
-	style="max-height: calc(100dvh - {navBarHeight}px)"
->
+<div id="main-container" class="flex flex-row justify-center items-start">
 	<SideNav
-		class="h-screen fixed lg:sticky lg:top-0 lg:flex flex-col left-0 w-60 transition-all duration-300 ease-in-out overflow-y-auto  {getShowNavbar()
+		class="h-[calc(100dvh-3rem)] fixed lg:sticky lg:top-[3rem] lg:flex flex-col left-0 w-60 transition-all duration-300 ease-in-out overflow-y-auto  {getShowNavbar()
 			? 'translate-x-0'
 			: '-translate-x-full'} lg:translate-x-0 z-40"
-		style="height: calc(100dvh - {navBarHeight}px);"
 	/>
 	<button
 		type="button"
 		id="overlay"
 		aria-label="Close sidebar overlay"
-		class="fixed inset-0 lg:hidden bg-black/50 z-30 duration-200 transition-all ease-in-out {getShowNavbar()
+		class="fixed top-[3rem] left-0 w-full h-full lg:hidden bg-black/50 z-30 duration-200 transition-all ease-in-out {getShowNavbar()
 			? 'no-doc-scroll visible opacity-100 backdrop-blur-xs'
 			: 'invisible opacity-0'}"
-		style="top: {navBarHeight}px"
 		onclick={() => setShowNavbar(false)}
 		tabindex="0"
 	></button>
 	<div
 		id="main-content"
 		class="flex lg:w-195 lg:flex-none flex-1 flex-col lg:border-r-1 border-dashed w-full"
-		style="min-height: calc(100dvh - {navBarHeight}px); height: 100%; "
 	>
 		<div style="view-transition-name: slide">{@render children()}</div>
 	</div>

@@ -16,8 +16,6 @@
 
 	let { data } = $props();
 
-	console.log(data.post);
-
 	//let slug = $state(params.slug || '');
 
 	const carta = new Carta({

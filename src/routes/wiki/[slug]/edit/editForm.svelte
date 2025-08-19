@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import { updatePost } from '../../wiki.remote';
+	import { updatePost, createPost } from '../../wiki.remote';
+	import { goto } from '$app/navigation';
 
 	import { Button } from '$lib/components/ui/button/index.js';
 	import { Input } from '$lib/components/ui/input/index.js';
@@ -23,17 +24,19 @@
 	import '$lib/styles/github.scss';
 
 	import slugify from '@sindresorhus/slugify';
+	import { is } from 'valibot';
 
-	let { data } = $props();
+	let { data = null } = $props();
 
 	let isSubmitting = $state(false);
+	const isNew = data.cleanPages ? false : true;
 
 	let categoryList = $state(data.categories);
-	let value = $state(data.cleanPages.content || '');
-	const oldSlug = data.cleanPages.slug || '';
-	let slug = $state(data.cleanPages.slug || '');
-	let title = $state(data.cleanPages.title || '');
-	let category = $state(data.cleanPages.category.toString() || '');
+	let value = $state(data.cleanPages?.content || '');
+	const oldSlug = data.cleanPages?.slug || '';
+	let slug = $state(data.cleanPages?.slug || '');
+	let title = $state(data.cleanPages?.title || '');
+	let category = $state(data.cleanPages?.category.toString() || '');
 	let dialogOpen = $state(false);
 
 	let edited = $derived.by(() => {
@@ -158,63 +161,123 @@
 	{/if}
 </div>
 
-<form {...updatePost} onsubmit={() => (isSubmitting = true)}>
-	<input type="hidden" name="content" {value} />
-	<input type="hidden" name="slug" value={slug} />
-	<input type="hidden" name="title" value={title} />
-	<input type="hidden" name="category" value={category} />
-	<input type="hidden" name="originalSlug" value={oldSlug} />
+{#if isNew}
+	<form
+		{...createPost.enhance(async ({ data, submit }) => {
+			isSubmitting = true;
+			const formData = new FormData();
+			data.set('content', value);
+			data.set('slug', slug);
+			data.set('title', title);
+			data.set('category', category);
 
-	<Button class="cursor-pointer" type="submit" disabled={isSubmitting || !edited} variant="outline">
-		{#if isSubmitting}
-			<LoaderCircle class="ml-0 animate-spin" size={16} />
-		{:else}
-			<PenLine class="ml-0" size={16} />
-		{/if}
-		{isSubmitting ? 'Sparar...' : 'Spara ändringar'}
+			console.log(data);
+
+			try {
+				await submit();
+				goto(`/wiki/${slug}`);
+				isSubmitting = false;
+			} catch (error) {
+				toast.error('Nånting gick fel!');
+				isSubmitting = false;
+			}
+		})}
+	>
+		<Button
+			type="submit"
+			class="cursor-pointer shadow-none"
+			disabled={isSubmitting}
+			variant="outline"
+		>
+			<div class="flex flex-row w-[100px] items-center gap-x-2">
+				{#if !isSubmitting}
+					Skapa sida <PenLine />
+				{:else}
+					Skapa sida<LoaderCircle class="h-fit w-fit animate-spin" />
+				{/if}
+			</div></Button
+		>
+	</form>
+{:else}
+	<form
+		{...updatePost.enhance(async ({ data, submit }) => {
+			isSubmitting = true;
+			const formData = new FormData();
+			data.set('content', value);
+			data.set('slug', slug);
+			data.set('title', title);
+			data.set('category', category);
+			data.set('originalSlug', oldSlug);
+
+			console.log(data);
+
+			try {
+				await submit();
+				goto(`/wiki/${slug}`);
+				isSubmitting = false;
+			} catch (error) {
+				toast.error('Nånting gick fel!');
+				isSubmitting = false;
+			}
+		})}
+	>
+		<Button
+			type="submit"
+			class="cursor-pointer shadow-none"
+			disabled={isSubmitting}
+			variant="outline"
+		>
+			<div class="flex flex-row w-[120px] items-center gap-x-2">
+				{#if !isSubmitting}
+					Spara ändringar <PenLine />
+				{:else}
+					Spara ändringar<LoaderCircle class="h-fit w-fit animate-spin" />
+				{/if}
+			</div></Button
+		>
+	</form>
+
+	<Button
+		onclick={() => (dialogOpen = true)}
+		class="h-10 cursor-pointer mt-2 border-destructive/[20%]"
+		variant="outline"
+	>
+		Ta bort sida
+		<Trash2 class="ml-0" size={16} />
 	</Button>
-</form>
 
-<Button
-	onclick={() => (dialogOpen = true)}
-	class="cursor-pointer mt-2 border-destructive/[20%]"
-	variant="outline"
->
-	Ta bort sida
-	<Trash2 class="ml-0" size={16} />
-</Button>
-
-<Dialog.Root bind:open={dialogOpen}>
-	<Dialog.Trigger class="modal" disabled={isSubmitting}></Dialog.Trigger>
-	<Dialog.Content>
-		<Dialog.Header>
-			<Dialog.Title>Är du helt säker?</Dialog.Title>
-			<Dialog.Description>
-				Denna åtgärd kan inte ångras. Detta kommer permanent att ta bort sidan från databasen!
-				<div class="grid grid-cols-[1fr_1fr] gap-2">
-					<Button
-						onclick={() => (dialogOpen = false)}
-						class=" cursor-pointer mt-2 w-full"
-						variant="outline">Ångra!</Button
-					>
-					<form
-						method="POST"
-						action="?/delete"
-						use:enhance={() => {
-							isSubmitting = true; // Sätt "laddar"-status innan formuläret skickas
-							return async ({ update }) => {
-								// Körs när servern har svarat
-								await update();
-								isSubmitting = false;
-							};
-						}}
-					>
-						<Button type="submit" class="mt-2 w-full cursor-pointer" variant="destructive"
-							>Ta bort sida!</Button
+	<Dialog.Root bind:open={dialogOpen}>
+		<Dialog.Trigger class="modal" disabled={isSubmitting}></Dialog.Trigger>
+		<Dialog.Content>
+			<Dialog.Header>
+				<Dialog.Title>Är du helt säker?</Dialog.Title>
+				<Dialog.Description>
+					Denna åtgärd kan inte ångras. Detta kommer permanent att ta bort sidan från databasen!
+					<div class="grid grid-cols-[1fr_1fr] gap-2">
+						<Button
+							onclick={() => (dialogOpen = false)}
+							class=" cursor-pointer mt-2 w-full"
+							variant="outline">Ångra!</Button
 						>
-					</form>
-				</div>
-			</Dialog.Description>
-		</Dialog.Header>
-	</Dialog.Content>
-</Dialog.Root>
+						<form
+							method="POST"
+							action="?/delete"
+							use:enhance={() => {
+								isSubmitting = true; // Sätt "laddar"-status innan formuläret skickas
+								return async ({ update }) => {
+									// Körs när servern har svarat
+									await update();
+									isSubmitting = false;
+								};
+							}}
+						>
+							<Button type="submit" class="mt-2 w-full cursor-pointer" variant="destructive"
+								>Ta bort sida!</Button
+							>
+						</form>
+					</div>
+				</Dialog.Description>
+			</Dialog.Header>
+		</Dialog.Content>
+	</Dialog.Root>
+{/if}

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { getPageDataForEdit } from '../../wiki.remote';
 	import EditForm from './editForm.svelte'; // Vi skapar denna snart
+	import { blur, slide } from 'svelte/transition';
 
 	let { params } = $props();
 
@@ -8,15 +9,20 @@
 	const pageDataPromise = getPageDataForEdit(params.slug);
 </script>
 
-{#await pageDataPromise}
-	<div class="p-8 text-center">
-		<p>Laddar redigeringsdata...</p>
-	</div>
-{:then pageData}
-	<EditForm data={pageData} />
-{:catch error}
-	<div class="p-8 text-center text-red-500">
-		<h1>Fel</h1>
-		<p>Kunde inte ladda sidan: {error.message}</p>
-	</div>
-{/await}
+<main>
+	{#await pageDataPromise}
+		<div transition:slide class="p-8 text-center">
+			<p>Laddar redigeringsdata...</p>
+		</div>
+	{:then pageData}
+		<div transition:blur>
+			{pageData.timeStamp}
+			<EditForm data={pageData} />
+		</div>
+	{:catch error}
+		<div transition:blur class="p-8 text-center text-red-500">
+			<h1>Fel</h1>
+			<p>Kunde inte ladda sidan: {error.message}</p>
+		</div>
+	{/await}
+</main>
