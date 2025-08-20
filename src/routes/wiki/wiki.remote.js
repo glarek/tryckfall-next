@@ -195,11 +195,11 @@ export const updatePost = form(async (formData) => {
 });
 
 // Ersätter `actions.delete`
-export const deletePost = form(async () => {
+export const deletePost = form(async (formData) => {
 	const event = getRequestEvent();
 	if (!event) throw error(500, 'Could not get request event');
 	const { supabase } = event.locals;
-	const slug = event.url.searchParams.get('slug');
+	const slug = formData.get('originalSlug');
 
 	const { error: deleteError } = await supabase.from('wiki-pages').delete().eq('slug', slug);
 	if (deleteError) return fail(500, { message: deleteError.message });

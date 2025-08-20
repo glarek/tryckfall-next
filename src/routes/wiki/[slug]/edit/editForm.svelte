@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import { updatePost, createPost } from '../../wiki.remote';
+	import { updatePost, createPost, deletePost } from '../../wiki.remote';
 	import { goto } from '$app/navigation';
 
 	import { Button } from '$lib/components/ui/button/index.js';
@@ -253,16 +253,18 @@
 							variant="outline">Ångra!</Button
 						>
 						<form
-							method="POST"
-							action="?/delete"
-							use:enhance={() => {
-								isSubmitting = true; // Sätt "laddar"-status innan formuläret skickas
-								return async ({ update }) => {
-									// Körs när servern har svarat
-									await update();
+							{...deletePost.enhance(async ({ data, submit }) => {
+								isSubmitting = true;
+								data.set('originalSlug', oldSlug);
+								console.log(data);
+
+								try {
+									await submit();
+								} catch (error) {
+									toast.error('Nånting gick fel!');
 									isSubmitting = false;
-								};
-							}}
+								}
+							})}
 						>
 							<Button type="submit" class="mt-2 w-full cursor-pointer" variant="destructive"
 								>Ta bort sida!</Button
