@@ -183,12 +183,7 @@
 			}
 		})}
 	>
-		<Button
-			type="submit"
-			class="cursor-pointer shadow-none"
-			disabled={isSubmitting}
-			variant="outline"
-		>
+		<Button type="submit" class="cursor-pointer shadow-none" variant="outline">
 			<div class="flex flex-row w-[100px] items-center gap-x-2">
 				{#if !isSubmitting}
 					Skapa sida <PenLine />
@@ -213,8 +208,6 @@
 
 			try {
 				await submit();
-				goto(`/wiki/${slug}`);
-				isSubmitting = false;
 			} catch (error) {
 				toast.error('Nånting gick fel!');
 				isSubmitting = false;
