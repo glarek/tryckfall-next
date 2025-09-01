@@ -194,6 +194,10 @@ export const deletePost = form(async (formData) => {
 
 	try {
 		const revalidationPromises = [
+			event.fetch(`/wiki/${slug}`, {
+				method: 'HEAD',
+				headers: { 'x-prerender-revalidate': `${REVALIDATION_SECRET}` }
+			}),
 			event.fetch(`/wiki/`, {
 				method: 'HEAD',
 				headers: { 'x-prerender-revalidate': `${REVALIDATION_SECRET}` }
