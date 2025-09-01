@@ -11,7 +11,7 @@
 		open = $bindable(false),
 		buttonText,
 		childrenLinks = [],
-		icon, // Svelte-komponent för ikonen bredvid knapptexten
+		Icon, // Svelte-komponent för ikonen bredvid knapptexten
 		link,
 		...restProps
 	} = $props();
@@ -28,8 +28,8 @@
 				onclick={() => setShowNavbar(false)}
 				class="flex w-full items-center gap-2 rounded-sm p-2 m-1 text-left hover:bg-muted"
 			>
-				{#if icon}
-					<svelte:component this={icon} size={18} />
+				{#if Icon}
+					<Icon size={18} />
 				{/if}
 				{buttonText}
 			</a>
@@ -39,8 +39,8 @@
 				class="flex items-center gap-2 w-full justify-between rounded-sm p-2 m-1 text-left hover:bg-muted"
 			>
 				<div class="flex flex-row items-center gap-2">
-					{#if icon}
-						<svelte:component this={icon} size={18} />
+					{#if Icon}
+						<Icon size={18} />
 					{/if}
 					{buttonText}
 				</div>

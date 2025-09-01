@@ -191,6 +191,8 @@
 		'&': {
 			padding: '5px', // Lägg till yttre marginal om du vill
 			paddingLeft: '0px',
+			paddingRight: '0px',
+			paddingBottom: '0px',
 			borderRadius: '8px',
 			borderTopLeftRadius: '0px',
 			borderTopRightRadius: '0px'
@@ -210,7 +212,7 @@
 	let selectedTheme = $derived(mode.current === 'light' ? ayuLight : oneDark);
 </script>
 
-<div class="border-1 rounded-lg bg-input/30">
+<div class="border-1 overflow-clip rounded-lg bg-input/30">
 	<div class="pl-2 pt-2 pb-2 flex flex-row gap-2">
 		<Button variant="outline" class=" border-0 border-muted shadow-none" onclick={boldClick}
 			><Bold /></Button
@@ -221,7 +223,7 @@
 		>
 	</div>
 	<CodeMirror
-		class="overflow-y-auto max-h-[500px] "
+		class="max-h-[500px] overflow-y-auto"
 		bind:value={contentValue}
 		on:ready={(e) => (editorView = e.detail)}
 		lang={markdown()}

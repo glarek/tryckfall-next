@@ -54,10 +54,19 @@ export const navLinks = [
 		]
 	},
 	{
-		title: 'Skript - IDA ICE',
-		href: '/ida-ice-skript',
+		title: 'Energi',
+		href: '/energi',
 		icon: IdaIce,
-		children: []
+		children: [
+			{
+				title: 'IDA ICE-skript',
+				href: '/energi/ida-ice-skript'
+			},
+			{
+				title: 'Läs in energideklaration',
+				href: '/energi/laes-in-energideklaration'
+			}
+		]
 	},
 	{
 		title: 'Wiki',

@@ -55,11 +55,6 @@ export const getCategories = query(async () => {
 
 	console.log('--- Getting categories ---');
 
-	const { data: role } = await supabase.rpc('get_user_role');
-	if (role !== 'admin') {
-		redirect(303, '/auth');
-	}
-
 	const { data: categories } = await supabase.from('wiki-categories').select('id, title');
 
 	console.log(categories);
@@ -76,13 +71,6 @@ export const getPageDataForEdit = query(
 		if (!event) throw error(500, 'Could not get request event');
 
 		const { supabase } = event.locals;
-
-		console.log('--- Remote query running ---');
-
-		const { data: role } = await supabase.rpc('get_user_role');
-		if (role !== 'admin') {
-			redirect(303, '/auth');
-		}
 
 		const { data: categories } = await supabase.from('wiki-categories').select('id, title');
 		const { data, error: pageError } = await supabase
@@ -204,7 +192,24 @@ export const deletePost = form(async (formData) => {
 	const { error: deleteError } = await supabase.from('wiki-pages').delete().eq('slug', slug);
 	if (deleteError) return fail(500, { message: deleteError.message });
 
-	redirect(303, '/wiki');
+	try {
+		const revalidationPromises = [
+			event.fetch(`/wiki/`, {
+				method: 'HEAD',
+				headers: { 'x-prerender-revalidate': `${REVALIDATION_SECRET}` }
+			})
+		];
+
+		// Vänta på att BÅDA anropen slutförs parallellt
+		await Promise.all(revalidationPromises);
+
+		console.log('Revalidation complete for both endpoints.');
+	} catch (e) {
+		console.warn('Could not revalidate wiki pages:', e);
+	}
+
+	console.log('Redirectar dig');
+	throw redirect(303, `/wiki/`);
 });
 
 // Ersätter `actions.imageUpload`

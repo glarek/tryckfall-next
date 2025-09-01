@@ -2,7 +2,6 @@
 	import { ModeWatcher, toggleMode } from 'mode-watcher';
 	let { class: additionalClasses = '', ...restProps } = $props();
 	import NavigationMenuLink from '$lib/components/NavigationMenuLink.svelte';
-	import { base } from '$app/paths';
 	import { navLinks } from '$lib/config/navigation.js';
 </script>
 
@@ -16,8 +15,8 @@
 		{#each navLinks as navLink}
 			<NavigationMenuLink
 				buttonText={navLink.title}
-				icon={navLink.icon}
-				link="{base}{navLink.href}"
+				Icon={navLink.icon}
+				link={navLink.href}
 				childrenLinks={navLink.children}
 			/>
 		{/each}

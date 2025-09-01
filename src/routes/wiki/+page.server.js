@@ -1,6 +1,5 @@
 import { REVALIDATION_SECRET } from '$env/static/private';
 import { getPosts } from './wiki.remote';
-import { error as svelteError } from '@sveltejs/kit';
 
 export const config = {
 	isr: {
