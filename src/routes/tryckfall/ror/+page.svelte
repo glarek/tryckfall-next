@@ -73,6 +73,10 @@
 		temperatureError || temperatureAverageError || flowInfinity || fluidPropertiesStore.isLoading
 	);
 
+	let hideInputError = $derived(
+		temperatureError || temperatureAverageError || fluidPropertiesStore.isLoading
+	);
+
 	// Initialize standard values
 	//let flowRateSeries = $state(flowRateSeriesData[0]);
 	//let powerSeries = $state(powerData[0]);
@@ -229,7 +233,7 @@
 					</span>
 				</div>
 			{/if}
-			{#if !temperatureError && !fluidPropertiesStore.isLoading && !calculationError}
+			{#if !temperatureError && !fluidPropertiesStore.isLoading && !hideInputError}
 				<div transition:slide>
 					<div class="flex w-full flex-col gap-2 pb-4">
 						<Label for="supply">Vätskeflöde</Label>

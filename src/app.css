@@ -12,6 +12,10 @@
 
 @custom-variant dark (&:is(.dark *));
 
+h1 {
+	@apply font-serif text-4xl font-semibold;
+}
+
 :root {
 	--font-serif: 'DM Serif Display', serif;
 	--font-sans: 'Rethink Sans Variable', sans-serif;
@@ -174,25 +178,26 @@
 		@apply bg-primary/[50%] dark:text-foreground p-0.5;
 	}
 
+	img,
+	svg {
+		@apply max-w-[100%];
+	}
+
 	.markdown {
 		@apply m-6;
 	}
 
-	.markdown table {
-		@apply text-base;
+	.cm-line {
+		@apply font-mono text-sm;
 	}
 
-	.markdown th,
-	.markdown td {
+	table {
+		@apply text-sm border-collapse;
+	}
+
+	th,
+	td {
 		@apply p-2;
-	}
-
-	.markdown thead {
-		@apply bg-foreground/[4%];
-	}
-
-	.markdown tr {
-		@apply even:bg-foreground/[3%];
 	}
 
 	.markdown li {

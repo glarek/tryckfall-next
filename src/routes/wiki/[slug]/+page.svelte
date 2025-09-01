@@ -1,30 +1,11 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import { scale } from 'svelte/transition';
 
 	import { PenLine, Trash2, Wand } from '@lucide/svelte';
 
-	import { Carta, Markdown } from 'carta-md';
-	import '@cartamd/plugin-attachment/default.css';
-	import { imsize } from 'carta-plugin-imsize';
-	import { emoji } from '@cartamd/plugin-emoji';
-	import { code } from '@cartamd/plugin-code';
-	import { subscript } from 'carta-plugin-subscript';
-	import 'carta-md/default.css'; /* Default theme */
-
-	import '$lib/styles/github.scss';
-
 	let { data } = $props();
 
 	//let slug = $state(params.slug || '');
-
-	const carta = new Carta({
-		sanitizer: false,
-		gfmOptions: {
-			singleTilde: false
-		},
-		extensions: [imsize(), emoji(), code(), subscript()]
-	});
 
 	const isUserAdmin = data?.role === 'admin';
 </script>
@@ -37,7 +18,8 @@
 		</div>
 	{/if}
 
-	<Markdown {carta} value={data.post.content} />
+	{@html data?.HTMLContent}
+
 	{#if isUserAdmin}
 		<a
 			transition:scale

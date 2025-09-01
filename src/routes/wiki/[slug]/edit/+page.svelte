@@ -16,7 +16,6 @@
 		</div>
 	{:then pageData}
 		<div transition:blur>
-			{pageData.timeStamp}
 			<EditForm data={pageData} />
 		</div>
 	{:catch error}

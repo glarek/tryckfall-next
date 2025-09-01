@@ -3,6 +3,7 @@
 	import { updatePost, createPost, deletePost } from '../../wiki.remote';
 	import { goto } from '$app/navigation';
 
+	import * as Tabs from '$lib/components/ui/tabs/index.js';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import { Input } from '$lib/components/ui/input/index.js';
 	import { Label } from '$lib/components/ui/label/index.js';
@@ -12,19 +13,10 @@
 
 	import { PenLine, Trash2, Wand, LoaderCircle } from '@lucide/svelte';
 
-	import { Carta, MarkdownEditor } from 'carta-md';
-	import { attachment } from '@cartamd/plugin-attachment';
-	import '@cartamd/plugin-attachment/default.css';
-	import { imsize } from 'carta-plugin-imsize';
-	import { emoji } from '@cartamd/plugin-emoji';
-	import { code } from '@cartamd/plugin-code';
-	import { subscript } from 'carta-plugin-subscript';
-	import 'carta-md/default.css'; /* Default theme */
-
-	import '$lib/styles/github.scss';
-
 	import slugify from '@sindresorhus/slugify';
 	import { is } from 'valibot';
+
+	import CodeMirrorEditor from '$lib/components/codemirror/CodeMirrorEditor.svelte';
 
 	let { data = null } = $props();
 
@@ -32,15 +24,40 @@
 	const isNew = data.cleanPages ? false : true;
 
 	let categoryList = $state(data.categories);
-	let value = $state(data.cleanPages?.content || '');
+	let contentValue = $state(data.cleanPages?.content || '');
 	const oldSlug = data.cleanPages?.slug || '';
 	let slug = $state(data.cleanPages?.slug || '');
 	let title = $state(data.cleanPages?.title || '');
 	let category = $state(data.cleanPages?.category.toString() || '');
 	let dialogOpen = $state(false);
 
+	import { compile } from 'mdsvex';
+
+	import remarkSubSuper from 'remark-sub-super';
+
+	let compiledHtml = $state('');
+
+	$effect(() => {
+		async function updatePreview() {
+			try {
+				const result = await compile(contentValue, { remarkPlugins: [remarkSubSuper] });
+				if (result) {
+					// Extrahera Svelte-komponenten och rendera den
+					compiledHtml = result.code;
+					// En liten justering för att hantera hur Svelte-komponenter i mdsvex kompileras
+				} else {
+					compiledHtml = '';
+				}
+			} catch (error) {
+				console.error('Fel vid kompilering av MDSvex:', error);
+			}
+		}
+
+		updatePreview();
+	});
+
 	let edited = $derived.by(() => {
-		value;
+		contentValue;
 		slug;
 		title;
 		category;
@@ -49,230 +66,182 @@
 
 	edited = false;
 
-	const carta = new Carta({
-		sanitizer: false,
-		gfmOptions: {
-			singleTilde: false
-		},
-		extensions: [
-			imsize(),
-			attachment({
-				async upload(file: File) {
-					const formData = new FormData();
-					formData.append('image', file);
-
-					try {
-						const response = await fetch('?/imageUpload', {
-							method: 'POST',
-							body: formData
-						});
-
-						// STEG 1: Öppna "paketet" och se vad som är inuti
-						// Detta parsar JSON-datan från serverns svar.
-						const resultData = await response.json();
-						const result = JSON.parse(resultData.data);
-
-						console.log(result[3]);
-
-						// STEG 2: Kontrollera om allt gick bra, BÅDE nätverket OCH din action.
-						// `!response.ok` fångar HTTP-fel (t.ex. 404, 500).
-						// `!resultData.success` fångar fel som din action skickar (t.ex. valideringsfel).
-						if (!response.ok || !result[3]) {
-							// Använd felmeddelandet från serverns svar för bästa feedback.
-							throw new Error(resultData.error || 'Något gick fel vid uppladdningen.');
-						}
-
-						// Nu är `resultData` det faktiska objektet: { success: true, url: '...' }
-						console.log('Korrekt data från servern:', resultData);
-
-						// STEG 3: Returnera den korrekta URL:en från datan.
-						// Detta är URL:en som Carta-pluginet kommer att infoga i din text.
-						return result[3];
-					} catch (error: any) {
-						console.error('Fetch error:', error);
-						alert(`Uppladdning misslyckades: ${error.message}`);
-						// Kasta felet vidare så att Carta vet att det misslyckades
-						throw error;
-					}
-				}
-			}),
-			emoji(),
-			code(),
-			subscript()
-		]
-	});
-
 	const triggerContent = $derived(
 		categoryList.find((f) => f.id === Number(category))?.title ?? 'Välj kategori'
 	);
 </script>
 
-<Label class="mb-2" for="title">Sidans titel</Label>
-<Input
-	autocomplete="off"
-	autocorrect="off"
-	class="mb-4 font-mono text-lime-500"
-	name="title"
-	bind:value={title}
-/>
-<Label class="mb-2" for="slug"
-	><span>
-		Sidans slug - <span class="text-muted-foreground">{'tryckfall.nu/' + slug}</span></span
-	></Label
->
-<div class="relative">
-	<Input
-		onchange={() => (edited = true)}
-		autocomplete="off"
-		autocorrect="off"
-		class=" font-mono mb-4 text-pink-500"
-		name="slug"
-		bind:value={slug}
-	/>
-	<Button
-		class="cursor-pointer hover:border-primary absolute bg-transparent shadow-none border-muted-foreground -translate-y-1/2 top-1/2 w-[40px] h-[40px] rounded-full right-2"
-		onclick={() => (slug = slugify(title))}><Wand class="text-foreground" size={32} /></Button
-	>
-</div>
-<Label class="mb-2" for="category">Sidans kategori</Label>
-<Select.Root type="single" name="category" bind:value={category}>
-	<Select.Trigger class="w-[180px]">
-		{triggerContent}
-	</Select.Trigger>
-	<Select.Content>
-		<Select.Group>
-			<Select.Label>Kategorier</Select.Label>
-			{#each categoryList as categoryItem}
-				<Select.Item value={categoryItem.id.toString()} label={categoryItem.title}>
-					{categoryItem.title}
-				</Select.Item>
-			{/each}
-		</Select.Group>
-	</Select.Content>
-</Select.Root>
-<hr class="my-4" />
-
-<div class="markdown mt-0 mx-0 mb-4 relative">
-	<MarkdownEditor {carta} bind:value theme="github" mode="tabs" />
-	{#if edited}
-		<div class="transition-all absolute -bottom-3 p-1 right-2 bg-primary rounded-full">
-			<PenLine size={20} />
+<Tabs.Root value="settings">
+	<Tabs.List>
+		<Tabs.Trigger value="settings">Inställningar</Tabs.Trigger>
+		<Tabs.Trigger value="preview">Förhandsvy</Tabs.Trigger>
+	</Tabs.List>
+	<Tabs.Content value="settings">
+		<Label class="mb-2" for="title">Sidans titel</Label>
+		<Input
+			autocomplete="off"
+			autocorrect="off"
+			class="mb-4 font-mono text-lime-500"
+			name="title"
+			bind:value={title}
+		/>
+		<Label class="mb-2" for="slug"
+			><span>
+				Sidans slug - <span class="text-muted-foreground">{'tryckfall.nu/' + slug}</span></span
+			></Label
+		>
+		<div class="relative">
+			<Input
+				onchange={() => (edited = true)}
+				autocomplete="off"
+				autocorrect="off"
+				class=" font-mono mb-4 text-pink-500"
+				name="slug"
+				bind:value={slug}
+			/>
+			<Button
+				class="cursor-pointer hover:border-primary absolute bg-transparent shadow-none border-muted-foreground -translate-y-1/2 top-1/2 w-[40px] h-[40px] rounded-full right-2"
+				onclick={() => (slug = slugify(title))}><Wand class="text-foreground" size={32} /></Button
+			>
 		</div>
-	{/if}
-</div>
+		<Label class="mb-2" for="category">Sidans kategori</Label>
+		<Select.Root type="single" name="category" bind:value={category}>
+			<Select.Trigger class="w-[180px]">
+				{triggerContent}
+			</Select.Trigger>
+			<Select.Content>
+				<Select.Group>
+					<Select.Label>Kategorier</Select.Label>
+					{#each categoryList as categoryItem}
+						<Select.Item value={categoryItem.id.toString()} label={categoryItem.title}>
+							{categoryItem.title}
+						</Select.Item>
+					{/each}
+				</Select.Group>
+			</Select.Content>
+		</Select.Root>
+		<hr class="my-4" />
 
-{#if isNew}
-	<form
-		{...createPost.enhance(async ({ data, submit }) => {
-			isSubmitting = true;
-			const formData = new FormData();
-			data.set('content', value);
-			data.set('slug', slug);
-			data.set('title', title);
-			data.set('category', category);
+		<CodeMirrorEditor bind:contentValue />
 
-			console.log(data);
+		<div class="markdown mt-0 mx-0 mb-4 relative">
+			{#if edited}
+				<div class="transition-all absolute -bottom-3 p-1 right-2 bg-primary rounded-full">
+					<PenLine size={20} />
+				</div>
+			{/if}
+		</div>
 
-			try {
-				await submit();
-				goto(`/wiki/${slug}`);
-				isSubmitting = false;
-			} catch (error) {
-				toast.error('Nånting gick fel!');
-				isSubmitting = false;
-			}
-		})}
-	>
-		<Button type="submit" class="cursor-pointer shadow-none" variant="outline">
-			<div class="flex flex-row w-[100px] items-center gap-x-2">
-				{#if !isSubmitting}
-					Skapa sida <PenLine />
-				{:else}
-					Skapa sida<LoaderCircle class="h-fit w-fit animate-spin" />
-				{/if}
-			</div></Button
-		>
-	</form>
-{:else}
-	<form
-		{...updatePost.enhance(async ({ data, submit }) => {
-			isSubmitting = true;
-			const formData = new FormData();
-			data.set('content', value);
-			data.set('slug', slug);
-			data.set('title', title);
-			data.set('category', category);
-			data.set('originalSlug', oldSlug);
+		{#if isNew}
+			<form
+				{...createPost.enhance(async ({ data, submit }) => {
+					isSubmitting = true;
+					const formData = new FormData();
+					data.set('content', contentValue);
+					data.set('slug', slug);
+					data.set('title', title);
+					data.set('category', category);
 
-			console.log(data);
+					try {
+						await submit();
+						goto(`/wiki/${slug}`);
+						isSubmitting = false;
+					} catch (error) {
+						toast.error('Nånting gick fel!');
+						isSubmitting = false;
+					}
+				})}
+			>
+				<Button type="submit" class="cursor-pointer shadow-none" variant="outline">
+					<div class="flex flex-row w-[100px] items-center gap-x-2">
+						{#if !isSubmitting}
+							Skapa sida <PenLine />
+						{:else}
+							Skapa sida<LoaderCircle class="h-fit w-fit animate-spin" />
+						{/if}
+					</div></Button
+				>
+			</form>
+		{:else}
+			<form
+				{...updatePost.enhance(async ({ data, submit }) => {
+					isSubmitting = true;
+					const formData = new FormData();
+					data.set('content', contentValue);
+					data.set('slug', slug);
+					data.set('title', title);
+					data.set('category', category);
+					data.set('originalSlug', oldSlug);
 
-			try {
-				await submit();
-			} catch (error) {
-				toast.error('Nånting gick fel!');
-				isSubmitting = false;
-			}
-		})}
-	>
-		<Button
-			type="submit"
-			class="cursor-pointer shadow-none"
-			disabled={isSubmitting}
-			variant="outline"
-		>
-			<div class="flex flex-row w-[120px] items-center gap-x-2">
-				{#if !isSubmitting}
-					Spara ändringar <PenLine />
-				{:else}
-					Spara ändringar<LoaderCircle class="h-fit w-fit animate-spin" />
-				{/if}
-			</div></Button
-		>
-	</form>
+					try {
+						await submit();
+					} catch (error) {
+						toast.error('Nånting gick fel!');
+						isSubmitting = false;
+					}
+				})}
+			>
+				<Button
+					type="submit"
+					class="cursor-pointer shadow-none"
+					disabled={isSubmitting}
+					variant="outline"
+				>
+					<div class="flex flex-row w-[120px] items-center gap-x-2">
+						{#if !isSubmitting}
+							Spara ändringar <PenLine />
+						{:else}
+							Spara ändringar<LoaderCircle class="h-fit w-fit animate-spin" />
+						{/if}
+					</div></Button
+				>
+			</form>
 
-	<Button
-		onclick={() => (dialogOpen = true)}
-		class="h-10 cursor-pointer mt-2 border-destructive/[20%]"
-		variant="outline"
-	>
-		Ta bort sida
-		<Trash2 class="ml-0" size={16} />
-	</Button>
+			<Button
+				onclick={() => (dialogOpen = true)}
+				class="h-10 cursor-pointer mt-2 border-destructive/[20%]"
+				variant="outline"
+			>
+				Ta bort sida
+				<Trash2 class="ml-0" size={16} />
+			</Button>
 
-	<Dialog.Root bind:open={dialogOpen}>
-		<Dialog.Trigger class="modal" disabled={isSubmitting}></Dialog.Trigger>
-		<Dialog.Content>
-			<Dialog.Header>
-				<Dialog.Title>Är du helt säker?</Dialog.Title>
-				<Dialog.Description>
-					Denna åtgärd kan inte ångras. Detta kommer permanent att ta bort sidan från databasen!
-					<div class="grid grid-cols-[1fr_1fr] gap-2">
-						<Button
-							onclick={() => (dialogOpen = false)}
-							class=" cursor-pointer mt-2 w-full"
-							variant="outline">Ångra!</Button
-						>
-						<form
-							{...deletePost.enhance(async ({ data, submit }) => {
-								isSubmitting = true;
-								data.set('originalSlug', oldSlug);
-								console.log(data);
+			<Dialog.Root bind:open={dialogOpen}>
+				<Dialog.Trigger class="modal" disabled={isSubmitting}></Dialog.Trigger>
+				<Dialog.Content>
+					<Dialog.Header>
+						<Dialog.Title>Är du helt säker?</Dialog.Title>
+						<Dialog.Description>
+							Denna åtgärd kan inte ångras. Detta kommer permanent att ta bort sidan från databasen!
+							<div class="grid grid-cols-[1fr_1fr] gap-2">
+								<Button
+									onclick={() => (dialogOpen = false)}
+									class=" cursor-pointer mt-2 w-full"
+									variant="outline">Ångra!</Button
+								>
+								<form
+									{...deletePost.enhance(async ({ data, submit }) => {
+										isSubmitting = true;
+										data.set('originalSlug', oldSlug);
 
-								try {
-									await submit();
-								} catch (error) {
-									toast.error('Nånting gick fel!');
-									isSubmitting = false;
-								}
-							})}
-						>
-							<Button type="submit" class="mt-2 w-full cursor-pointer" variant="destructive"
-								>Ta bort sida!</Button
-							>
-						</form>
-					</div>
-				</Dialog.Description>
-			</Dialog.Header>
-		</Dialog.Content>
-	</Dialog.Root>
-{/if}
+										try {
+											await submit();
+										} catch (error) {
+											toast.error('Nånting gick fel!');
+											isSubmitting = false;
+										}
+									})}
+								>
+									<Button type="submit" class="mt-2 w-full cursor-pointer" variant="destructive"
+										>Ta bort sida!</Button
+									>
+								</form>
+							</div>
+						</Dialog.Description>
+					</Dialog.Header>
+				</Dialog.Content>
+			</Dialog.Root>
+		{/if}
+	</Tabs.Content>
+	<Tabs.Content value="preview">{@html compiledHtml}</Tabs.Content>
+</Tabs.Root>

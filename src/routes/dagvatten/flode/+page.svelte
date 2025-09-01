@@ -71,7 +71,7 @@
 
 		<p>Den horisontellt projicerade takyta som träffas av regnet.</p>
 		<div class="p-2 flex">
-			<TakArea width={300} />
+			<TakArea width={500} />
 		</div>
 
 		<hr />

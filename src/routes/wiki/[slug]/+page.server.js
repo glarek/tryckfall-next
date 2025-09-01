@@ -2,6 +2,9 @@ import { REVALIDATION_SECRET } from '$env/static/private';
 import { getPost } from '../wiki.remote';
 import { error as svelteError } from '@sveltejs/kit';
 
+import { compile } from 'mdsvex';
+import remarkSubSuper from 'remark-sub-super';
+
 export const config = {
 	isr: {
 		expiration: 60000,
@@ -13,6 +16,8 @@ export const config = {
 export const load = async (event) => {
 	const slug = event.params.slug;
 	const post = await getPost(slug);
+
+	const compiledContent = await compile(post.content, { remarkPlugins: [remarkSubSuper] });
 
 	if (!post) {
 		throw svelteError(404, 'Sidan hittades inte');
@@ -27,6 +32,7 @@ export const load = async (event) => {
 	return {
 		post,
 		time,
-		slug
+		slug,
+		HTMLContent: compiledContent?.code
 	};
 };

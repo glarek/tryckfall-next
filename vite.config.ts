@@ -5,6 +5,7 @@ import tailwindcss from '@tailwindcss/vite';
 export default defineConfig({
 	plugins: [tailwindcss(), sveltekit()],
 	optimizeDeps: {
-		include: ['svelte-sonner']
+		include: ['svelte-sonner'],
+		exclude: ['svelte-codemirror-editor', 'codemirror', '@codemirror/language-markdown' /* ... */]
 	}
 });
