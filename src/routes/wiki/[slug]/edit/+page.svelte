@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { getPageDataForEdit } from '../../wiki.remote';
-	import EditForm from './editForm.svelte'; // Vi skapar denna snart
+	import EditForm from './editForm.svelte';
 	import { blur, slide } from 'svelte/transition';
 
 	let { params } = $props();

@@ -1,7 +1,6 @@
 import { REVALIDATION_SECRET } from '$env/static/private';
 import { getPost } from '../wiki.remote';
 import { error as svelteError } from '@sveltejs/kit';
-
 import { compile } from 'mdsvex';
 import remarkSubSuper from 'remark-sub-super';
 

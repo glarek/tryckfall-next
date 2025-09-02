@@ -1,30 +1,50 @@
 <script lang="ts">
-	// prettier-ignore
-	import { onMount } from 'svelte'
-	import { inputStore } from './inputStore.svelte.js'; // Import the store
-	import { airPropertiesStore } from './airPropertiesStore.svelte.js'; // Import the store
-	import { base } from '$app/paths';
+	import { onMount } from 'svelte';
+	import { loadCoolProp } from '$lib/coolprop.js'; // Importera vår nya laddare
+
+	import { inputStore } from './inputStore.svelte.js'; // .svelte.js är oftast inte nödvändigt för stores
+	import { airPropertiesStore } from './airPropertiesStore.svelte.js';
 
 	// --- Constants ---
 	const ZERO_CELSIUS_KELVIN = 273.15;
 	const AIR_PRESSURE = 101325; // Standard atmospheric pressure in Pa
 
-	let coolPropModule = null as any; // To hold the loaded CoolProp Module
-	let isCoolPropReady = false;
-	let assignedRuntimeInitializedCallback = null as any; // Store the function we assign for cleanup
+	let coolPropModule = null as any;
+	let isCoolPropReady = $state(false);
 
-	function calculateAirProperties() {
-		// Read input values directly from the store
-		if (!isCoolPropReady || !coolPropModule) {
+	// --- CoolProp Initialization ---
+	onMount(async () => {
+		airPropertiesStore.isLoading = true;
+		airPropertiesStore.error = null;
+
+		try {
+			// Anropa vår laddare och vänta på att den blir klar.
+			coolPropModule = await loadCoolProp();
+			isCoolPropReady = true;
+		} catch (error) {
+			console.error(error);
+			airPropertiesStore.error = error.message;
+		} finally {
+			airPropertiesStore.isLoading = false;
+		}
+	});
+
+	// --- Reactive Effect for Calculations ---
+	// Denna $effect kommer nu automatiskt att köras om när isCoolPropReady blir true.
+	$effect(() => {
+		// Läs av beroendena för att återköra effekten när de ändras
+		const { inletTemperature, outletTemperature, relativeHumidity } = inputStore;
+
+		if (!isCoolPropReady) {
 			console.log('CoolProp effect skipped: Module not ready.');
-			return; // Don't run if CoolProp isn't loaded
+			return; // Kör inte om CoolProp inte är laddad
 		}
 
 		try {
-			const avgTempC = (inputStore.inletTemperature + inputStore.outletTemperature) / 2;
+			const avgTempC = (inletTemperature + outletTemperature) / 2;
 			const avgTempK = avgTempC + ZERO_CELSIUS_KELVIN;
 
-			// Calculate properties using HAPropsSI and PropsSI
+			// ... alla dina HAPropsSI och PropsSI-anrop här ...
 			const H = coolPropModule.HAPropsSI(
 				'H',
 				'T',
@@ -32,8 +52,12 @@
 				'P',
 				AIR_PRESSURE,
 				'R',
-				inputStore.relativeHumidity / 100
+				relativeHumidity / 100
 			);
+			// ... och så vidare ...
+			const D = coolPropModule.PropsSI('D', 'T', avgTempK, 'P', AIR_PRESSURE, 'Air');
+			const V = coolPropModule.PropsSI('V', 'T', avgTempK, 'P', AIR_PRESSURE, 'Air');
+			const kinematicVisc = D > 0 ? V / D : 0;
 			const Cp = coolPropModule.HAPropsSI(
 				'cp_ha',
 				'T',
@@ -41,7 +65,7 @@
 				'P',
 				AIR_PRESSURE,
 				'R',
-				inputStore.relativeHumidity / 100
+				relativeHumidity / 100
 			);
 			const Tdp =
 				coolPropModule.HAPropsSI(
@@ -51,8 +75,8 @@
 					'P',
 					AIR_PRESSURE,
 					'R',
-					inputStore.relativeHumidity / 100
-				) - ZERO_CELSIUS_KELVIN; // K to C
+					relativeHumidity / 100
+				) - ZERO_CELSIUS_KELVIN;
 			const Twb =
 				coolPropModule.HAPropsSI(
 					'Twb',
@@ -61,13 +85,10 @@
 					'P',
 					AIR_PRESSURE,
 					'R',
-					inputStore.relativeHumidity / 100
-				) - ZERO_CELSIUS_KELVIN; // K to C
-			const D = coolPropModule.PropsSI('D', 'T', avgTempK, 'P', AIR_PRESSURE, 'Air'); // Density
-			const V = coolPropModule.PropsSI('V', 'T', avgTempK, 'P', AIR_PRESSURE, 'Air'); // Dynamic Viscosity
-			const kinematicVisc = D > 0 ? V / D : 0;
+					relativeHumidity / 100
+				) - ZERO_CELSIUS_KELVIN;
 
-			// Update the store with calculated values
+			// Uppdatera store
 			inputStore.calcTemperature = avgTempC;
 			airPropertiesStore.enthalpy = H;
 			airPropertiesStore.specificHeatCapacity = Cp;
@@ -76,71 +97,10 @@
 			airPropertiesStore.airDensity = D;
 			airPropertiesStore.dynamicViscosity = V;
 			airPropertiesStore.kinematicViscosity = kinematicVisc;
-			airPropertiesStore.error = null; // Clear any previous error);
+			airPropertiesStore.error = null;
 		} catch (error) {
 			console.error('Error during CoolProp calculation:', error);
-			// Update store with error state and potentially reset outputs
 			airPropertiesStore.error = error.message || 'Calculation failed';
 		}
-	}
-
-	// --- CoolProp Initialization ---
-	onMount(() => {
-		// Indicate loading state in the store
-		airPropertiesStore.isLoading = true;
-		airPropertiesStore.error = null;
-
-		const checkCoolProp = () => {
-			// Checks if 'Module' exists and is ready
-			if (typeof Module !== 'undefined' && Module.calledRun) {
-				console.log('CoolProp module already initialized.');
-				coolPropModule = Module; // Assigns the global Module to a local variable
-				isCoolPropReady = true;
-				airPropertiesStore.isLoading = false;
-				calculateAirProperties();
-			} else if (typeof Module !== 'undefined' && Module.onRuntimeInitialized) {
-				// Define the callback function separately for cleanup
-				assignedRuntimeInitializedCallback = () => {
-					console.log('CoolProp runtime initialized.');
-					coolPropModule = Module;
-					isCoolPropReady = true;
-					airPropertiesStore.isLoading = false;
-					calculateAirProperties();
-					assignedRuntimeInitializedCallback = null; // Clear reference after execution
-				};
-			} else {
-				console.log('CoolProp Module not ready yet, waiting...');
-				setTimeout(checkCoolProp, 150); // Check again shortly
-			}
-		};
-
-		checkCoolProp();
-
-		// Cleanup
-		return () => {
-			// Check if the currently assigned callback is the one we stored
-			if (
-				typeof Module !== 'undefined' &&
-				Module.onRuntimeInitialized === assignedRuntimeInitializedCallback
-			) {
-				Module.onRuntimeInitialized = null;
-			}
-		};
-	});
-
-	// --- Reactive Effect for Calculations ---
-	// Use $effect.pre to ensure inputs are stable before calculating
-	$effect.pre(() => {
-		// Read input values directly from the store
-		const _dependencies = [
-			inputStore.inletTemperature,
-			inputStore.outletTemperature,
-			inputStore.relativeHumidity
-		];
-		calculateAirProperties(); // Call the calculation function
 	});
 </script>
-
-<svelte:head>
-	<script src="{base}/coolprop.js"></script>
-</svelte:head>

@@ -147,7 +147,8 @@
 						goto(`/wiki/${slug}`);
 						isSubmitting = false;
 					} catch (error) {
-						toast.error('Nånting gick fel!');
+						toast.error(error.body?.message);
+						console.log(error);
 						isSubmitting = false;
 					}
 				})}
@@ -227,13 +228,17 @@
 										try {
 											await submit();
 										} catch (error) {
-											toast.error('Nånting gick fel!');
+											toast.error(error.message);
 											isSubmitting = false;
 										}
 									})}
 								>
 									<Button type="submit" class="mt-2 w-full cursor-pointer" variant="destructive"
-										>Ta bort sida!</Button
+										>{#if !isSubmitting}
+											Ta bort sida!
+										{:else}
+											Tar bort sida!<LoaderCircle class="h-fit w-fit animate-spin" />
+										{/if}</Button
 									>
 								</form>
 							</div>

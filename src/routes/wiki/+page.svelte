@@ -31,7 +31,9 @@
 </div>
 
 {#if data.groupedPages.length === 0}
-	<p>Hittade inga sidor.</p>
+	<div class="flex flex-wrap flex-col divide-y-1 divide-dashed border-b-1 border-dashed p-4">
+		<h2 class="text-red-500">Hittade inga sidor</h2>
+	</div>
 {:else}
 	<div class="flex flex-wrap flex-col divide-y-1 divide-dashed border-b-1 border-dashed">
 		{#each groups as group}

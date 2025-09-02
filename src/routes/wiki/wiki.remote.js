@@ -1,5 +1,5 @@
 import { form, command, query, getRequestEvent } from '$app/server';
-import { fail, error, redirect } from '@sveltejs/kit';
+import { error, redirect } from '@sveltejs/kit';
 
 import { IMAGE_UPLOAD_TOKEN } from '$env/static/private';
 import { REVALIDATION_SECRET } from '$env/static/private';
@@ -26,6 +26,7 @@ export const getPosts = query(async () => {
 export const getPost = query(
 	v.string(), // Validerar att `slug` är en sträng
 	async (slug) => {
+		console.log('Getting postdata...');
 		const event = getRequestEvent();
 		if (!event) throw error(500, 'Server error');
 
@@ -37,11 +38,12 @@ export const getPost = query(
 			.eq('slug', slug)
 			.single();
 
-		post = { ...post, category: post.category?.title };
-
 		if (dbError) {
 			error(404, 'Inlägget hittades inte');
+			return;
 		}
+
+		post = { ...post, category: post.category?.title || 'Okategoriserad' };
 
 		return post;
 	}
@@ -66,6 +68,7 @@ export const getCategories = query(async () => {
 export const getPageDataForEdit = query(
 	v.string(), // Validerar att `slug` är en sträng [cite: 26]
 	async (slug) => {
+		console.log('Getting page data for edit...');
 		const timeStamp = Date.now();
 		const event = getRequestEvent();
 		if (!event) throw error(500, 'Could not get request event');
@@ -98,14 +101,18 @@ export const createPost = form(async (formData) => {
 	const slug = formData.get('slug');
 	const category_id = Number(formData.get('category'));
 
-	if (!slug) return fail(400, { message: 'Slug får inte vara tom.' });
+	if (!title) return error(400, { message: 'Titel får inte vara tom.' });
+	if (!slug) return error(400, { message: 'Slug får inte vara tom.' });
+	if (!category_id) return error(400, { message: 'Kategori får inte vara tom.' });
+	if (!content) return error(400, { message: 'Innehåll får inte vara tom.' });
 
 	const { error: createError } = await supabase
 		.from('wiki-pages')
 		.insert({ content, title, slug, category_id });
 
 	if (createError) {
-		return fail(500, { message: createError.message });
+		console.log(createError);
+		error(500, { message: createError.message });
 	}
 
 	try {
@@ -125,7 +132,7 @@ export const createPost = form(async (formData) => {
 	}
 
 	console.log('Redirectar dig');
-	throw redirect(303, `/wiki/${slug}`);
+	redirect(303, `/wiki/${slug}`);
 });
 
 // Ersätter `actions.update`
@@ -139,9 +146,12 @@ export const updatePost = form(async (formData) => {
 	const title = formData.get('title');
 	const slug = formData.get('slug');
 	const category_id = Number(formData.get('category'));
-	const originalSlug = formData.get('originalSlug'); // Vi måste få ursprunglig slug på annat sätt
+	const originalSlug = formData.get('originalSlug');
 
-	if (!slug) return fail(400, { message: 'Slug får inte vara tom.' });
+	if (!content) return error(400, { message: 'Innehåll får inte vara tom.' });
+	if (!title) return error(400, { message: 'Titel får inte vara tom.' });
+	if (!slug) return error(400, { message: 'Slug får inte vara tom.' });
+	if (!category_id) return error(400, { message: 'Kategori får inte vara tom.' });
 
 	const { error: updateError } = await supabase
 		.from('wiki-pages')
@@ -149,7 +159,7 @@ export const updatePost = form(async (formData) => {
 		.eq('slug', originalSlug);
 
 	if (updateError) {
-		return fail(500, { message: updateError.message });
+		return error(500, { message: updateError.message });
 	}
 
 	// Omdirigera till den uppdaterade sidan med cache-busting
@@ -190,7 +200,7 @@ export const deletePost = form(async (formData) => {
 	const slug = formData.get('originalSlug');
 
 	const { error: deleteError } = await supabase.from('wiki-pages').delete().eq('slug', slug);
-	if (deleteError) return fail(500, { message: deleteError.message });
+	if (deleteError) return error(500, { message: deleteError.message });
 
 	try {
 		const revalidationPromises = [
@@ -213,7 +223,7 @@ export const deletePost = form(async (formData) => {
 	}
 
 	console.log('Redirectar dig');
-	throw redirect(303, `/wiki/`);
+	redirect(303, `/wiki/`);
 });
 
 // Ersätter `actions.imageUpload`
