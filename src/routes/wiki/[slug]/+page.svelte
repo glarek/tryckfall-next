@@ -10,7 +10,7 @@
 	const isUserAdmin = data?.role === 'admin';
 </script>
 
-<div class="markdown relative">
+<div class="markdown relative m-6">
 	{#if isUserAdmin}
 		<div class=" relative font-mono text-sm bg-muted w-fit p-1 rounded-md pb-3 mb-2">
 			{data.post.category} > {data.post.title}<br />

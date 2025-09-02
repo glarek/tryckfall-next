@@ -150,6 +150,17 @@ h1 {
 		@apply p-6;
 	}
 
+	.markdown > h1 {
+		@apply mb-2;
+	}
+
+	.markdown > h2:not(:first-child),
+	.markdown > h3:not(:first-child),
+	.markdown > h4:not(:first-child),
+	.markdown > h5:not(:first-child) {
+		@apply mt-4;
+	}
+
 	h1 {
 		@apply font-serif text-4xl font-semibold;
 	}
@@ -163,7 +174,7 @@ h1 {
 	}
 
 	p {
-		@apply text-base mb-2 mt-1 tracking-tight;
+		@apply text-base tracking-tight;
 	}
 
 	u {
@@ -183,10 +194,6 @@ h1 {
 		@apply max-w-[100%];
 	}
 
-	.markdown {
-		@apply m-6;
-	}
-
 	.cm-line {
 		@apply font-mono text-sm;
 	}
@@ -201,7 +208,7 @@ h1 {
 	}
 
 	.markdown li {
-		@apply text-sm list-disc list-outside ml-8 my-1;
+		@apply list-disc list-outside ml-8 my-1;
 	}
 
 	.email {

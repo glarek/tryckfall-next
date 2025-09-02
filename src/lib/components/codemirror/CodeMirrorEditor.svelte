@@ -20,8 +20,8 @@
 	import { keymap } from '@codemirror/view';
 	import { EditorSelection } from '@codemirror/state';
 	import { markdown } from '@codemirror/lang-markdown';
-	import { oneDark } from '@codemirror/theme-one-dark';
-	import { ayuLight } from 'thememirror';
+	import { githubLight } from '@fsegurai/codemirror-theme-github-light';
+	import { githubDark } from '@fsegurai/codemirror-theme-github-dark';
 
 	let editorView;
 
@@ -189,7 +189,6 @@
 
 	const paddingTheme = EditorView.theme({
 		'&': {
-			padding: '5px', // Lägg till yttre marginal om du vill
 			paddingLeft: '0px',
 			paddingRight: '0px',
 			paddingBottom: '0px',
@@ -209,11 +208,11 @@
 		}
 	});
 
-	let selectedTheme = $derived(mode.current === 'light' ? ayuLight : oneDark);
+	let selectedTheme = $derived(mode.current === 'light' ? githubLight : githubDark);
 </script>
 
 <div class="border-1 overflow-clip rounded-lg bg-input/30">
-	<div class="pl-2 pt-2 pb-2 flex flex-row gap-2">
+	<div class="pl-2 pt-2 pb-2 flex flex-row gap-2 border-b-1">
 		<Button variant="outline" class=" border-0 border-muted shadow-none" onclick={boldClick}
 			><Bold /></Button
 		>

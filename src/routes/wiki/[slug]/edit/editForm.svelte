@@ -56,6 +56,10 @@
 		updatePreview();
 	});
 
+	function updateSlugify() {
+		slug = slugify(title);
+	}
+
 	let edited = $derived.by(() => {
 		contentValue;
 		slug;
@@ -81,13 +85,14 @@
 		<Input
 			autocomplete="off"
 			autocorrect="off"
-			class="mb-4 font-mono text-lime-500"
+			class="mb-4 font-mono"
 			name="title"
 			bind:value={title}
+			oninput={() => updateSlugify()}
 		/>
 		<Label class="mb-2" for="slug"
 			><span>
-				Sidans slug - <span class="text-muted-foreground">{'tryckfall.nu/' + slug}</span></span
+				Sidans slug - <span class="text-muted-foreground">{'tryckfall.nu/wiki/' + slug}</span></span
 			></Label
 		>
 		<div class="relative">
@@ -95,7 +100,7 @@
 				onchange={() => (edited = true)}
 				autocomplete="off"
 				autocorrect="off"
-				class=" font-mono mb-4 text-pink-500"
+				class=" font-mono mb-4"
 				name="slug"
 				bind:value={slug}
 			/>
@@ -248,5 +253,5 @@
 			</Dialog.Root>
 		{/if}
 	</Tabs.Content>
-	<Tabs.Content value="preview">{@html compiledHtml}</Tabs.Content>
+	<Tabs.Content value="preview"><div class="markdown">{@html compiledHtml}</div></Tabs.Content>
 </Tabs.Root>
