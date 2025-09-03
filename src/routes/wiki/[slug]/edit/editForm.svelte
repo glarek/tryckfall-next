@@ -148,9 +148,7 @@
 					data.set('category', category);
 
 					try {
-						await submit();
-						goto(`/wiki/${slug}`);
-						isSubmitting = false;
+						await submit().updates();
 					} catch (error) {
 						toast.error(error.body?.message);
 						console.log(error);
@@ -169,30 +167,31 @@
 				>
 			</form>
 		{:else}
-			<div class="grid grid-cols-[1fr_1fr] w-fit gap-2">
-				<form
-					{...updatePost.enhance(async ({ data, submit }) => {
-						isSubmitting = true;
-						const formData = new FormData();
-						data.set('content', contentValue);
-						data.set('slug', slug);
-						data.set('title', title);
-						data.set('category', category);
-						data.set('originalSlug', oldSlug);
-						try {
-							await submit();
-						} catch (error) {
-							toast.error('Nånting gick fel!');
-							isSubmitting = false;
-						}
-					})}
+			<form
+				{...updatePost.enhance(async ({ data, submit }) => {
+					isSubmitting = true;
+					const formData = new FormData();
+					data.set('content', contentValue);
+					data.set('slug', slug);
+					data.set('title', title);
+					data.set('category', category);
+					data.set('originalSlug', oldSlug);
+
+					try {
+						await submit().updates();
+					} catch (error) {
+						toast.error('Nånting gick fel!');
+						isSubmitting = false;
+					}
+				})}
+			>
+				<Button
+					type="submit"
+					class="cursor-pointer shadow-none"
+					disabled={isSubmitting}
+					variant="outline"
 				>
-					<Button
-						type="submit"
-						class="cursor-pointer "
-						variant="outline"
-						disabled={isSubmitting || !edited}
-					>
+					<div class="flex flex-row w-[120px] items-center gap-x-2">
 						{#if !isSubmitting}
 							Spara ändringar
 							<PenLine />
@@ -233,7 +232,7 @@
 										data.set('originalSlug', oldSlug);
 
 										try {
-											await submit();
+											await submit().updates();
 										} catch (error) {
 											toast.error(error.message);
 											isSubmitting = false;

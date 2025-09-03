@@ -5,7 +5,7 @@
 	let randomint = Math.floor(Math.random() * (10 + 1));
 </script>
 
-<div class="p-20">
+<div class="md:p-20 p-6">
 	<div class="grid md:grid-cols-[3fr_167px] gap-10 w-full justify-center items-center">
 		<div class="md:order-1 order-2">
 			<h1 class="text-3xl font-bold text-left">
