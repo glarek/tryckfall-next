@@ -231,7 +231,7 @@
 										data.set('originalSlug', oldSlug);
 
 										try {
-											await submit();
+											await submit().updates();
 										} catch (error) {
 											toast.error(error.message);
 											isSubmitting = false;
