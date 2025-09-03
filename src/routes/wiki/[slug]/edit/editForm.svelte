@@ -148,7 +148,7 @@
 					data.set('category', category);
 
 					try {
-						await submit();
+						await submit().updates();
 						goto(`/wiki/${slug}`);
 						isSubmitting = false;
 					} catch (error) {
@@ -180,7 +180,7 @@
 					data.set('originalSlug', oldSlug);
 
 					try {
-						await submit();
+						await submit().updates();
 					} catch (error) {
 						toast.error('Nånting gick fel!');
 						isSubmitting = false;
