@@ -36,12 +36,11 @@
 		{ value: 1.2, label: 'Speciell drift' }
 	];
 
-	let frequencyFactor = $state(1); // Standardvärde för frekvensfaktor
+	let frequencyFactor = $state('1'); // Standardvärde för frekvensfaktor
 	let calculationType = $state('zones'); // Standardvärde för beräkningstyp
 
 	const triggerContent = $derived(
-		frequencyFactors.find((f) => f.value.toString() === frequencyFactor.toString())?.label ??
-			'Välj frekvens...'
+		frequencyFactors.find((f) => f.value.toString() === frequencyFactor)?.label ?? 'Välj frekvens...'
 	);
 
 	// Skapa en Map för snabb åtkomst till sewageItem-data via id.
@@ -106,12 +105,17 @@
 				total += item.flow * count;
 			}
 		}
-		total = total ** 0.5 * frequencyFactor;
+		total = total ** 0.5 * parseFloat(frequencyFactor);
 		return smartRound(total, 3);
 	}
 
 	let totalZoneFlow = $derived(zones.reduce((total, zone) => total + totalFlow(zone.utilities), 0));
-	let totalZoneProbableFlow = $derived(totalZoneFlow ** 0.5 * frequencyFactor);
+	let totalZoneProbableFlow = $derived(totalZoneFlow ** 0.5 * parseFloat(frequencyFactor));
+
+	let directNormFlow = $state(0);
+	let directProbableFlow = $derived(
+		directNormFlow > 0 ? directNormFlow ** 0.5 * parseFloat(frequencyFactor) : 0
+	);
 </script>
 
 <div
@@ -169,6 +173,34 @@
 				<p class="m-1 font-semibold">{smartRound(totalZoneFlow, 3)} l/s</p>
 				<p class="m-1">Sannolikt flöde:</p>
 				<p class="m-1 font-semibold">{smartRound(totalZoneProbableFlow, 3)} l/s</p>
+			</div>
+		{/if}
+		{#if calculationType === 'flow'}
+			<h1 class="mt-2">Inställningar för flöde</h1>
+			<hr />
+			<h2>Normflöde</h2>
+			<div class="my-4 grid grid-cols-[80px_1fr] gap-4 items-center">
+				<Input type="number" bind:value={directNormFlow} min={0} step={0.1} />
+				<Label>l/s</Label>
+			</div>
+
+			<hr />
+			<Select.Root type="single" name="frequencyFactor" bind:value={frequencyFactor}>
+				<Select.Trigger class="w-[180px]">{triggerContent}</Select.Trigger>
+				<Select.Content>
+					<Select.Group>
+						<Select.Label>Frekvensfaktor</Select.Label>
+						{#each frequencyFactors as factor (factor.value)}
+							<Select.Item value={factor.value.toString()} label={factor.label}>
+								{factor.label}
+							</Select.Item>
+						{/each}
+					</Select.Group>
+				</Select.Content>
+			</Select.Root>
+			<div class="grid grid-cols-[120px_1fr] gap-y-0 mt-2 p-1 w-full border-1 rounded-md">
+				<p class="m-1">Sannolikt flöde:</p>
+				<p class="m-1 font-semibold">{smartRound(directProbableFlow, 3)} l/s</p>
 			</div>
 		{/if}
 	</div>
