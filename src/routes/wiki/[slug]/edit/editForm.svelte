@@ -167,40 +167,42 @@
 				>
 			</form>
 		{:else}
-			<form
-				{...updatePost.enhance(async ({ data, submit }) => {
-					isSubmitting = true;
-					const formData = new FormData();
-					data.set('content', contentValue);
-					data.set('slug', slug);
-					data.set('title', title);
-					data.set('category', category);
-					data.set('originalSlug', oldSlug);
-
-					try {
-						await submit().updates();
-					} catch (error) {
-						toast.error('Nånting gick fel!');
-						isSubmitting = false;
-					}
-				})}
-			>
-				<Button
-					type="submit"
-					class="cursor-pointer shadow-none"
-					disabled={isSubmitting}
-					variant="outline"
+			<div class="grid grid-cols-[1fr_1fr] gap-2 w-fit">
+				<form
+					{...updatePost.enhance(async ({ data, submit }) => {
+						isSubmitting = true;
+						const formData = new FormData();
+						data.set('content', contentValue);
+						data.set('slug', slug);
+						data.set('title', title);
+						data.set('category', category);
+						data.set('originalSlug', oldSlug);
+						try {
+							await submit().updates();
+						} catch (error) {
+							toast.error('Nånting gick fel!');
+							isSubmitting = false;
+						}
+					})}
 				>
-					<div class="flex flex-row w-[120px] items-center gap-x-2">
-						{#if !isSubmitting}
-							Spara ändringar
-							<PenLine />
-						{:else}
-							Sparar ändringar
-							<div
-								class="w-4 h-4 border-foreground border-2 border-t-transparent rounded-full animate-spin"
-							></div>
-						{/if}
+					<Button
+						type="submit"
+						class="cursor-pointer shadow-none"
+						disabled={isSubmitting || !edited}
+						variant="outline"
+					>
+						<div class="flex flex-row items-center gap-x-2">
+							{#if !isSubmitting}
+								Spara ändringar
+
+								<PenLine />
+							{:else}
+								Sparar ändringar
+								<div
+									class="w-4 h-4 border-2 border-foreground border-t-transparent rounded-full animate-spin"
+								></div>
+							{/if}
+						</div>
 					</Button>
 				</form>
 				<Button
