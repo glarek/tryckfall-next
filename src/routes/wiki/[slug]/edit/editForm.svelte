@@ -149,8 +149,6 @@
 
 					try {
 						await submit().updates();
-						goto(`/wiki/${slug}`);
-						isSubmitting = false;
 					} catch (error) {
 						toast.error(error.body?.message);
 						console.log(error);
