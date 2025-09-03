@@ -55,7 +55,7 @@ h1 {
 	--sidebar-accent-foreground: oklch(0.21 0.006 285.885);
 	--sidebar-border: oklch(0.92 0.004 286.32);
 	--sidebar-ring: oklch(0.623 0.214 259.815);
-
+	--mark: oklch(78.85% 0.14521 350.627);
 	scrollbar-gutter: stable;
 }
 
@@ -66,7 +66,7 @@ h1 {
 	--card-foreground: oklch(0.985 0 0);
 	--popover: oklch(0.21 0.006 285.885);
 	--popover-foreground: oklch(0.985 0 0);
-	--primary: oklch(0.71 0.1624 244.25);
+	--primary: oklch(79.96% 0.11731 236.286);
 	--primary-foreground: oklch(0.985 0 0);
 	--secondary: oklch(0.274 0.006 286.033);
 	--secondary-foreground: oklch(0.985 0 0);
@@ -76,7 +76,7 @@ h1 {
 	--accent-foreground: oklch(0.985 0 0);
 	--destructive: oklch(0.704 0.191 22.216);
 	--border: oklch(1 0 0 / 10%);
-	--input: oklch(1 0 0 / 15%);
+	--input: lch(100% 0.01 296.81 / 0.15);
 	--ring: oklch(0.488 0.243 264.376);
 	--chart-1: oklch(0.488 0.243 264.376);
 	--chart-2: oklch(0.696 0.17 162.48);
@@ -91,6 +91,7 @@ h1 {
 	--sidebar-accent-foreground: oklch(0.985 0 0);
 	--sidebar-border: oklch(1 0 0 / 10%);
 	--sidebar-ring: oklch(0.488 0.243 264.376);
+	--mark: oklch(66.991% 0.15362 240.062);
 }
 
 :root:has(.no-doc-scroll) {
@@ -246,7 +247,7 @@ h1 {
 	}
 
 	mark {
-		--mark-color: var(--input);
+		--mark-color: var(--mark);
 		--mark-skew: 0.25em;
 		--mark-height: 0.6em;
 		--mark-overlap: 0.1em;
