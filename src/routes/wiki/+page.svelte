@@ -33,8 +33,8 @@
 	</div>
 	<div class="mt-2 order-1 md:order-2 justify-self-center mb-4">
 		<svg
-  fill="currentColor"
-  stroke="currentColor"
+			fill="currentColor"
+			stroke="currentColor"
 			width="167"
 			xmlns="http://www.w3.org/2000/svg"
 			xml:space="preserve"
@@ -94,22 +94,24 @@
 	</div>
 {/if}
 
-<div class="flex flex-col">
-	<a href="/wiki/skapa-sida">
-		<button
-			class="hover:text-primary p-4 inline-flex gap-x-2 items-center center cursor-pointer w-full border-b-1 border-dashed"
-		>
-			<Plus />
-			<h2>Skapa ny sida</h2>
-		</button>
-	</a>
+{#if data?.role === 'admin'}
+	<div class="flex flex-col">
+		<a href="/wiki/skapa-sida">
+			<button
+				class="hover:text-primary p-4 inline-flex gap-x-2 items-center center cursor-pointer w-full border-b-1 border-dashed"
+			>
+				<Plus />
+				<h2>Skapa ny sida</h2>
+			</button>
+		</a>
 
-	<a href="skapa-kategori">
-		<button
-			class="hover:text-primary p-4 inline-flex gap-x-2 items-center cursor-pointer w-full border-b-1 border-dashed"
-		>
-			<Plus />
-			<h2>Skapa ny kategori</h2>
-		</button>
-	</a>
-</div>
+		<a href="skapa-kategori">
+			<button
+				class="hover:text-primary p-4 inline-flex gap-x-2 items-center cursor-pointer w-full border-b-1 border-dashed"
+			>
+				<Plus />
+				<h2>Skapa ny kategori</h2>
+			</button>
+		</a>
+	</div>
+{/if}

@@ -58,6 +58,7 @@
 		"@fontsource-variable/jetbrains-mono": "^5.2.6",
 		"@fontsource-variable/reddit-sans": "^5.2.6",
 		"@fontsource-variable/rethink-sans": "^5.2.6",
+		"@fontsource/caprasimo": "^5.2.6",
 		"@fontsource/dm-serif-display": "^5.2.6",
 		"@fsegurai/codemirror-theme-bundle": "^6.2.2",
 		"@fsegurai/codemirror-theme-github-light": "^6.2.2",

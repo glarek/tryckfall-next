@@ -74,7 +74,7 @@
 	></button>
 	<div
 		id="main-content"
-		class="flex lg:w-195 lg:flex-none flex-1 flex-col lg:border-r-1 border-dashed w-full"
+		class="flex lg:w-195 lg:flex-none flex-1 flex-col lg:border-r-1 border-dashed w-full min-h-[calc(100svh-3rem)]"
 	>
 		<div style="view-transition-name: slide">{@render children()}</div>
 	</div>

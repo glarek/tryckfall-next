@@ -1,7 +1,7 @@
 <script>
 	import { ModeWatcher, toggleMode } from 'mode-watcher';
 	import MenuIcon from '$lib/icons/menu-icon.svelte';
-	import { Moon, Sun, Menu } from '@lucide/svelte';
+	import { Moon, Sun, Menu, KeyRound, CircleUserRound } from '@lucide/svelte';
 	import Logo from '$lib/icons/logo.svelte';
 	import { getShowNavbar, toggleNavbar } from '$lib/utils/navBarState.svelte.js';
 	import { base } from '$app/paths';
@@ -9,6 +9,7 @@
 		mainClass: mainClasses = '',
 		navClass: navClasses = '',
 		loggedIn: loggedIn = false,
+		admin: admin = false,
 		...restProps
 	} = $props();
 </script>
@@ -22,13 +23,13 @@
 	<nav class="flex items-center pl-4 pr-4 py-4 justify-between {navClasses}">
 		<Logo class="fill-foreground h-6 self-center" />
 		<ul class="flex flex-row gap-x-4 items-center">
-			<li class="hover:text-muted-foreground transition-colors hidden md:flex">
+			<li class="hover:text-muted-foreground transition-colors flex">
 				{#if loggedIn}
-					<form method="POST" action="{base}/auth?/logout">
-						<button type="submit" class="font-semibold cursor-pointer">Logga ut</button>
-					</form>
+					<a href="/private" class="font-semibold hover:text-primary"
+						><CircleUserRound class="relative"></CircleUserRound>
+					</a>
 				{:else}
-					<a href="{base}/auth" class="font-semibold">Logga in</a>
+					<a href="/auth" class="font-semibold"><KeyRound /></a>
 				{/if}
 			</li>
 

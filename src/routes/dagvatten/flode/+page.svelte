@@ -71,7 +71,7 @@
 
 		<p>Den horisontellt projicerade takyta som träffas av regnet.</p>
 		<div class="p-2 flex">
-			<TakArea width={500} />
+			<TakArea width={350} />
 		</div>
 
 		<hr />
@@ -81,12 +81,13 @@
 			Ytkoefficient är ett värde som visar hur pass mycket en yta släpper igenom vatten. Ju högre
 			siffra detso mindre vattensläpper ytan igenom.
 		</p>
-		<table class="table-tryckfall table-fixed text-sm border-spacing-2 border-collapse w-full">
+
+		<table class="table-fixed overflow-auto text-sm border-spacing-2 border-collapse w-full">
 			<thead class="border-b-1">
 				<tr>
-					<th class="text-left">Typ av yta</th>
-					<th class="w-fit">Area</th>
-					<th class="w-fit">Ytkoefficient</th>
+					<th class=" text-left">Typ av yta</th>
+					<th class="w-25">Area</th>
+					<th class="w-25">Ytkoefficient</th>
 				</tr>
 			</thead>
 			<tbody class="text-center">
@@ -117,6 +118,7 @@
 				</tr>
 			</tbody>
 		</table>
+
 		<hr />
 		<h2>Riskfaktor</h2>
 
@@ -129,7 +131,7 @@
 			<thead class="border-b-1">
 				<tr>
 					<th class="text-left">Typ av avvattning</th>
-					<th class="w-[60px]">&Upsilon; </th>
+					<th class="w-25">&Upsilon; </th>
 				</tr>
 			</thead>
 			<tbody class="text-center">
