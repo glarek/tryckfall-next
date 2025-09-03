@@ -169,48 +169,50 @@
 				>
 			</form>
 		{:else}
-			<form
-				{...updatePost.enhance(async ({ data, submit }) => {
-					isSubmitting = true;
-					const formData = new FormData();
-					data.set('content', contentValue);
-					data.set('slug', slug);
-					data.set('title', title);
-					data.set('category', category);
-					data.set('originalSlug', oldSlug);
-
-					try {
-						await submit();
-					} catch (error) {
-						toast.error('Nånting gick fel!');
-						isSubmitting = false;
-					}
-				})}
-			>
+			<div class="grid grid-cols-[1fr_1fr] w-fit gap-2">
+				<form
+					{...updatePost.enhance(async ({ data, submit }) => {
+						isSubmitting = true;
+						const formData = new FormData();
+						data.set('content', contentValue);
+						data.set('slug', slug);
+						data.set('title', title);
+						data.set('category', category);
+						data.set('originalSlug', oldSlug);
+						try {
+							await submit();
+						} catch (error) {
+							toast.error('Nånting gick fel!');
+							isSubmitting = false;
+						}
+					})}
+				>
+					<Button
+						type="submit"
+						class="cursor-pointer "
+						variant="outline"
+						disabled={isSubmitting || !edited}
+					>
+						{#if !isSubmitting}
+							Spara ändringar
+							<PenLine />
+						{:else}
+							Sparar ändringar
+							<div
+								class="w-4 h-4 border-foreground border-2 border-t-transparent rounded-full animate-spin"
+							></div>
+						{/if}
+					</Button>
+				</form>
 				<Button
-					type="submit"
-					class="cursor-pointer shadow-none"
-					disabled={isSubmitting}
+					onclick={() => (dialogOpen = true)}
+					class="cursor-pointer border-destructive/[20%]"
 					variant="outline"
 				>
-					<div class="flex flex-row w-[120px] items-center gap-x-2">
-						{#if !isSubmitting}
-							Spara ändringar <PenLine />
-						{:else}
-							Spara ändringar<LoaderCircle class="h-fit w-fit animate-spin" />
-						{/if}
-					</div></Button
-				>
-			</form>
-
-			<Button
-				onclick={() => (dialogOpen = true)}
-				class="h-10 cursor-pointer mt-2 border-destructive/[20%]"
-				variant="outline"
-			>
-				Ta bort sida
-				<Trash2 class="ml-0" size={16} />
-			</Button>
+					Ta bort sida
+					<Trash2 class="ml-0" size={16} />
+				</Button>
+			</div>
 
 			<Dialog.Root bind:open={dialogOpen}>
 				<Dialog.Trigger class="modal" disabled={isSubmitting}></Dialog.Trigger>
@@ -242,7 +244,10 @@
 										>{#if !isSubmitting}
 											Ta bort sida!
 										{:else}
-											Tar bort sida!<LoaderCircle class="h-fit w-fit animate-spin" />
+											Tar bort sida!
+											<div
+												class="w-4 h-4 border-background border-2 border-t-transparent rounded-full animate-spin"
+											></div>
 										{/if}</Button
 									>
 								</form>
