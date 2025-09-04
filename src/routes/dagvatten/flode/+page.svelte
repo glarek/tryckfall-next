@@ -27,7 +27,7 @@
 	<div class="p-4">
 		<h1>Sannolikt flöde för dagvatten</h1>
 		<p>Beräkning av sannolikt flöde för avvattning av takyta enligt Dahlström (2010).</p>
-		<div class="grid grid-cols-[20fr_16fr_4fr] items-center gap-2 max-w-xs">
+		<div class="grid grid-cols-[20fr_16fr_4fr] items-center gap-2 max-w-xs text-nowrap">
 			<Label>Återkomsttid</Label>
 			<Input type="number" step="1" bind:value={returnTimeYear} />
 			<span class="text-sm">år</span>

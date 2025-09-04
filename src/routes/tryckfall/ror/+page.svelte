@@ -167,7 +167,7 @@
 					<div class="flex flex-row items-center gap-x-2">
 						<Input type="number" id="supply" bind:value={inputStore.inletTemperature} />
 
-						<span>°C</span>
+						<span class=" text-nowrap">°C</span>
 					</div>
 				</div>
 
@@ -175,7 +175,7 @@
 					<Label for="supply">Retur</Label>
 					<div class="flex flex-row items-center gap-x-2">
 						<Input type="number" id="return" bind:value={inputStore.outletTemperature} />
-						<span>°C</span>
+						<span class="text-nowrap">°C</span>
 					</div>
 				</div>
 			</div>
