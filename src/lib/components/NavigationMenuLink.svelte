@@ -26,7 +26,7 @@
 			<a
 				href={link}
 				onclick={() => setShowNavbar(false)}
-				class="flex w-full items-center gap-2 rounded-sm p-2 m-1 text-left hover:bg-muted"
+				class="flex w-full items-center gap-2 rounded-sm p-2 m-1 text-left hover:bg-muted popclick"
 			>
 				{#if Icon}
 					<Icon size={18} />
@@ -55,7 +55,7 @@
 			{#if open}
 				<div class="ml-1 left-6 pl-4 my-2 pt-0 pb-1 font-medium" transition:slide>
 					{#each childrenLinks as childLink}
-						<MenuLink link="{base}{childLink.href}">{childLink.title}</MenuLink>
+						<MenuLink link={childLink.href}>{childLink.title}</MenuLink>
 					{/each}
 				</div>
 			{/if}

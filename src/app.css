@@ -145,6 +145,10 @@
 		@apply p-6;
 	}
 
+	.popclick {
+		@apply active:scale-115 transition-transform;
+	}
+
 	.main-container {
 		@apply w-full overflow-hidden;
 	}
@@ -204,6 +208,35 @@
 	th,
 	td {
 		@apply p-2;
+	}
+
+	thead {
+		@apply bg-foreground/3 text-foreground underline  decoration-2 decoration-primary;
+	}
+
+	thead > tr > th {
+		@apply border-0;
+	}
+
+	thead > tr > th:first-child {
+		@apply rounded-tl-lg;
+	}
+
+	thead > tr > th:last-child {
+		@apply rounded-tr-md;
+	}
+
+	tbody > tr:nth-child(even) {
+		@apply bg-foreground/3 hover:bg-primary/10;
+	}
+
+	th:not(:first-child),
+	td:not(:first-child) {
+		@apply border-foreground/10 border-dashed;
+	}
+
+	tr {
+		@apply hover:bg-primary/10;
 	}
 
 	.markdown li {

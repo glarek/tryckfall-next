@@ -4,10 +4,12 @@
 	import TopNav from '$lib/components/TopNav.svelte';
 	import SideNav from '$lib/components/SideNav.svelte';
 	import { Toaster } from '$lib/components/ui/sonner/index.js';
+	import { setContext } from 'svelte';
 
 	import { getShowNavbar, toggleNavbar, setShowNavbar } from '$lib/utils/navBarState.svelte.js';
 
 	import { onMount } from 'svelte';
+	import { derived } from 'svelte/store';
 
 	let { data, children } = $props();
 	let { session, supabase } = $derived(data);
@@ -15,7 +17,9 @@
 	let loggedIn = $derived(session !== null);
 
 	let navBarHeight = 50;
-	let navigating = $state(false);
+	let navigating = $state({ isNavigating: false });
+
+	setContext('navigating', navigating);
 
 	onMount(() => {
 		const { data } = supabase.auth.onAuthStateChange((_, newSession) => {
@@ -27,7 +31,7 @@
 	});
 
 	beforeNavigate(async () => {
-		navigating = true;
+		navigating.isNavigating = true;
 		return;
 	});
 
@@ -47,7 +51,7 @@
 		if (mainContainer) {
 			mainContainer.scrollTop = 0;
 		}
-		navigating = false;
+		navigating.isNavigating = false;
 	});
 </script>
 

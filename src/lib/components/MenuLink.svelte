@@ -8,7 +8,7 @@
 </script>
 
 <li
-	class="text-muted-foreground hover:text-foreground hover:border-foreground border-l-2 py-0.5 pl-3 {activeLink
+	class="text-muted-foreground hover:text-foreground hover:border-foreground border-l-2 py-0.5 pl-3 popclick {activeLink
 		? 'text-primary border-primary'
 		: ''}"
 >

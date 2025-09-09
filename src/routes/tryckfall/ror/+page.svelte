@@ -418,27 +418,23 @@
 					<CircleAlert size="16px" />Laminär strömning
 				</div></Table.Caption
 			>
-			<Table.Header>
-				<Table.Row>
-					<Table.Head class="text-center font-semibold"
-						>DN<br /><span class="text-muted-foreground italic text-xs">mm</span></Table.Head
+			<thead>
+				<tr>
+					<th class="text-center font-semibold"
+						>DN<br /><span class="text-muted-foreground italic text-xs">mm</span></th
 					>
-					<Table.Head class="text-center font-semibold"
-						>Hastighet <br /><span class="text-muted-foreground italic text-xs">m/s</span
-						></Table.Head
+					<th class="text-center font-semibold"
+						>Hastighet <br /><span class="text-muted-foreground italic text-xs">m/s</span></th
 					>
-					<Table.Head class="text-center font-semibold hidden md:block"
-						>Reynolds <br />tal</Table.Head
+					<th class="text-center font-semibold hidden md:block">Reynolds <br />tal</th>
+					<th class="text-center font-semibold"
+						>Tryckfall<br /><span class="text-muted-foreground italic text-xs">Pa/m</span></th
 					>
-					<Table.Head class="text-center font-semibold"
-						>Tryckfall<br /><span class="text-muted-foreground italic text-xs">Pa/m</span
-						></Table.Head
-					>
-				</Table.Row>
-			</Table.Header>
-			<Table.Body>
+				</tr>
+			</thead>
+			<tbody>
 				{#each pipeArray as pipe, i}
-					<Table.Row
+					<tr
 						style="color: color-mix(in oklch, var(--background), var(--foreground) {(
 							getBellCurveValue(
 								0.2,
@@ -449,7 +445,7 @@
 						).toFixed(0)}%)"
 						class="hover:text-foreground! transition-none"
 					>
-						<Table.Cell class="font-medium text-center">
+						<td class="font-medium text-center">
 							<Tooltip.Provider delayDuration={200}>
 								<Tooltip.Root>
 									<Tooltip.Trigger>
@@ -463,8 +459,8 @@
 									>
 								</Tooltip.Root>
 							</Tooltip.Provider>
-						</Table.Cell>
-						<Table.Cell class="text-center table-cell relative">
+						</td>
+						<td class="text-center table-cell relative">
 							{#if calculationError}<span
 									transition:fly
 									class="absolute left-1/2 top-1/2 -translate-y-1/2 -translate-x-1/2 align-center w-[56px] rounded-md h-[22px] bg-muted animate-pulse"
@@ -476,24 +472,24 @@
 											class="absolute left-full translate-x-2 opacity-25"
 										/>{:else}{/if}
 								</div>
-							{/if}</Table.Cell
+							{/if}</td
 						>
 
-						<Table.Cell class="text-center md:table-cell hidden relative"
+						<td class="text-center md:table-cell hidden relative"
 							>{#if calculationError}<span
 									transition:fly
 									class="absolute left-1/2 top-1/2 -translate-y-1/2 -translate-x-1/2 align-center w-[56px] rounded-md h-[22px] bg-muted animate-pulse"
 								></span>{:else}<span transition:fly>{pipe.reynoldsNumber.toFixed(0)}</span>{/if}
-						</Table.Cell>
-						<Table.Cell class="text-center table-cell relative">
+						</td>
+						<td class="text-center table-cell relative">
 							{#if calculationError}<span
 									transition:fly
 									class="absolute left-1/2 top-1/2 -translate-y-1/2 -translate-x-1/2 align-center w-[56px] rounded-md h-[22px] bg-muted animate-pulse"
 								></span>{:else}<span transition:fly>{pipe.pressureDrop.toFixed(0)}</span>{/if}
-						</Table.Cell>
-					</Table.Row>
+						</td>
+					</tr>
 				{/each}
-			</Table.Body>
+			</tbody>
 		</Table.Root>
 	</div>
 </div>

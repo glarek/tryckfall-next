@@ -83,7 +83,7 @@
 		</p>
 
 		<table class="table-fixed overflow-auto text-sm border-spacing-2 border-collapse w-full">
-			<thead class="border-b-1">
+			<thead>
 				<tr>
 					<th class=" text-left">Typ av yta</th>
 					<th class="w-25">Area</th>
@@ -128,7 +128,7 @@
 		</p>
 
 		<table class="table-tryckfall table-fixed text-sm border-spacing-2 border-collapse w-full">
-			<thead class="border-b-1">
+			<thead>
 				<tr>
 					<th class="text-left">Typ av avvattning</th>
 					<th class="w-25">&Upsilon; </th>

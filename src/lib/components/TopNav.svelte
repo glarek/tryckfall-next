@@ -3,8 +3,11 @@
 	import MenuIcon from '$lib/icons/menu-icon.svelte';
 	import { Moon, Sun, Menu, KeyRound, CircleUserRound } from '@lucide/svelte';
 	import Logo from '$lib/icons/logo.svelte';
+	import Pump from '$lib/icons/pump.svelte';
 	import { getShowNavbar, toggleNavbar } from '$lib/utils/navBarState.svelte.js';
-	import { base } from '$app/paths';
+
+	import { getContext } from 'svelte';
+
 	let {
 		mainClass: mainClasses = '',
 		navClass: navClasses = '',
@@ -12,6 +15,8 @@
 		admin: admin = false,
 		...restProps
 	} = $props();
+
+	let navigating = getContext('navigating');
 </script>
 
 <ModeWatcher />
@@ -21,20 +26,32 @@
 	class="flex flex-col border-b-1 border-dashed items-center justify-center bg-background {mainClasses}"
 >
 	<nav class="flex items-center pl-4 pr-4 py-4 justify-between {navClasses}">
-		<Logo class="fill-foreground h-6 self-center" />
+		<a href="/" class="popclick">
+			<Logo
+				href="/"
+				class="hover:fill-primary fill-foreground h-7 self-center transition-colors duration-75"
+			/>
+		</a>
+		<div class="flex flex-row">
+			<Pump
+				circleClass="fill-foreground h-6 {navigating.isNavigating ? 'animate-spin' : ''}"
+				arrowClass="fill-foreground h-6"
+			/>
+		</div>
+
 		<ul class="flex flex-row gap-x-4 items-center">
 			<li class="hover:text-muted-foreground transition-colors flex">
 				{#if loggedIn}
-					<a href="/private" class="font-semibold hover:text-primary"
+					<a href="/private" class="font-semibold hover:text-primary popclick"
 						><CircleUserRound class="relative"></CircleUserRound>
 					</a>
 				{:else}
-					<a href="/auth" class="font-semibold"><KeyRound /></a>
+					<a href="/auth" class="font-semibold popclick"><KeyRound /></a>
 				{/if}
 			</li>
 
 			<button
-				class="items-center justify-center w-7 h-7 relative group cursor-pointer"
+				class="items-center justify-center w-7 h-7 relative group cursor-pointer popclick"
 				onclick={toggleMode}
 			>
 				<Moon

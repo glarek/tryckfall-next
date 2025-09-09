@@ -337,36 +337,32 @@
 		<p>Beräknade tryckfall och hastigheter.</p>
 
 		<Table.Root>
-			<Table.Header>
-				<Table.Row>
+			<thead>
+				<tr>
 					{#if !inputStore.useRectangular}
-						<Table.Head class="text-center font-semibold"
-							>DN<br /><span class="text-muted-foreground italic text-xs">mm</span></Table.Head
+						<th class="text-center font-semibold"
+							>DN<br /><span class="text-muted-foreground italic text-xs">mm</span></th
 						>
 					{:else}
-						<Table.Head class="text-center font-semibold"
-							>Bredd<br /><span class="text-muted-foreground italic text-xs">mm</span></Table.Head
+						<th class="text-center font-semibold"
+							>Bredd<br /><span class="text-muted-foreground italic text-xs">mm</span></th
 						>
-						<Table.Head class="text-center font-semibold">×</Table.Head>
-						<Table.Head class="text-center font-semibold"
-							>Höjd<br /><span class="text-muted-foreground italic text-xs">mm</span></Table.Head
+						<th class="text-center font-semibold">×</th>
+						<th class="text-center font-semibold"
+							>Höjd<br /><span class="text-muted-foreground italic text-xs">mm</span></th
 						>{/if}
-					<Table.Head class="text-center font-semibold"
-						>Hastighet <br /><span class="text-muted-foreground italic text-xs">m/s</span
-						></Table.Head
+					<th class="text-center font-semibold"
+						>Hastighet <br /><span class="text-muted-foreground italic text-xs">m/s</span></th
 					>
-					<Table.Head class="text-center font-semibold hidden md:block"
-						>Reynolds <br />tal</Table.Head
+					<th class="text-center font-semibold hidden md:block">Reynolds <br />tal</th>
+					<th class="text-center font-semibold"
+						>Tryckfall<br /><span class="text-muted-foreground italic text-xs">Pa/m</span></th
 					>
-					<Table.Head class="text-center font-semibold"
-						>Tryckfall<br /><span class="text-muted-foreground italic text-xs">Pa/m</span
-						></Table.Head
-					>
-				</Table.Row>
-			</Table.Header>
-			<Table.Body>
+				</tr>
+			</thead>
+			<tbody>
 				{#each ductArray as duct, i}
-					<Table.Row
+					<tr
 						style="color: color-mix(in oklch, var(--background), var(--foreground) {getBellCurveValue(
 							0.2,
 							1,
@@ -376,7 +372,7 @@
 						class="hover:text-foreground! transition-none"
 					>
 						{#if !inputStore.useRectangular}
-							<Table.Cell class="font-medium text-center"
+							<td class="font-medium text-center"
 								><input
 									class="w-[40px] text-center no-spinner"
 									type="number"
@@ -386,10 +382,10 @@
 										if (!target) return;
 										target.select();
 									}}
-								/></Table.Cell
+								/></td
 							>
 						{:else}
-							<Table.Cell class="font-medium text-center"
+							<td class="font-medium text-center"
 								><input
 									class="w-[40px] text-center no-spinner"
 									type="number"
@@ -399,10 +395,10 @@
 										if (!target) return;
 										target.select();
 									}}
-								/></Table.Cell
+								/></td
 							>
-							<Table.Cell class="font-medium text-center">×</Table.Cell>
-							<Table.Cell class="font-medium text-center"
+							<td class="font-medium text-center">×</td>
+							<td class="font-medium text-center"
 								><input
 									class="w-[40px] text-center no-spinner"
 									type="number"
@@ -412,10 +408,10 @@
 										if (!target) return;
 										target.select();
 									}}
-								/></Table.Cell
+								/></td
 							>
 						{/if}
-						<Table.Cell class="text-center relative">
+						<td class="text-center relative">
 							{#if airPropertiesStore.isLoading || flowInfinity}
 								<span
 									transition:fly
@@ -424,9 +420,9 @@
 							{:else}
 								<span transition:fly>{smartRound(duct.velocity, 3)}</span>
 							{/if}
-						</Table.Cell>
+						</td>
 
-						<Table.Cell class="text-center md:table-cell hidden relative">
+						<td class="text-center md:table-cell hidden relative">
 							{#if airPropertiesStore.isLoading || flowInfinity}
 								<span
 									transition:fly
@@ -435,8 +431,8 @@
 							{:else}
 								<span transition:fly>{smartRound(duct.reynoldsNumber, 0)}</span>
 							{/if}
-						</Table.Cell>
-						<Table.Cell class="text-center overflow-x-clip relative">
+						</td>
+						<td class="text-center overflow-x-clip relative">
 							{#if airPropertiesStore.isLoading || flowInfinity}
 								<span
 									transition:fly
@@ -445,10 +441,10 @@
 							{:else}
 								<span transition:fly>{duct.pressureDrop.toFixed(2)}</span>
 							{/if}
-						</Table.Cell>
-					</Table.Row>
+						</td>
+					</tr>
 				{/each}
-			</Table.Body>
+			</tbody>
 		</Table.Root>
 	</div>
 </div>

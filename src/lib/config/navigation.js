@@ -1,13 +1,7 @@
-import { House, Gauge, CloudDrizzle, Toilet, BookText } from '@lucide/svelte';
+import { Gauge, CloudDrizzle, Toilet, BookText } from '@lucide/svelte';
 import { IdaIce } from '$lib/icons/index';
 
 export const navLinks = [
-	{
-		title: 'Hem',
-		href: '/',
-		icon: House,
-		children: []
-	},
 	{
 		title: 'Tryckfall',
 		href: '/tryckfall',

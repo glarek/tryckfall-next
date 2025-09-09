@@ -6,7 +6,7 @@
 	<p>Stuprör dimensioneras lämpligen enligt <u>AMA Hus 24</u> enligt <u>Tabell RA JTJ.821/1</u>.</p>
 	<div class="overflow-auto">
 		<table class="table-tryckfall table-fixed w-full text-sm overflow-auto">
-			<thead class="border-b-1">
+			<thead>
 				<tr>
 					<th class="text-left w-[160px]">Takarea i m² (högst)</th>
 					<th class="w-[50px]">80</th>
