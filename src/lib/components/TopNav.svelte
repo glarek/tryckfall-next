@@ -20,6 +20,11 @@
 
 <ModeWatcher />
 
+<span
+	class="{navigating.isNavigating
+		? 'top-[0px]'
+		: '-top-[2px]'} loader absolute transition-all duration-500"
+></span>
 <div
 	{...restProps}
 	class="flex flex-col border-b-1 border-dashed items-center justify-center bg-background {mainClasses}"
@@ -28,7 +33,7 @@
 		<a href="/" class="popclick">
 			<Logo
 				href="/"
-				class="hover:fill-primary fill-foreground h-7 self-center transition-colors duration-75"
+				class="hover:fill-primary fill-foreground w-[120px] self-center transition-colors duration-75"
 			/>
 		</a>
 
