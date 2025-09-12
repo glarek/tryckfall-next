@@ -23,7 +23,7 @@
 <span
 	class="{navigating.isNavigating
 		? 'top-[0px]'
-		: '-top-[2px]'} loader absolute transition-all duration-500"
+		: '-top-[2px]'} loader absolute transition-all duration-50 ease-in-out"
 ></span>
 <div
 	{...restProps}
