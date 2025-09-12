@@ -40,7 +40,8 @@
 	let calculationType = $state('zones'); // Standardvärde för beräkningstyp
 
 	const triggerContent = $derived(
-		frequencyFactors.find((f) => f.value.toString() === frequencyFactor)?.label ?? 'Välj frekvens...'
+		frequencyFactors.find((f) => f.value.toString() === frequencyFactor)?.label ??
+			'Välj frekvens...'
 	);
 
 	// Skapa en Map för snabb åtkomst till sewageItem-data via id.

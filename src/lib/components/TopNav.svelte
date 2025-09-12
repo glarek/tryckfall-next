@@ -3,7 +3,7 @@
 	import MenuIcon from '$lib/icons/menu-icon.svelte';
 	import { Moon, Sun, Menu, KeyRound, CircleUserRound } from '@lucide/svelte';
 	import Logo from '$lib/icons/logo.svelte';
-	import Pump from '$lib/icons/pump.svelte';
+
 	import { getShowNavbar, toggleNavbar } from '$lib/utils/navBarState.svelte.js';
 
 	import { getContext } from 'svelte';
@@ -11,7 +11,6 @@
 	let {
 		mainClass: mainClasses = '',
 		navClass: navClasses = '',
-		loggedIn: loggedIn = false,
 		admin: admin = false,
 		...restProps
 	} = $props();
@@ -32,23 +31,9 @@
 				class="hover:fill-primary fill-foreground h-7 self-center transition-colors duration-75"
 			/>
 		</a>
-		<div class="flex flex-row">
-			<Pump
-				circleClass="fill-foreground h-6 {navigating.isNavigating ? 'animate-spin' : ''}"
-				arrowClass="fill-foreground h-6"
-			/>
-		</div>
 
 		<ul class="flex flex-row gap-x-4 items-center">
-			<li class="hover:text-muted-foreground transition-colors flex">
-				{#if loggedIn}
-					<a href="/private" class="font-semibold hover:text-primary popclick"
-						><CircleUserRound class="relative"></CircleUserRound>
-					</a>
-				{:else}
-					<a href="/auth" class="font-semibold popclick"><KeyRound /></a>
-				{/if}
-			</li>
+			<li class="hover:text-muted-foreground transition-colors flex"></li>
 
 			<button
 				class="items-center justify-center w-7 h-7 relative group cursor-pointer popclick"

@@ -1,8 +1,19 @@
 <script>
 	import { ModeWatcher, toggleMode } from 'mode-watcher';
-	let { class: additionalClasses = '', ...restProps } = $props();
+	import { slide } from 'svelte/transition';
+
 	import NavigationMenuLink from '$lib/components/NavigationMenuLink.svelte';
+	import Grit from '$lib/icons/grit.svelte';
 	import { navLinks } from '$lib/config/navigation.js';
+	import { onMount } from 'svelte';
+	import { CircleUserRound, ShieldUser } from '@lucide/svelte';
+
+	let { class: additionalClasses = '', loggedIn, ...restProps } = $props();
+	let userLoad = $state(false);
+
+	onMount(() => {
+		userLoad = true;
+	});
 </script>
 
 <ModeWatcher />
@@ -20,6 +31,21 @@
 				childrenLinks={navLink.children}
 			/>
 		{/each}
+		{#if userLoad}
+			<div transition:slide>
+				<hr />
+				{#if loggedIn}
+					<NavigationMenuLink buttonText="Användare" Icon={CircleUserRound} link="/private" />
+				{:else}
+					<NavigationMenuLink buttonText="Logga in" Icon={ShieldUser} link="/auth" />
+				{/if}
+			</div>
+		{/if}
 	</ul>
-	<span class="flex justify-center">En del av...</span>
+
+	<div class="flex flex-col items-center justify-center gap-y-3 mb-5">
+		<a href="https://gritprojects.se"
+			><Grit class="hover:text-primary h-14 text-foreground/5 transition-colors" /></a
+		>
+	</div>
 </div>

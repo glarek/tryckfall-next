@@ -1,5 +1,10 @@
 <script>
 	import { beforeNavigate, onNavigate, afterNavigate, invalidate } from '$app/navigation';
+	import { page } from '$app/state';
+	const metadata = $derived(page.data?.pageMeta ?? []);
+
+	$inspect(metadata);
+
 	import '../app.css';
 	import TopNav from '$lib/components/TopNav.svelte';
 	import SideNav from '$lib/components/SideNav.svelte';
@@ -37,13 +42,6 @@
 
 	onNavigate((navigation) => {
 		if (!document.startViewTransition) return;
-
-		return new Promise((resolve) => {
-			document.startViewTransition(async () => {
-				resolve();
-				await navigation.complete;
-			});
-		});
 	});
 
 	afterNavigate(() => {
@@ -55,13 +53,24 @@
 	});
 </script>
 
+<svelte:head>
+	<title
+		>{metadata.title ? metadata.title + ' - tryckfall.nu' : 'tryckfall.nu - VVS-beräkningar'}</title
+	>
+	{#each metadata as meta}
+		<meta {...meta} />
+	{/each}
+</svelte:head>
+
 <Toaster richColors position="top-left" />
 
 <header class="z-50 sticky top-0">
-	<TopNav {loggedIn} mainClass="h-[3rem]" navClass="lg:w-5xl w-full" />
+	<TopNav mainClass="h-[3rem]" navClass="lg:w-5xl w-full" />
 </header>
+
 <div id="main-container" class="flex flex-row justify-center items-start">
 	<SideNav
+		{loggedIn}
 		class="h-[calc(100dvh-3rem)] fixed lg:sticky lg:top-[3rem] lg:flex flex-col left-0 w-60 transition-all duration-300 ease-in-out overflow-y-auto  {getShowNavbar()
 			? 'translate-x-0'
 			: '-translate-x-full'} lg:translate-x-0 z-40"
