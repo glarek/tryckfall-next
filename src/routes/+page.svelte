@@ -1,8 +1,6 @@
 <script>
 	let { data } = $props();
 	import { Button } from '$lib/components/ui/button';
-
-	let randomint = Math.floor(Math.random() * (10 + 1));
 </script>
 
 <div class="md:p-20 p-6">
@@ -30,7 +28,7 @@
 			</div>
 		</div>
 		<div class="md:order-2 order-1 justify-self-center">
-			{#if randomint != 7}
+			{#if data.randomint != 7}
 				<svg
 					stroke="currentColor"
 					fill="none"
