@@ -33,7 +33,7 @@
 		<a href="/" class="popclick">
 			<Logo
 				href="/"
-				class="hover:fill-primary fill-foreground w-[120px] self-center transition-colors duration-75"
+				class="hover:fill-primary fill-foreground w-[135px] self-center transition-colors duration-75"
 			/>
 		</a>
 

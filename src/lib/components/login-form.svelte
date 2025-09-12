@@ -90,7 +90,7 @@
 				<Button type="submit" class="w-full cursor-pointer">
 					{#if logIn}Loggar in
 						<div
-							class="w-4 h-4 border-2 border-background border-t-transparent rounded-full animate-spin"
+							class="w-4 h-4 border-2 dark:border-foreground border-background border-t-transparent dark:border-t-transparent rounded-full animate-spin"
 						></div>{:else}Logga in{/if}</Button
 				>
 			</div>

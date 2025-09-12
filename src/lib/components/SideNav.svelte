@@ -43,8 +43,8 @@
 		{/if}
 	</ul>
 
-	<div class="flex flex-col items-center justify-center gap-y-3 mb-5">
-		<a href="https://gritprojects.se"
+	<div class="flex flex-col items-center justify-center gap-y-3 my-4 popclick">
+		<a href="https://google.se"
 			><Grit class="hover:text-primary h-14 text-foreground/5 transition-colors" /></a
 		>
 	</div>
