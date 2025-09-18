@@ -68,6 +68,12 @@
 	<TopNav mainClass="h-[3rem]" navClass="lg:w-5xl w-full" />
 </header>
 
+<span
+	class="{navigating.isNavigating
+		? 'h-[2px]'
+		: 'h-[0px]'} top-[calc(3rem-1px)] z-99 absolute loader transition-all duration-500"
+></span>
+
 <div id="main-container" class="flex flex-row justify-center items-start">
 	<SideNav
 		{loggedIn}

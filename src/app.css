@@ -164,6 +164,10 @@
 		@apply mt-4;
 	}
 
+	.error-message {
+		@apply text-destructive text-xs mt-1;
+	}
+
 	h1 {
 		@apply font-serif font-light tracking-tighter text-4xl;
 	}

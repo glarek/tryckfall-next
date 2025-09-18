@@ -1,13 +1,18 @@
 <script lang="ts">
 	import { scale } from 'svelte/transition';
-
 	import { PenLine, Trash2, Wand } from '@lucide/svelte';
+	import { onMount } from 'svelte';
 
 	let { data } = $props();
 
 	//let slug = $state(params.slug || '');
 
-	const isUserAdmin = data?.role === 'admin';
+	let isUserAdmin = $state(false);
+
+	onMount(() => {
+		// Load any additional data if needed
+		isUserAdmin = data?.role === 'admin';
+	});
 </script>
 
 <div class="markdown relative m-6">

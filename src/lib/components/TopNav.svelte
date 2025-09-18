@@ -20,11 +20,6 @@
 
 <ModeWatcher />
 
-<span
-	class="{navigating.isNavigating
-		? 'top-[0px]'
-		: '-top-[2px]'} loader absolute transition-all duration-50 ease-in-out"
-></span>
 <div
 	{...restProps}
 	class="flex flex-col border-b-1 border-dashed items-center justify-center bg-background {mainClasses}"
