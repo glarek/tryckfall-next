@@ -192,6 +192,10 @@
 		@apply my-2;
 	}
 
+	button {
+		@apply cursor-pointer;
+	}
+
 	mark {
 		@apply bg-primary/[50%] dark:text-foreground p-0.5;
 	}

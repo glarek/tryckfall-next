@@ -24,30 +24,46 @@
 
 	let { form, errors, constraints, message, enhance } = superForm(formData, {
 		taintedMessage: 'Fyll i alla fält korrekt',
-		validators: zod4(registerSchema)
+		validators: zod4(registerSchema),
+		onSubmit: () => (logIn = true)
 	});
 
 	const id = $props.id();
 </script>
 
-<SuperDebug data={form} />
-
 <div class={cn('flex flex-col gap-6', className)} bind:this={ref} {...restProps}>
 	<div class="flex flex-col items-center gap-2">
+		<svg
+			class="mb-10"
+			width="219"
+			height="81"
+			xmlns="http://www.w3.org/2000/svg"
+			xml:space="preserve"
+			style="fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5"
+			viewBox="0 0 219 81"
+			stroke="currentColor"
+			><path
+				d="M113.853 78.616s-10.217-48.814-13.708-66.801c32.809-15.13 80.037-2.209 103.746-10.398 16.046 32.636 13.411 66.427 13.174 66.377-18.655-3.911-61.066-10.029-103.212 10.822Z"
+				style="fill:none;stroke-width:2.83px"
+			/><path
+				d="M100.372 11.782c43.531 15.418 59.852 37.727 59.852 37.727s22.038-13.1 43.667-48.092M87.573 32.225c-36-10.538-36.277 26.041-86.156 28.535M87.573 61.144c-28.699-5.527-23.541 13.163-62.28 17.472"
+				style="fill:none;stroke-width:2.83px"
+			/></svg
+		>
 		<h1 class="text-xl">
 			Registrera dig på <span
 				class=" decoration-primary decoration-wavy underline decoration-1 underline-offset-2"
 				>tryckfall.nu</span
 			>
 		</h1>
-		<div class="text-center text-sm">
+		<div class="text-center text-muted-foreground text-sm">
 			Har du redan konto?
-			<a href="/auth" class="hover:text-primary cursor-pointer underline underline-offset-4">
+			<a href="/auth" class=" hover:text-primary cursor-pointer underline underline-offset-2">
 				Logga in
 			</a>
 		</div>
 	</div>
-	<form method="POST" use:enhance>
+	<form method="POST" use:enhance action="?/signup">
 		<div class="flex flex-col gap-6">
 			<div class="flex flex-col gap-6">
 				<div class="grid gap-3">

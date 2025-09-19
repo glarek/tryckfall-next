@@ -22,6 +22,7 @@ export const GET: RequestHandler = async ({ url, locals: { supabase } }) => {
 		const { error } = await supabase.auth.verifyOtp({ type, token_hash });
 		if (!error) {
 			redirectTo.searchParams.delete('next');
+			redirectTo.pathname = 'auth/confirm/success';
 			redirect(303, redirectTo);
 		}
 	}

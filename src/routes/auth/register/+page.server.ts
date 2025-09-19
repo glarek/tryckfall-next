@@ -1,5 +1,4 @@
 import { fail, redirect } from '@sveltejs/kit';
-import { message } from 'sveltekit-superforms';
 
 import { superValidate } from 'sveltekit-superforms/server';
 import { registerSchema } from '$lib/schemas';
@@ -12,7 +11,7 @@ export const load = async () => {
 };
 
 export const actions = {
-	default: async ({ request }) => {
+	signup: async ({ request, locals: { supabase } }) => {
 		const form = await superValidate(request, zod4(registerSchema));
 
 		// Superforms kollar om datan är giltig
@@ -22,10 +21,23 @@ export const actions = {
 			return fail(400, { form });
 		}
 
+		const { email, password, firstName, lastName } = form.data;
+		console.log(typeof form.data);
+
+		const { data, error } = await supabase.auth.signUp({
+			email,
+			password,
+			options: { data: { firstName, lastName } }
+		});
+		if (error) {
+			console.error(error);
+			redirect(303, '/auth/error');
+		}
+
 		// Datan är giltig! Här kan du skapa användaren i databasen
-		console.log('Användare skapad:', form.data);
+		console.log('Användare skapad:', data.user.email);
 
 		// Returnera formuläret för att visa ett success-meddelande
-		redirect(303, '/register/success');
+		redirect(303, '/auth/success');
 	}
 };
