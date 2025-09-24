@@ -11,7 +11,6 @@
 	import { cn, type WithElementRef } from '$lib/utils.js';
 
 	import { superForm } from 'sveltekit-superforms';
-	import SuperDebug from 'sveltekit-superforms/SuperDebug.svelte';
 
 	let logIn = $state(false);
 

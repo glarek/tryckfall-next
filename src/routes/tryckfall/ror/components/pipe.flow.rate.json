@@ -12,6 +12,12 @@
 		"step": 1
 	},
 	{
+		"label": "l/h",
+		"name": "Liter per timme",
+		"value": 0.00000027777777777778,
+		"step": 1
+	},
+	{
 		"label": "m³/h",
 		"name": "Kubikmeter per timme",
 		"value": 0.0002777777777777778,

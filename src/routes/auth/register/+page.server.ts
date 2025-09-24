@@ -25,8 +25,8 @@ export const actions = {
 		console.log(typeof form.data);
 
 		const { data, error } = await supabase.auth.signUp({
-			email,
-			password,
+			email: email as string,
+			password: password as string,
 			options: { data: { firstName, lastName } }
 		});
 		if (error) {
