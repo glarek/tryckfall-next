@@ -4,7 +4,8 @@ import { registerSchema } from '$lib/schemas';
 
 export interface User {
 	email: string;
-	name: string;
+	first_name: string;
+	last_name: string;
 	role: string;
 }
 

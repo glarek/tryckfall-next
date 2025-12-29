@@ -78,11 +78,18 @@ export class ApiClient {
 			// Try to parse error message from JSON
 			try {
 				const errorData = await response.json();
-				throw new Error(
+				const error: any = new Error(
 					errorData.message || `API Error: ${response.status} ${response.statusText}`
 				);
+				error.code = errorData.code;
+				error.status = errorData.status; // 'error' status string from API
+				error.httpStatus = response.status; // HTTP 400, 401 etc
+				throw error;
 			} catch (e: any) {
-				// If parsing fails or errorData has no message, fallback to status text
+				// If parsing fails or we just re-threw our custom error
+				if (e.code || e.httpStatus) throw e; // It's already our custom error
+
+				// Fallback for non-JSON errors
 				throw new Error(e.message || `API Error: ${response.status} ${response.statusText}`);
 			}
 		}

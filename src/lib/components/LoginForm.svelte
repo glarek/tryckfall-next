@@ -1,13 +1,16 @@
 <script lang="ts">
 	import type { HTMLAttributes } from 'svelte/elements';
-	
+
 	import { Label } from '$lib/components/ui/label/index.js';
 	import { Input } from '$lib/components/ui/input/index.js';
+	import { Alert, AlertDescription, AlertTitle } from '$lib/components/ui/alert/index.js';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import { cn, type WithElementRef } from '$lib/utils.js';
 	import { goto } from '$app/navigation';
 	import { authApi } from '$lib/api/auth';
 	import { auth } from '$lib/stores/auth.svelte';
+	import { handleApiError } from '$lib/utils/apiResponseHandler';
+	import { TriangleAlert } from '@lucide/svelte';
 
 	let loading = $state(false);
 	let error = $state<string | null>(null);
@@ -101,11 +104,11 @@
 					await goto('/private');
 				} else {
 					console.error('Login failed: Invalid response', response);
-					error = 'Inloggning misslyckades. Kontrollera dina uppgifter.';
+					error = handleApiError(response);
 				}
 			} catch (err: any) {
-				console.error('Login error:', err);
-				error = err.message || 'Ett oväntat fel uppstod.';
+				console.log({ err });
+				error = handleApiError(err);
 			} finally {
 				loading = false;
 			}
@@ -139,7 +142,11 @@
 				/>
 			</div>
 			{#if error}
-				<p class="text-destructive text-sm">{error}</p>
+				<Alert variant="destructive">
+					<TriangleAlert class="size-4" />
+					<AlertTitle>Inloggningsfel!</AlertTitle>
+					<AlertDescription>{error}</AlertDescription>
+				</Alert>
 			{/if}
 			<Button type="submit" class="transition-all duration-300 " disabled={loading}>
 				{#if loading}

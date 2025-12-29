@@ -6,6 +6,7 @@ interface AuthResponse {
 	token?: string;
 	user?: User;
 	message?: string;
+	code?: string;
 }
 
 export const authApi = {

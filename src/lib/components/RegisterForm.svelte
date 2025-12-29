@@ -3,16 +3,13 @@
 	import { registerSchema } from '$lib/schemas';
 	import { goto } from '$app/navigation';
 	import { authApi } from '$lib/api/auth';
-
 	import { Label } from '$lib/components/ui/label/index.js';
 	import { Input } from '$lib/components/ui/input/index.js';
 	import { Button } from '$lib/components/ui/button/index.js';
+	import { Alert, AlertDescription, AlertTitle } from '$lib/components/ui/alert';
 	import { cn, type WithElementRef } from '$lib/utils.js';
-	import { toast } from 'svelte-sonner';
-
-	let loading = $state(false);
-	let formError = $state<string | null>(null);
-	let errors = $state<Record<string, string>>({});
+	import { handleApiError } from '$lib/utils/apiResponseHandler';
+	import { TriangleAlert } from '@lucide/svelte';
 
 	let {
 		ref = $bindable(null),
@@ -20,17 +17,73 @@
 		...restProps
 	}: WithElementRef<HTMLAttributes<HTMLDivElement>> = $props();
 
+	let loading = $state(false);
+	// error represents a general form error (like API failure)
+	let error = $state<string | null>(null);
+	// errors represents validation errors for specific fields
+	let validationErrors = $state<Record<string, string>>({});
+
 	let formData = $state({
 		email: '',
-		username: '',
-		firstName: '',
-		lastName: '',
+		first_name: '',
+		last_name: '',
 		password: '',
 		repeatPassword: ''
 	});
 
-	const id = $props.id();
+	async function handleSubmit(e: Event) {
+		e.preventDefault();
+		loading = true;
+		error = null;
+		validationErrors = {};
+
+		const result = registerSchema.safeParse(formData);
+
+		if (!result.success) {
+			const fieldErrors = result.error.flatten().fieldErrors;
+			for (const [key, value] of Object.entries(fieldErrors)) {
+				if (value) validationErrors[key] = value[0];
+			}
+			loading = false;
+			return;
+		}
+
+		try {
+			await authApi.register(result.data);
+			// Success flow - maybe redirect to login or a "verify email" page?
+			// The API docs say: verify email link is sent.
+			// Let's redirect to login with a query param or just /auth
+			// Ideally we would show a success message, but user asked for "like login form"
+			// Login form redirects to /private. Here we probably want /auth (login page)
+			// But maybe we should show a success message?
+			// User said "remove toasters".
+			// I'll stick to goto('/auth') as before, but maybe we can add a 'sucess' state to show a text?
+			// For now, let's just redirect.
+			await goto('/auth');
+		} catch (err: any) {
+			console.log({ err });
+			error = handleApiError(err);
+		} finally {
+			loading = false;
+		}
+	}
 </script>
+
+{#snippet field(
+	name: keyof typeof formData,
+	label: string,
+	type: string = 'text',
+	placeholder?: string,
+	required: boolean = false
+)}
+	<div class="grid gap-2">
+		<Label for={name}>{label}</Label>
+		<Input id={name} {type} {name} {placeholder} {required} bind:value={formData[name]} />
+		{#if validationErrors[name]}<p class="text-destructive text-xs">
+				{validationErrors[name]}
+			</p>{/if}
+	</div>
+{/snippet}
 
 <div class={cn('flex flex-col gap-6', className)} bind:this={ref} {...restProps}>
 	<div class="flex flex-col items-center gap-2">
@@ -64,65 +117,17 @@
 			</a>
 		</div>
 	</div>
-	<form method="POST" onsubmit={handleSubmit}>
+	<form onsubmit={handleSubmit}>
 		<div class="grid gap-4">
 			<div class="grid grid-cols-2 gap-4">
-				<div class="grid gap-2">
-					<Label for="first-name">Förnamn</Label>
-					<Input
-						id="first-name"
-						name="firstName"
-						placeholder="Max"
-						required
-						bind:value={formData.firstName}
-					/>
-					{#if errors.firstName}<p class="text-destructive text-xs">{errors.firstName}</p>{/if}
-				</div>
-				<div class="grid gap-2">
-					<Label for="last-name">Efternamn</Label>
-					<Input
-						id="last-name"
-						name="lastName"
-						placeholder="Robinson"
-						required
-						bind:value={formData.lastName}
-					/>
-					{#if errors.lastName}<p class="text-destructive text-xs">{errors.lastName}</p>{/if}
-				</div>
+				{@render field('first_name', 'Förnamn', 'text', 'Max', true)}
+				{@render field('last_name', 'Efternamn', 'text', 'Robinson', true)}
 			</div>
 
-			<div class="grid gap-2">
-				<Label for="email">E-post</Label>
-				<Input
-					id="email"
-					type="email"
-					name="email"
-					placeholder="m@exempel.com"
-					required
-					bind:value={formData.email}
-				/>
-				{#if errors.email}<p class="text-destructive text-xs">{errors.email}</p>{/if}
-			</div>
-			<div class="grid gap-2">
-				<Label for="password">Lösenord</Label>
-				<Input id="password" type="password" name="password" bind:value={formData.password} />
-				{#if errors.password}<p class="text-destructive text-xs">{errors.password}</p>{/if}
-			</div>
-			<div class="grid gap-2">
-				<Label for="confirm-password">Bekräfta Lösenord</Label>
-				<Input
-					id="confirm-password"
-					type="password"
-					name="confirmPassword"
-					bind:value={formData.repeatPassword}
-				/>
-				{#if errors.confirmPassword}<p class="text-destructive text-xs">
-						{errors.confirmPassword}
-					</p>{/if}
-			</div>
-			{#if formError}
-				<p class="text-destructive text-sm">{formError}</p>
-			{/if}
+			{@render field('email', 'E-post', 'email', 'm@exempel.com', true)}
+			{@render field('password', 'Lösenord', 'password')}
+			{@render field('repeatPassword', 'Bekräfta Lösenord', 'password')}
+
 			<Button type="submit" class="w-full " disabled={loading}>
 				{#if loading}
 					Skapar konto...
@@ -130,6 +135,13 @@
 					Skapa ett konto
 				{/if}
 			</Button>
+			{#if error}
+				<Alert variant="destructive">
+					<TriangleAlert class="size-4" />
+					<AlertTitle>Registreringsfel!</AlertTitle>
+					<AlertDescription>{error}</AlertDescription>
+				</Alert>
+			{/if}
 		</div>
 		<div class="mt-4 text-center text-sm">
 			Har du redan ett konto?
