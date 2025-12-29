@@ -1,46 +1,11 @@
-import { createBrowserClient, createServerClient, isBrowser } from '@supabase/ssr';
-import { PUBLIC_SUPABASE_ANON_KEY, PUBLIC_SUPABASE_URL } from '$env/static/public';
-import type { LayoutLoad } from './$types';
+import { auth } from '$lib/stores/auth.svelte';
+import { browser } from '$app/environment';
 
-export const load: LayoutLoad = async ({ data, depends, fetch }) => {
-	/**
-	 * Declare a dependency so the layout can be invalidated, for example, on
-	 * session refresh.
-	 */
-	depends('supabase:auth');
+export const ssr = false; // Disable SSR for the whole app as it's an SPA
 
-	const supabase = isBrowser()
-		? createBrowserClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY, {
-				global: {
-					fetch
-				}
-			})
-		: createServerClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY, {
-				global: {
-					fetch
-				},
-				cookies: {
-					getAll() {
-						return data.cookies;
-					}
-				}
-			});
-
-	/**
-	 * It's fine to use `getSession` here, because on the client, `getSession` is
-	 * safe, and on the server, it reads `session` from the `LayoutData`, which
-	 * safely checked the session using `safeGetSession`.
-	 */
-	const {
-		data: { session }
-	} = await supabase.auth.getSession();
-
-	const {
-		data: { user }
-	} = await supabase.auth.getUser();
-
-	const { data: roleData } = await supabase.rpc('get_user_role');
-	const role = roleData ?? null;
-
-	return { session, supabase, user, role };
+export const load = async () => {
+	if (browser) {
+		auth.initialize();
+	}
+	return {};
 };

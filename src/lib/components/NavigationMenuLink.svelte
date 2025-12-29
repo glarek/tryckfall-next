@@ -1,7 +1,7 @@
 <script lang="ts">
 	import * as Collapsible from '$lib/components/ui/collapsible';
 	import { slide } from 'svelte/transition';
-	import { ChevronRight } from '@lucide/svelte'; // Ikon för att indikera expanderbart tillstånd
+	import { ChevronRight } from '@lucide/svelte';
 	import { page } from '$app/state';
 	import { base } from '$app/paths';
 	import { setShowNavbar } from '$lib/utils/navBarState.svelte.js';
@@ -11,49 +11,49 @@
 		open = $bindable(false),
 		buttonText,
 		childrenLinks = [],
-		Icon, // Svelte-komponent för ikonen bredvid knapptexten
+		Icon,
 		link,
 		...restProps
 	} = $props();
+
 	let activeLink = $derived(
-		page.url.pathname.replace(base, '').split('/')[1] == link.replace(base, '').split('/')[1]
+		page.url.pathname.replace(base, '').split('/')[1] === link.replace(base, '').split('/')[1]
 	);
+
+	const baseTriggerClass =
+		'm-0.5 ml-0 flex w-full items-center gap-2 rounded-lg p-2 text-left font-medium transition-all duration-200 hover:translate-x-1 hover:bg-muted hover:text-accent-foreground focus-visible:bg-muted focus-visible:outline-none';
 </script>
 
-<Collapsible.Root class="flex w-full flex-col items-start" bind:open {...restProps}>
-	{#if childrenLinks.length === 0}
-		<Collapsible.Trigger class="w-full {activeLink ? 'text-primary' : ''}">
-			<a
-				href={link}
-				onclick={() => setShowNavbar(false)}
-				class="flex w-full items-center gap-2 rounded-sm p-2 m-1 text-left hover:bg-muted popclick"
-			>
-				{#if Icon}
-					<Icon size={18} />
-				{/if}
-				{buttonText}
-			</a>
-		</Collapsible.Trigger>{:else}
-		<Collapsible.Trigger class="w-full {activeLink ? 'text-primary' : ''}">
-			<span
-				class="flex items-center gap-2 w-full justify-between rounded-sm p-2 m-1 text-left hover:bg-muted"
-			>
-				<div class="flex flex-row items-center gap-2">
-					{#if Icon}
-						<Icon size={18} />
-					{/if}
-					{buttonText}
-				</div>
+{#snippet linkInner()}
+	{#if Icon}
+		<Icon size={18} />
+	{/if}
+	{buttonText}
+{/snippet}
 
+<Collapsible.Root class="flex w-full flex-col items-start" bind:open {...restProps}>
+	<Collapsible.Trigger class="w-full {activeLink ? 'text-primary' : ''}">
+		{#if childrenLinks.length === 0}
+			<a href={link} onclick={() => setShowNavbar(false)} class="{baseTriggerClass} popclick">
+				{@render linkInner()}
+			</a>
+		{:else}
+			<span class="{baseTriggerClass} justify-between">
+				<div class="flex flex-row items-center gap-2">
+					{@render linkInner()}
+				</div>
 				<ChevronRight
 					size={16}
 					class="transform transition-transform duration-200 {open ? 'rotate-90' : ''}"
 				/>
 			</span>
-		</Collapsible.Trigger>
+		{/if}
+	</Collapsible.Trigger>
+
+	{#if childrenLinks.length > 0}
 		<Collapsible.Content forceMount>
 			{#if open}
-				<div class="ml-1 left-6 pl-4 my-2 pt-0 pb-1 font-medium" transition:slide>
+				<div class="left-6 my-2 ml-1 pt-0 pb-1 pl-4 font-medium" transition:slide>
 					{#each childrenLinks as childLink}
 						<MenuLink link={childLink.href}>{childLink.title}</MenuLink>
 					{/each}

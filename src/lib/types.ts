@@ -2,5 +2,11 @@
 import { z } from 'zod';
 import { registerSchema } from '$lib/schemas';
 
+export interface User {
+	email: string;
+	name: string;
+	role: string;
+}
+
 // Genererar en typ baserad på schemat!
 export type RegistrationSchema = z.infer<typeof registerSchema>;

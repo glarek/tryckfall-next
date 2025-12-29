@@ -7,6 +7,7 @@
 @import '@fontsource-variable/rethink-sans';
 @import '@fontsource/dm-serif-display';
 @import '@fontsource/caprasimo';
+@import '@fontsource/poppins';
 
 @custom-variant dark (&:is(.dark *));
 
@@ -146,7 +147,7 @@
 	}
 
 	.popclick {
-		@apply active:scale-115 transition-transform;
+		@apply transition-transform active:scale-115;
 	}
 
 	.main-container {
@@ -165,11 +166,11 @@
 	}
 
 	.error-message {
-		@apply text-destructive text-xs mt-1;
+		@apply text-destructive mt-1 text-xs;
 	}
 
 	h1 {
-		@apply font-serif font-light tracking-tighter text-4xl;
+		@apply font-serif text-4xl font-light tracking-tighter;
 	}
 
 	h2 {
@@ -181,11 +182,11 @@
 	}
 
 	p {
-		@apply text-base tracking-tight pb-3;
+		@apply pb-3 text-base tracking-tight;
 	}
 
 	u {
-		@apply font-semibold decoration-primary decoration-2;
+		@apply decoration-primary font-semibold decoration-2;
 	}
 
 	hr {
@@ -210,7 +211,7 @@
 	}
 
 	table {
-		@apply text-sm border-collapse overflow-x-scroll;
+		@apply border-collapse overflow-x-scroll text-sm;
 	}
 
 	th,
@@ -219,7 +220,7 @@
 	}
 
 	thead {
-		@apply bg-foreground/3 text-foreground underline  decoration-2 decoration-primary;
+		@apply bg-foreground/3 text-foreground decoration-primary underline decoration-2;
 	}
 
 	thead > tr > th {
@@ -248,11 +249,11 @@
 	}
 
 	.markdown li {
-		@apply list-disc list-outside ml-8 my-1;
+		@apply my-1 ml-8 list-outside list-disc;
 	}
 
 	.email {
-		@apply font-semibold hover:underline underline-offset-2 decoration-primary cursor-pointer;
+		@apply decoration-primary cursor-pointer font-semibold underline-offset-2 hover:underline;
 	}
 }
 
@@ -323,5 +324,29 @@
 			right center;
 		background-repeat: no-repeat;
 		color: inherit;
+	}
+
+	/* --- New Effects & Utilities --- */
+
+	/* .glass and .glass-card removed replaced by inline utilities */
+
+	.gradient-text {
+		@apply from-primary dark:from-primary bg-linear-to-r to-purple-600 bg-clip-text text-transparent dark:to-purple-400;
+	}
+
+	.gradient-bg {
+		@apply from-primary/10 via-background to-background bg-linear-to-br;
+	}
+
+	.card-base {
+		@apply bg-card text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-xs transition-all duration-300;
+	}
+
+	.input-base {
+		@apply border-input bg-background selection:bg-primary dark:bg-input/30 selection:text-primary-foreground ring-offset-background placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive flex h-9 w-full min-w-0 rounded-md border px-3 py-1 text-base shadow-xs transition-[color,box-shadow,border-color] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 md:text-sm;
+	}
+
+	.btn-base {
+		@apply aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive focus-visible:border-ring focus-visible:ring-ring/50 relative inline-flex shrink-0 items-center justify-center gap-2 overflow-hidden rounded-md text-sm font-medium whitespace-nowrap outline-hidden transition-all select-none focus-visible:ring-[3px] active:scale-95 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4;
 	}
 }

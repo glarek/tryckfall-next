@@ -44,6 +44,10 @@ export const navLinks = [
 			{
 				title: 'Fettavskiljare',
 				href: '/spillvatten/fettavskiljare'
+			},
+			{
+				title: 'Buffertvolym',
+				href: '/spillvatten/buffer-volym'
 			}
 		]
 	},

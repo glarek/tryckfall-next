@@ -1,13 +1,18 @@
 <script lang="ts">
 	import type { HTMLAttributes } from 'svelte/elements';
+	
 	import { Label } from '$lib/components/ui/label/index.js';
 	import { Input } from '$lib/components/ui/input/index.js';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import { cn, type WithElementRef } from '$lib/utils.js';
+	import { goto } from '$app/navigation';
+	import { authApi } from '$lib/api/auth';
+	import { auth } from '$lib/stores/auth.svelte';
 
-	import { enhance } from '$app/forms';
-
-	let logIn = $state(false);
+	let loading = $state(false);
+	let error = $state<string | null>(null);
+	let email = $state('');
+	let password = $state('');
 
 	let {
 		ref = $bindable(null),
@@ -19,7 +24,7 @@
 </script>
 
 <div class="flex flex-col items-center gap-2">
-	<div class="flex items-center justify-center rounded-md mb-3">
+	<div class="mb-3 flex items-center justify-center rounded-md">
 		<svg
 			width="167"
 			xmlns="http://www.w3.org/2000/svg"
@@ -65,11 +70,11 @@
 
 	<h1 class="text-xl">
 		Logga in på <span
-			class=" decoration-primary decoration-wavy underline decoration-1 underline-offset-2"
+			class=" decoration-primary underline decoration-wavy decoration-1 underline-offset-2"
 			>tryckfall.nu</span
 		>
 	</h1>
-	<div class="text-center text-muted-foreground text-sm">
+	<div class="text-muted-foreground text-center text-sm">
 		Saknar du konto?
 		<a href="/auth/register" class="hover:text-primary cursor-pointer underline underline-offset-4">
 			Registrera
@@ -80,37 +85,73 @@
 <div class={cn('flex flex-col gap-6', className)} bind:this={ref} {...restProps}>
 	<form
 		method="POST"
-		use:enhance={() => {
-			logIn = true;
+		onsubmit={async (e) => {
+			e.preventDefault();
+			loading = true;
+			error = null;
+			const formData = new FormData(e.currentTarget);
+			const email = formData.get('email') as string;
+			const password = formData.get('password') as string;
 
-			return async ({ update }) => {
-				await update();
-			};
+			try {
+				const response = await authApi.login(email, password);
+				// Assuming response contains user and token as per earlier docs/implementation
+				if (response.token && response.user) {
+					auth.login(response.user, response.token);
+					await goto('/private');
+				} else {
+					console.error('Login failed: Invalid response', response);
+					error = 'Inloggning misslyckades. Kontrollera dina uppgifter.';
+				}
+			} catch (err: any) {
+				console.error('Login error:', err);
+				error = err.message || 'Ett oväntat fel uppstod.';
+			} finally {
+				loading = false;
+			}
 		}}
-		action="?/login"
 	>
-		<div class="flex flex-col gap-6">
-			<div class="flex flex-col gap-6">
-				<div class="grid gap-3">
-					<Label for="email">E-post</Label>
-					<Input id="email" type="email" name="email" placeholder="m@example.com" required />
-				</div>
-				<div class="grid gap-3">
-					<Label for="password-password">Lösenord</Label>
-					<Input name="password" type="password" required />
-				</div>
-				<Button type="submit" class="w-full cursor-pointer">
-					{#if logIn}Loggar in
-						<div
-							class="w-4 h-4 border-2 dark:border-foreground border-background border-t-transparent dark:border-t-transparent rounded-full animate-spin"
-						></div>{:else}Logga in{/if}</Button
-				>
+		<div class="grid gap-4">
+			<div class="grid gap-2">
+				<Label for="email">E-post</Label>
+				<Input
+					id="email"
+					type="email"
+					name="email"
+					placeholder="namn@exempel.se"
+					autocomplete="username"
+					required
+					bind:value={email}
+				/>
 			</div>
-			<div class="border-b-1"></div>
+			<div class="grid gap-2">
+				<div class="flex items-center">
+					<Label for="password">Lösenord</Label>
+					<a href="##" class="ml-auto inline-block text-sm underline"> Glömt ditt lösenord? </a>
+				</div>
+				<Input
+					id="password"
+					type="password"
+					name="password"
+					autocomplete="current-password"
+					required
+					bind:value={password}
+				/>
+			</div>
+			{#if error}
+				<p class="text-destructive text-sm">{error}</p>
+			{/if}
+			<Button type="submit" class="transition-all duration-300 " disabled={loading}>
+				{#if loading}
+					Loggar in...
+				{:else}
+					Logga in
+				{/if}
+			</Button>
 		</div>
 	</form>
 	<div
-		class="text-muted-foreground *:[a]:hover:text-primary *:[a]:underline *:[a]:underline-offset-4 text-balance text-center text-xs"
+		class="text-muted-foreground *:[a]:hover:text-primary text-center text-xs text-balance *:[a]:underline *:[a]:underline-offset-4"
 	>
 		Genom att logga in godkänner du att du är snäll och inte vill jävlas.
 	</div>

@@ -1,51 +1,39 @@
 <script>
-	import { ModeWatcher, toggleMode } from 'mode-watcher';
-	import { slide } from 'svelte/transition';
-
+	import { ModeWatcher } from 'mode-watcher';
 	import NavigationMenuLink from '$lib/components/NavigationMenuLink.svelte';
 	import Grit from '$lib/icons/grit.svelte';
 	import { navLinks } from '$lib/config/navigation.js';
-	import { onMount } from 'svelte';
-	import { CircleUserRound, ShieldUser } from '@lucide/svelte';
 
-	let { class: additionalClasses = '', loggedIn, ...restProps } = $props();
-	let userLoad = $state(false);
-
-	onMount(() => {
-		userLoad = true;
-	});
+	let { class: additionalClasses = '', ...restProps } = $props();
 </script>
 
 <ModeWatcher />
 
-<div
-	class="flex justify-between border-r-1 lg:border-l-1 border-dashed px-4 py-4 font-semibold bg-background {additionalClasses} "
+<aside
+	class="flex h-[calc(100dvh-3.5rem)] flex-col justify-between border-r border-l border-[var(--border)] px-4 py-6 backdrop-blur-xl {additionalClasses}"
 	{...restProps}
 >
-	<ul class="flex flex-col">
-		{#each navLinks as navLink}
-			<NavigationMenuLink
-				buttonText={navLink.title}
-				Icon={navLink.icon}
-				link={navLink.href}
-				childrenLinks={navLink.children}
-			/>
-		{/each}
-		{#if userLoad}
-			<div transition:slide>
-				<hr />
-				{#if loggedIn}
-					<NavigationMenuLink buttonText="Användare" Icon={CircleUserRound} link="/private" />
-				{:else}
-					<NavigationMenuLink buttonText="Logga in" Icon={ShieldUser} link="/auth" />
-				{/if}
-			</div>
-		{/if}
-	</ul>
-
-	<div class="flex flex-col items-center justify-center gap-y-3 my-4 popclick">
-		<a href="https://google.se"
-			><Grit class="hover:text-primary h-14 text-foreground/5 transition-colors" /></a
-		>
+	<div class="flex flex-col gap-6">
+		<ul class="flex flex-col gap-2">
+			{#each navLinks as navLink}
+				<NavigationMenuLink
+					buttonText={navLink.title}
+					Icon={navLink.icon}
+					link={navLink.href}
+					childrenLinks={navLink.children}
+				/>
+			{/each}
+		</ul>
 	</div>
-</div>
+
+	<div class="mt-auto flex justify-center pb-4 opacity-50 transition-opacity hover:opacity-100">
+		<a
+			href="https://gritprojects.se"
+			target="_blank"
+			rel="noreferrer"
+			aria-label="GRIT Projects AB"
+		>
+			<Grit class="fill-foreground/20 hover:fill-primary h-12 w-auto transition-colors" />
+		</a>
+	</div>
+</aside>

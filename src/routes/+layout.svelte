@@ -1,5 +1,4 @@
 <script>
-	import { beforeNavigate, onNavigate, afterNavigate, invalidate } from '$app/navigation';
 	import { page } from '$app/state';
 	const metadata = $derived(page.data?.pageMeta ?? []);
 
@@ -13,44 +12,13 @@
 
 	import { getShowNavbar, toggleNavbar, setShowNavbar } from '$lib/utils/navBarState.svelte.js';
 
-	import { onMount } from 'svelte';
-	import { derived } from 'svelte/store';
+	import { auth } from '$lib/stores/auth.svelte';
 
 	let { data, children } = $props();
-	let { session, supabase } = $derived(data);
 
-	let loggedIn = $derived(session !== null);
+	let loggedIn = $derived(auth.isAuthenticated);
 
 	let navBarHeight = 50;
-	let navigating = $state({ isNavigating: false });
-
-	setContext('navigating', navigating);
-
-	onMount(() => {
-		const { data } = supabase.auth.onAuthStateChange((_, newSession) => {
-			if (newSession?.expires_at !== session?.expires_at) {
-				invalidate('supabase:auth');
-			}
-		});
-		return () => data.subscription.unsubscribe();
-	});
-
-	beforeNavigate(async () => {
-		navigating.isNavigating = true;
-		return;
-	});
-
-	onNavigate((navigation) => {
-		if (!document.startViewTransition) return;
-	});
-
-	afterNavigate(() => {
-		const mainContainer = document.getElementById('main-container');
-		if (mainContainer) {
-			mainContainer.scrollTop = 0;
-		}
-		navigating.isNavigating = false;
-	});
 </script>
 
 <svelte:head>
@@ -64,28 +32,21 @@
 
 <Toaster richColors position="top-left" />
 
-<header class="z-50 sticky top-0">
-	<TopNav mainClass="h-[3rem]" navClass="lg:w-5xl w-full" />
+<header class="sticky top-0 z-50">
+	<TopNav mainClass="h-[3.5rem]" navClass="lg:w-5xl w-full" />
 </header>
 
-<span
-	class="{navigating.isNavigating
-		? 'h-[2px]'
-		: 'h-[0px]'} top-[calc(3rem-1px)] z-99 absolute loader transition-all duration-500"
-></span>
-
-<div id="main-container" class="flex flex-row justify-center items-start">
+<div id="main-container" class="flex flex-row items-start justify-center">
 	<SideNav
-		{loggedIn}
-		class="h-[calc(100dvh-3rem)] fixed lg:sticky lg:top-[3rem] lg:flex flex-col left-0 w-60 transition-all duration-300 ease-in-out overflow-y-auto  {getShowNavbar()
+		class="bg-background fixed left-0 z-50 h-[calc(100dvh-3.5rem)] w-60 flex-col overflow-y-auto transition-all duration-300 ease-in-out lg:sticky lg:top-[3.5rem] lg:flex  {getShowNavbar()
 			? 'translate-x-0'
-			: '-translate-x-full'} lg:translate-x-0 z-40"
+			: '-translate-x-full'} lg:translate-x-0"
 	/>
 	<button
 		type="button"
 		id="overlay"
 		aria-label="Close sidebar overlay"
-		class="fixed top-[3rem] left-0 w-full h-full lg:hidden bg-black/50 z-30 duration-200 transition-all ease-in-out {getShowNavbar()
+		class="fixed top-[3.5rem] left-0 z-30 h-full w-full bg-black/50 transition-all duration-200 ease-in-out lg:hidden {getShowNavbar()
 			? 'no-doc-scroll visible opacity-100 backdrop-blur-xs'
 			: 'invisible opacity-0'}"
 		onclick={() => setShowNavbar(false)}
@@ -93,7 +54,7 @@
 	></button>
 	<div
 		id="main-content"
-		class="flex pb-4 lg:w-195 lg:flex-none flex-1 flex-col lg:border-r-1 border-dashed w-full min-h-[calc(100svh-3rem)]"
+		class="flex min-h-[calc(100svh-3.5rem)] w-full flex-1 flex-col border-dashed pb-4 lg:w-195 lg:flex-none lg:border-r-1"
 	>
 		<div style="view-transition-name: slide">{@render children()}</div>
 	</div>

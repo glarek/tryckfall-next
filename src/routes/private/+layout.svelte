@@ -1,6 +1,5 @@
 <script>
-	let { data, children } = $props();
-	let { supabase } = $derived(data);
+	let { children } = $props();
 </script>
 
 <main>

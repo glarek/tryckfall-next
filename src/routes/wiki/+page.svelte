@@ -1,23 +1,15 @@
-<script lang="ts">
+<script lang="js">
 	import { slide } from 'svelte/transition';
-	import type { PageData } from './$types';
-	let { data }: { data: PageData } = $props();
+	let { data } = $props();
 
 	import { Plus, ChevronRight } from '@lucide/svelte';
-
-	import * as Card from '$lib/components/ui/card/index.js';
-	import { Button } from '$lib/components/ui/button/index.js';
-
-	let groups = $state(
-		data.groupedPages.map((group) => ({
-			...group,
-			shown: false
-		}))
-	);
 </script>
 
-<div class="p-4 border-b-1 border-dashed grid gap-10 md:grid-cols-[3fr_167px] grid-rows-1">
-	<div class="md:order-1 order-2">
+Hejhej
+
+<!---
+<div class="grid grid-rows-1 gap-10 border-b-1 border-dashed p-4 md:grid-cols-[3fr_167px]">
+	<div class="order-2 md:order-1">
 		<h1>Enkel information för <mark>VVS</mark> och <mark>energi.</mark></h1>
 		<p>
 			Dessa dokument innehåller erfarenhetsbaserad information och tumregler inom VVS och energi.
@@ -31,7 +23,7 @@
 			>.
 		</p>
 	</div>
-	<div class="mt-2 order-1 md:order-2 justify-self-center mb-4">
+	<div class="order-1 mt-2 mb-4 justify-self-center md:order-2">
 		<svg
 			fill="currentColor"
 			stroke="currentColor"
@@ -60,16 +52,16 @@
 </div>
 
 {#if data.groupedPages.length === 0}
-	<div class="flex flex-wrap flex-col divide-y-1 divide-dashed border-b-1 border-dashed p-4">
+	<div class="flex flex-col flex-wrap divide-y-1 divide-dashed border-b-1 border-dashed p-4">
 		<h2 class="text-red-500">Hittade inga sidor</h2>
 	</div>
 {:else}
-	<div class="flex flex-wrap flex-col divide-y-1 divide-dashed border-b-1 border-dashed">
+	<div class="flex flex-col flex-wrap divide-y-1 divide-dashed border-b-1 border-dashed">
 		{#each groups as group}
 			<div class="p-4">
 				<button class="cursor-pointer" onclick={() => (group.shown = !group.shown)}>
 					<h2
-						class="hover:underline decoration-input underline-offset-5 inline-flex items-center"
+						class="decoration-input inline-flex items-center underline-offset-5 hover:underline"
 						id={group.categoryTitle.toLowerCase()}
 					>
 						{group.categoryTitle}<ChevronRight
@@ -82,7 +74,7 @@
 					<ul class="mt-2" transition:slide>
 						{#each group.pages as page}
 							<li
-								class="ml-2 pl-4 text-muted-foreground hover:text-foreground hover:border-foreground border-l-2"
+								class="text-muted-foreground hover:text-foreground hover:border-foreground ml-2 border-l-2 pl-4"
 							>
 								<a href="/wiki/{page.slug}">{page.title}</a>
 							</li>
@@ -98,7 +90,7 @@
 	<div class="flex flex-col">
 		<a href="/wiki/skapa-sida">
 			<button
-				class="hover:text-primary p-4 inline-flex gap-x-2 items-center center cursor-pointer w-full border-b-1 border-dashed"
+				class="hover:text-primary center inline-flex w-full cursor-pointer items-center gap-x-2 border-b-1 border-dashed p-4"
 			>
 				<Plus />
 				<h2>Skapa ny sida</h2>
@@ -107,7 +99,7 @@
 
 		<a href="skapa-kategori">
 			<button
-				class="hover:text-primary p-4 inline-flex gap-x-2 items-center cursor-pointer w-full border-b-1 border-dashed"
+				class="hover:text-primary inline-flex w-full cursor-pointer items-center gap-x-2 border-b-1 border-dashed p-4"
 			>
 				<Plus />
 				<h2>Skapa ny kategori</h2>
@@ -115,3 +107,5 @@
 		</a>
 	</div>
 {/if}
+
+-->

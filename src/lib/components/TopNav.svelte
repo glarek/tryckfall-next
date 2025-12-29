@@ -1,57 +1,76 @@
 <script>
 	import { ModeWatcher, toggleMode } from 'mode-watcher';
-	import MenuIcon from '$lib/icons/menu-icon.svelte';
-	import { Moon, Sun, Menu, KeyRound, CircleUserRound } from '@lucide/svelte';
+	import { Moon, Sun, Menu, X, UserCheck, UserRoundX } from '@lucide/svelte';
 	import Logo from '$lib/icons/logo.svelte';
-
 	import { getShowNavbar, toggleNavbar } from '$lib/utils/navBarState.svelte.js';
-
 	import { getContext } from 'svelte';
+	import { goto } from '$app/navigation';
 
-	let {
-		mainClass: mainClasses = '',
-		navClass: navClasses = '',
-		admin: admin = false,
-		...restProps
-	} = $props();
+	let { mainClass: mainClasses = '', navClass: navClasses = '', ...restProps } = $props();
 
-	let navigating = getContext('navigating');
+	import { auth } from '$lib/stores/auth.svelte.ts';
 </script>
 
 <ModeWatcher />
 
-<div
+<header
 	{...restProps}
-	class="flex flex-col border-b-1 border-dashed items-center justify-center bg-background {mainClasses}"
+	class="bg-background/60 supports-[backdrop-filter]:bg-background/10 sticky top-0 z-50 flex w-full justify-center border-b border-[var(--border)] backdrop-blur-xl {mainClasses}"
 >
-	<nav class="flex items-center pl-4 pr-4 py-4 justify-between {navClasses}">
-		<a href="/" class="popclick">
+	<nav class="flex h-full items-center justify-between px-4 {navClasses}">
+		<a href="/" class="popclick flex items-center gap-2">
 			<Logo
 				href="/"
-				class="hover:fill-primary fill-foreground w-[135px] self-center transition-colors duration-75"
+				class="hover:text-primary text-foreground w-[120px] transition-colors duration-300"
 			/>
 		</a>
 
-		<ul class="flex flex-row gap-x-4 items-center">
-			<li class="hover:text-muted-foreground transition-colors flex"></li>
-
+		<div class="flex items-center gap-4">
 			<button
-				class="items-center justify-center w-7 h-7 relative group cursor-pointer popclick"
+				class="btn-base bg-muted/50 hover:bg-muted popclick relative h-9 w-9 rounded-full"
+				onclick={() => goto(auth.isAuthenticated ? '/private' : '/auth')}
+				aria-label="Account"
+			>
+				<UserRoundX
+					class="absolute top-1/2 left-1/2 h-[1.2rem] w-[1.2rem] -translate-x-1/2 -translate-y-1/2 transition-all {auth.isAuthenticated
+						? 'scale-0 rotate-90'
+						: 'scale-100 rotate-0'}"
+				/>
+				<UserCheck
+					class="absolute top-1/2 left-1/2 h-[1.2rem] w-[1.2rem] -translate-x-1/2 -translate-y-1/2 transition-all {auth.isAuthenticated
+						? 'scale-100 rotate-0'
+						: 'scale-0 rotate-90'}"
+				/>
+			</button>
+			<button
+				class="btn-base bg-muted/50 hover:bg-muted popclick relative h-9 w-9 rounded-full"
 				onclick={toggleMode}
+				aria-label="Toggle theme"
 			>
 				<Moon
-					class="transition-all group-hover:text-indigo-700 absolute opacity-100 visible dark:invisible dark:opacity-0 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
+					class="absolute top-1/2 left-1/2 h-[1.2rem] w-[1.2rem] -translate-x-1/2 -translate-y-1/2 scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90"
 				/>
 				<Sun
-					class="transition-all group-hover:text-yellow-400 absolute opacity-0 invisible dark:visible dark:opacity-100 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
+					class="absolute top-1/2 left-1/2 h-[1.2rem] w-[1.2rem] -translate-x-1/2 -translate-y-1/2 scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0"
 				/>
 			</button>
+
 			<button
-				class="items-center justify-center w-7 h-7 relative lg:hidden group cursor-pointer hover:text-muted-foreground"
+				class="btn-base hover:bg-accent hover:text-accent-foreground relative h-9 w-9 items-center justify-center rounded-full transition-colors lg:hidden"
 				onclick={toggleNavbar}
+				aria-label="Toggle menu"
 			>
-				<MenuIcon menuOpen={getShowNavbar()} />
+				<Menu
+					class="absolute top-1/2 left-1/2 h-[1.2rem] w-[1.2rem] -translate-x-1/2 -translate-y-1/2 transition-all {getShowNavbar()
+						? 'scale-0 rotate-90'
+						: 'scale-100 rotate-0'}"
+				/>
+				<X
+					class="absolute top-1/2 left-1/2 h-[1.2rem] w-[1.2rem] -translate-x-1/2 -translate-y-1/2 transition-all {getShowNavbar()
+						? 'scale-100 rotate-0'
+						: 'scale-0 rotate-90'}"
+				/>
 			</button>
-		</ul>
+		</div>
 	</nav>
-</div>
+</header>
