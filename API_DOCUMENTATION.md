@@ -15,10 +15,10 @@ Local: `http://localhost:8000/api`
 - **Body**:
   ```json
   {
-    "password": "securePassword123",
-    "email": "john@example.com",
-    "first_name": "John",
-    "last_name": "Doe"
+  	"password": "securePassword123",
+  	"email": "john@example.com",
+  	"first_name": "John",
+  	"last_name": "Doe"
   }
   ```
 - **Response (201 Created)**:
@@ -47,17 +47,68 @@ User clicks a link sent to their email.
 - **Response (200 OK)**:
   ```json
   {
-    "status": "success",
-    "token": "eyJhbGciOiJIUzI1Ni...", // Store this JWT
-    "user": {
-      "first_name": "John",
-      "last_name": "Doe",
-      "email": "john@example.com",
-      "role": "guest"
-    }
+  	"status": "success",
+  	"token": "eyJhbGciOiJIUzI1Ni...", // Access Token (valid 1 hour)
+  	"refresh_token": "a1b2c3d4...", // Refresh Token (valid 7 days)
+  	"user": {
+  		"first_name": "John",
+  		"last_name": "Doe",
+  		"email": "john@example.com",
+  		"role": "guest"
+  	}
   }
   ```
 - **Note**: Returns `403` if account is not verified.
+
+### 4. Refresh Token
+
+Used to obtain a new Access Token when the current one expires.
+
+- **Endpoint**: `POST /auth/refresh`
+- **Body**:
+  ```json
+  { "refresh_token": "YOUR_REFRESH_TOKEN" }
+  ```
+- **Response (200 OK)**:
+  ```json
+  {
+  	"status": "success",
+  	"token": "eyJhbGciOiJIUzI1Ni...", // New Access Token
+  	"refresh_token": "new_random_token..." // New Refresh Token (Rolled)
+  }
+  ```
+- **Error**: Returns `401` if refresh token is invalid/expired.
+
+### 5. Forgot Password
+
+Initiates the password reset process. Sending duplicate requests is safe (always returns success).
+
+- **Endpoint**: `POST /auth/forgot-password`
+- **Body**:
+  ```json
+  { "email": "john@example.com" }
+  ```
+- **Response (200 OK)**:
+  ```json
+  { "status": "success", "message": "If the email exists..." }
+  ```
+
+### 6. Reset Password
+
+Completes the password reset process using the token sent via email.
+
+- **Endpoint**: `POST /auth/reset-password`
+- **Body**:
+  ```json
+  {
+  	"token": "TOKEN_FROM_EMAIL_LINK",
+  	"password": "newSecurePassword123"
+  }
+  ```
+- **Response (200 OK)**:
+  ```json
+  { "status": "success", "message": "Password has been reset..." }
+  ```
 
 ## Public Data (Wiki)
 
@@ -69,17 +120,15 @@ Returns a hierarchical list of categories to build the sidebar.
 - **Response**:
   ```json
   {
-    "status": "success",
-    "data": [
-      {
-        "id": 1,
-        "name": "Introduction",
-        "slug": "intro",
-        "articles": [
-          { "id": 10, "title": "Getting Started", "slug": "getting-started" }
-        ]
-      }
-    ]
+  	"status": "success",
+  	"data": [
+  		{
+  			"id": 1,
+  			"name": "Introduction",
+  			"slug": "intro",
+  			"articles": [{ "id": 10, "title": "Getting Started", "slug": "getting-started" }]
+  		}
+  	]
   }
   ```
 
@@ -89,15 +138,15 @@ Returns a hierarchical list of categories to build the sidebar.
 - **Response**:
   ```json
   {
-    "status": "success",
-    "data": {
-      "id": 10,
-      "title": "Getting Started",
-      "content": "<h1>Hello World</h1>...",
-      "author_id": 1,
-      "category_id": 1,
-      "created_at": "2024-01-01 12:00:00"
-    }
+  	"status": "success",
+  	"data": {
+  		"id": 10,
+  		"title": "Getting Started",
+  		"content": "<h1>Hello World</h1>...",
+  		"author_id": 1,
+  		"category_id": 1,
+  		"created_at": "2024-01-01 12:00:00"
+  	}
   }
   ```
 
@@ -126,9 +175,9 @@ used to embed images in articles.
 - **Response**:
   ```json
   {
-    "status": "success",
-    "url": "https://api.tryckfall.nu/uploads/a1b2c3d4.png",
-    "filename": "a1b2c3d4.png"
+  	"status": "success",
+  	"url": "https://api.tryckfall.nu/uploads/a1b2c3d4.png",
+  	"filename": "a1b2c3d4.png"
   }
   ```
 
@@ -138,32 +187,33 @@ All errors follow this JSON format:
 
 ```json
 {
-  "status": "error",
-  "code": "ERROR_CODE_STRING", // Specific error code
-  "message": "Human readable error description"
+	"status": "error",
+	"code": "ERROR_CODE_STRING", // Specific error code
+	"message": "Human readable error description"
 }
 ```
 
 ### Standard Response Codes
 
-| Code                  | HTTP Status | Description                                           |
-| :-------------------- | :---------- | :---------------------------------------------------- |
-| **Authentication**    |             |                                                       |
-| `MISSING_CREDENTIALS` | 400         | Email and password are required for login.            |
-| `INVALID_CREDENTIALS` | 401         | Incorrect email or password.                          |
-| `USER_UNVERIFIED`     | 403         | Email address is not verified yet.                    |
-| `UNAUTHORIZED_ACCESS` | 401         | Invalid or missing JWT token, or token expired.       |
-| **Registration**      |             |                                                       |
-| `MISSING_FIELDS`      | 400         | Required fields (email, password, names) are missing. |
-| `INVALID_INPUT`       | 400         | Input validation failed (e.g. name length).           |
-| `INVALID_EMAIL`       | 400         | Email format is invalid.                              |
-| `EMAIL_EXISTS`        | 409         | A user with this email address already exists.        |
-| `MAIL_SEND_FAILED`    | 500         | Failed to send the verification email.                |
-| **Verification**      |             |                                                       |
-| `MISSING_TOKEN`       | 400         | Verification token is missing from the URL.           |
-| `INVALID_TOKEN`       | 400         | Verification token is invalid or has expired.         |
-| **System**            |             |                                                       |
-| `UNKNOWN_ERROR`       | 500         | An unexpected error occurred.                         |
+| Code                  | HTTP Status | Description                                              |
+| :-------------------- | :---------- | :------------------------------------------------------- |
+| **Authentication**    |             |                                                          |
+| `MISSING_CREDENTIALS` | 400         | Email and password are required for login.               |
+| `INVALID_CREDENTIALS` | 401         | Incorrect email or password.                             |
+| `USER_UNVERIFIED`     | 403         | Email address is not verified yet.                       |
+| `UNAUTHORIZED_ACCESS` | 401         | Invalid or missing JWT token, or token expired.          |
+| `ACCOUNT_LOCKED`      | 423         | Account is locked due to too many failed login attempts. |
+| **Registration**      |             |                                                          |
+| `MISSING_FIELDS`      | 400         | Required fields (email, password, names) are missing.    |
+| `INVALID_INPUT`       | 400         | Input validation failed (e.g. name length).              |
+| `INVALID_EMAIL`       | 400         | Email format is invalid.                                 |
+| `EMAIL_EXISTS`        | 409         | A user with this email address already exists.           |
+| `MAIL_SEND_FAILED`    | 500         | Failed to send the verification email.                   |
+| **Verification**      |             |                                                          |
+| `MISSING_TOKEN`       | 400         | Verification token is missing from the URL.              |
+| `INVALID_TOKEN`       | 400         | Verification token is invalid or has expired.            |
+| **System**            |             |                                                          |
+| `UNKNOWN_ERROR`       | 500         | An unexpected error occurred.                            |
 
 ### HTTP Status Codes Summary
 

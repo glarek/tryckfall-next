@@ -9,6 +9,7 @@ export const ResponseMessages: Record<string, string> = {
 	INVALID_CREDENTIALS: 'Felaktig e-post eller lösenord.',
 	USER_UNVERIFIED: 'Din e-postadress har inte verifierats än.',
 	UNAUTHORIZED_ACCESS: 'Du har inte behörighet att utföra denna åtgärd. Vänligen logga in igen.',
+	ACCOUNT_LOCKED: 'Ditt konto är låst på grund av för många misslyckade inloggningsförsök.',
 
 	// Registration
 	MISSING_FIELDS: 'Vänligen fyll i alla obligatoriska fält (e-post, lösenord, namn).',

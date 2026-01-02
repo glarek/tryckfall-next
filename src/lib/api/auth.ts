@@ -4,6 +4,7 @@ import type { User } from '../types';
 interface AuthResponse {
 	status: string;
 	token?: string;
+	refresh_token?: string;
 	user?: User;
 	message?: string;
 	code?: string;

@@ -1,13 +1,16 @@
-<script lang="js">
+<script lang="ts">
 	import { slide } from 'svelte/transition';
-	let { data } = $props();
-
+	import { onMount } from 'svelte';
 	import { Plus, ChevronRight } from '@lucide/svelte';
+	import { wikiStore } from '$lib/stores/wiki.svelte';
+	import { auth } from '$lib/stores/auth.svelte';
+	import * as Accordion from '$lib/components/ui/accordion/index.js';
+
+	onMount(() => {
+		wikiStore.fetchMenu();
+	});
 </script>
 
-Hejhej
-
-<!---
 <div class="grid grid-rows-1 gap-10 border-b-1 border-dashed p-4 md:grid-cols-[3fr_167px]">
 	<div class="order-2 md:order-1">
 		<h1>Enkel information för <mark>VVS</mark> och <mark>energi.</mark></h1>
@@ -51,42 +54,46 @@ Hejhej
 	</div>
 </div>
 
-{#if data.groupedPages.length === 0}
+{#if wikiStore.isLoading}
+	<div class="p-4">Laddar...</div>
+{:else if wikiStore.error}
+	<div class="p-4 text-red-500">{wikiStore.error}</div>
+{:else if wikiStore.categories.length === 0}
 	<div class="flex flex-col flex-wrap divide-y-1 divide-dashed border-b-1 border-dashed p-4">
 		<h2 class="text-red-500">Hittade inga sidor</h2>
 	</div>
 {:else}
 	<div class="flex flex-col flex-wrap divide-y-1 divide-dashed border-b-1 border-dashed">
-		{#each groups as group}
-			<div class="p-4">
-				<button class="cursor-pointer" onclick={() => (group.shown = !group.shown)}>
-					<h2
-						class="decoration-input inline-flex items-center underline-offset-5 hover:underline"
-						id={group.categoryTitle.toLowerCase()}
+		<Accordion.Root type="multiple">
+			{#each wikiStore.categories as category}
+				<Accordion.Item value={category.id.toString()}>
+					<Accordion.Trigger
+						class="decoration-input inline-flex items-center px-4 underline-offset-5 hover:underline"
 					>
-						{group.categoryTitle}<ChevronRight
-							class="ml-1 {group.shown ? 'rotate-90 transition-transform' : 'transition-transform'}"
-						/>
-					</h2>
-				</button>
-
-				{#if group.shown}
-					<ul class="mt-2" transition:slide>
-						{#each group.pages as page}
-							<li
-								class="text-muted-foreground hover:text-foreground hover:border-foreground ml-2 border-l-2 pl-4"
-							>
-								<a href="/wiki/{page.slug}">{page.title}</a>
-							</li>
-						{/each}
-					</ul>
-				{/if}
-			</div>
-		{/each}
+						{#snippet children()}
+							<h2>{category.name}</h2>
+						{/snippet}
+					</Accordion.Trigger>
+					<Accordion.Content class="px-4">
+						{#snippet children()}
+							<ul class="mt-2">
+								{#each category.articles as article}
+									<li
+										class="text-muted-foreground hover:text-foreground hover:border-foreground ml-2 border-l-2 pl-4"
+									>
+										<a href="/wiki/article/{article.slug}">{article.title}</a>
+									</li>
+								{/each}
+							</ul>
+						{/snippet}
+					</Accordion.Content>
+				</Accordion.Item>
+			{/each}
+		</Accordion.Root>
 	</div>
 {/if}
 
-{#if data?.role === 'admin'}
+{#if auth.user?.role === 'admin'}
 	<div class="flex flex-col">
 		<a href="/wiki/skapa-sida">
 			<button
@@ -107,5 +114,3 @@ Hejhej
 		</a>
 	</div>
 {/if}
-
--->

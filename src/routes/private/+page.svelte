@@ -54,7 +54,7 @@
 
 <div class="p-6">
 	<div class="mb-6 flex items-center justify-between">
-		<h1>Välkommen {auth.user?.name || 'Användare'}!</h1>
+		<h1>Välkommen {auth.user?.first_name || 'Användare'}!</h1>
 		<Button onclick={logout} variant="outline">Logga ut</Button>
 	</div>
 	<hr class="my-4" />

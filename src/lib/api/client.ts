@@ -1,4 +1,5 @@
 import { browser } from '$app/environment';
+import { auth } from '../stores/auth.svelte';
 
 export class ApiClient {
 	private baseUrl: string;
@@ -49,11 +50,27 @@ export class ApiClient {
 			}
 		}
 
-		const response = await fetch(`${this.baseUrl}${path}`, {
+		let response = await fetch(`${this.baseUrl}${path}`, {
 			method: 'POST',
 			headers,
 			body: formData
 		});
+
+		if (response.status === 401 && authRequired) {
+			const refreshed = await this.refreshAccessToken();
+			if (refreshed) {
+				// Retry with new token
+				const newHeaders: any = {};
+				const token = localStorage.getItem('token');
+				if (token) newHeaders['Authorization'] = `Bearer ${token}`;
+
+				response = await fetch(`${this.baseUrl}${path}`, {
+					method: 'POST',
+					headers: newHeaders,
+					body: formData
+				});
+			}
+		}
 
 		return this.handleResponse<T>(response);
 	}
@@ -64,13 +81,60 @@ export class ApiClient {
 		body?: any,
 		authRequired: boolean = false
 	): Promise<T> {
-		const response = await fetch(`${this.baseUrl}${path}`, {
+		let response = await fetch(`${this.baseUrl}${path}`, {
 			method,
 			headers: this.getHeaders(authRequired),
 			body: body ? JSON.stringify(body) : undefined
 		});
 
+		if (response.status === 401 && authRequired) {
+			const refreshed = await this.refreshAccessToken();
+			if (refreshed) {
+				// Retry with new token
+				response = await fetch(`${this.baseUrl}${path}`, {
+					method,
+					headers: this.getHeaders(authRequired),
+					body: body ? JSON.stringify(body) : undefined
+				});
+			}
+		}
+
 		return this.handleResponse<T>(response);
+	}
+
+	private async refreshAccessToken(): Promise<boolean> {
+		if (!browser) return false;
+
+		const refreshToken = auth.refreshToken || localStorage.getItem('refreshToken');
+		if (!refreshToken) {
+			auth.logout();
+			return false;
+		}
+
+		try {
+			const response = await fetch(`${this.baseUrl}/auth/refresh`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					Accept: 'application/json'
+				},
+				body: JSON.stringify({ refresh_token: refreshToken })
+			});
+
+			if (response.ok) {
+				const data = await response.json();
+				if (data.status === 'success' && data.token && data.refresh_token) {
+					auth.updateTokens(data.token, data.refresh_token);
+					return true;
+				}
+			}
+		} catch (error) {
+			console.error('Error refreshing token:', error);
+		}
+
+		// If we reached here, refresh failed
+		auth.logout();
+		return false;
 	}
 
 	private async handleResponse<T>(response: Response): Promise<T> {
@@ -95,11 +159,6 @@ export class ApiClient {
 		}
 
 		const data = await response.json();
-		// Some endpoints return { status: 'success', data: ... } or just the data directly?
-		// documentation says: { status: "success", data: ... } usually.
-		// Let's return the raw JSON for now and let specialized clients handle structure,
-		// OR normalize it here. Based on docs, responses are wrapped.
-
 		return data as T;
 	}
 }

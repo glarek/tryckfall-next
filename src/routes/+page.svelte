@@ -1,24 +1,25 @@
 <script>
 	let { data } = $props();
 	import { Button } from '$lib/components/ui/button';
+	let randomint = $state(Math.floor(Math.random() * 10));
 </script>
 
-<div class="md:p-20 p-6">
-	<div class="grid md:grid-cols-[3fr_167px] gap-10 w-full justify-center items-center">
-		<div class="md:order-1 order-2">
-			<h1 class="text-4xl text-left">
+<div class="p-6 md:p-20">
+	<div class="grid w-full items-center justify-center gap-10 md:grid-cols-[3fr_167px]">
+		<div class="order-2 md:order-1">
+			<h1 class="text-left text-4xl">
 				Din sida för <mark class=" font-">tryckfall-</mark> och andra VVS-beräkningar!
 			</h1>
 			<p class="mt-5 mb-5">
 				Utför snabba beräkningar i rör och kanaler med <a
 					href="https://coolprop.org/"
-					class="hover:text-primary underline underline-offset-1 decoration-2 decoration-wavy"
+					class="hover:text-primary underline decoration-wavy decoration-2 underline-offset-1"
 				>
 					CoolProp
 				</a>
 				och håll dig uppdaterad med nya verktyg.
 			</p>
-			<div class="grid grid-cols-[1fr_1fr] gap-2 mt-2 md:w-fit w-full">
+			<div class="mt-2 grid w-full grid-cols-[1fr_1fr] gap-2 md:w-fit">
 				<Button variant="outline" class=" cursor-pointer rounded-lg" href="/tryckfall/ror"
 					>Tryckfall i rör</Button
 				>
@@ -27,8 +28,8 @@
 				>
 			</div>
 		</div>
-		<div class="md:order-2 order-1 justify-self-center">
-			{#if data.randomint != 7}
+		<div class="order-1 justify-self-center md:order-2">
+			{#if randomint != 7}
 				<svg
 					stroke="currentColor"
 					fill="none"

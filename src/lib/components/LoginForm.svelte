@@ -100,7 +100,7 @@
 				const response = await authApi.login(email, password);
 				// Assuming response contains user and token as per earlier docs/implementation
 				if (response.token && response.user) {
-					auth.login(response.user, response.token);
+					auth.login(response.user, response.token, response.refresh_token || '');
 					await goto('/private');
 				} else {
 					console.error('Login failed: Invalid response', response);
